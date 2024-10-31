@@ -6,6 +6,6 @@ using namespace std;
 
 int main(){
 
-    cout << "poop in my butt" << endl;
+    cout << "poop in my butt emma style" << endl;
 
 }
