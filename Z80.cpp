@@ -14,7 +14,8 @@ using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
-const string filenameMAX = ""; //Max change this if you want to run it 
+const string filenameMAX = "C:\\Users\\Maxwell\\OneDrive\\Desktop\\411-paper\\load-regs.bin"; //Max change this if you want to run it 
+const string fileRun = filenameMAX;
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
@@ -80,7 +81,7 @@ void z80_mem_load(const char *filename) {
 int main(){
     cout << "FUCK THIS AHHHHH" << endl; //File running check
 
-    z80_mem_load(filenameEMMA.c_str()); //Load into memory
+    z80_mem_load(fileRun.c_str()); //Load into memory
     for (int i =0; i < MEMSIZE; i++)
     {
         if(memory[i] != 0)
