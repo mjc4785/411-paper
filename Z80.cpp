@@ -1,58 +1,83 @@
+#include <stdio.h>
 #include <iostream>
 #include <string>
-#include <cstdint>
+#include <string.h>
+#include <errno.h>
+#include <stdint.h>
+#include "registers.h"
+#define NUM_CYCLES 1024
+
 using namespace std;
+int const MEMORYSIZE = 65536;
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
+const string filenameMAX ="";
+Z80 registers;
 
-class Z80{
-    private:
+//extern void z80_init(void);
+//extern int z80_execute(int cycles);
+static uint8_t memory[MEMORYSIZE];
 
-        //REGISTERS--------------------------------
-        //General 8-bit registers
-        uint8_t regA;
-        uint8_t Flags; //Single Byte
-        uint8_t regB;
-        uint8_t regC;
-        uint8_t regD;
-        uint8_t regE;
-        uint8_t regH;
-        uint8_t regL;
-        //Alternate 8-bit registers
-        uint8_t reg_A; 
-        uint8_t reg_F;
-        uint8_t reg_B;
-        uint8_t reg_C;
-        uint8_t reg_D;
-        uint8_t reg_E;
-        uint8_t reg_H;
-        uint8_t reg_L;
+void z80_mem_write(uint16_t addr, uint8_t value) {
+    memory[addr] = value;
+}
 
-        //Weird 8-bit registers
-        uint8_t reg_I; //Interrupt Page Address
-        uint8_t reg_R; //Memory Refresh
+uint8_t z80_mem_read(uint16_t addr) {
+    return memory[addr];
+}
 
-        //16-bit registers
-        uint16_t reg_IX;
-        uint16_t reg_IY;
-        uint16_t reg_SP;//Stack Pointer 
-        uint16_t reg_PC;//Program Counter
+void z80_mem_write16(uint16_t addr, uint16_t value) {
+    memory[addr] = (uint8_t)(value & 0xff);
+    memory[addr + 1] = (uint8_t)(value >> 8);
+}
 
-        //Paired Registers - ??DOES LITTLE ENDIAN APPLY HERE??
-        uint8_t regBC[2] = {regB, regC};
-        uint8_t regDE[2] = {regD, regE};
-        uint8_t regHL[2] = {regH, regL};
-        uint8_t reg_BC[2] = {reg_B, reg_C};
-        uint8_t reg_DE[2] = {reg_D, reg_E};
-        uint8_t reg_HL[2] = {reg_H, reg_L};
+uint16_t z80_mem_read16(uint16_t addr) {
+    return ((uint16_t)memory[addr]) | (((uint16_t)memory[addr + 1]) << 8);
+}
 
-        //MEMORY SPACE ----------------------------------------------
-        int memory[512000]; //??Holds the read in opcode from binary??
+void z80_mem_dump(const char *filename) {
+    FILE *fileptr;
 
-    public: 
+    if(!(fileptr = fopen(filename, "wb"))) {
+        fprintf(stderr, "z80_mem_dump: Cannot open destination file %s: %s\n",
+                filename, strerror(errno));
+        return;
+    }
 
-};
+    if(fwrite(memory, 1, 65536, fileptr) != 65536) {
+        cout << "z80_mem_dump: Couldn't write full memory dump" << endl;
+        fclose(fileptr);
+        return;
+    }
 
+    fclose(fileptr);
+}
+
+void z80_mem_load(const char *filename) {
+    FILE *fileptr;
+
+    if(!(fileptr = fopen(filename, "rb"))) {
+        cout << "Cannot read" << endl;
+        return;
+    }
+
+    if(!fread(memory, 1, 65536, fileptr)) {
+        fprintf(stderr, "z80_mem_read: Couldn't read progmemory binary\n");
+        fclose(fileptr);
+        return;
+    }
+
+    fclose(fileptr);
+    return;
+}
+ 
 int main(){
+    cout << "FUCK THIS AHHHHH" << endl;
 
-    cout << "poop in my butt emma style" << endl;
-
+    z80_mem_load(filenameEMMA.c_str());
+    for (int i =0; i < MEMORYSIZE; i++){
+        if(memory[i] != 0){
+            printf("ram[%04x] = %02x\n", i, memory[i]);
+        }
+    }
+    return 0;
 }
