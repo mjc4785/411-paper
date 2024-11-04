@@ -49,6 +49,41 @@ struct Z80{
         uint8_t *reg_DE[2] = {reg_D, reg_E};
         uint8_t *reg_HL[2] = {reg_H, reg_L};
 
+        //Z80 instance constructor
+        Z80 RegInit(){
+
+                //General 8-bit registers
+                *regA = NULL;
+                *Flags = NULL; //Single Byte
+                *regB = NULL;
+                *regC = NULL;
+                *regD = NULL;
+                *regE = NULL;
+                *regH = NULL;
+                *regL = NULL;
+
+                //Alternate 8-bit registers
+                *reg_A = NULL; 
+                *reg_F = NULL;
+                *reg_B = NULL;
+                *reg_C = NULL;
+                *reg_D = NULL;
+                *reg_E = NULL;
+                *reg_H = NULL;
+                *reg_L = NULL;
+
+                //Weird 8-bit registers
+                *reg_I = NULL; //Interrupt Page Address
+                *reg_R = NULL; //Memory Refresh
+
+                //16-bit registers
+                *reg_IX = NULL;
+                *reg_IY = NULL;
+                *reg_SP = NULL;//Stack Pointer 
+                *reg_PC = NULL;//Program Counter
+
+        }
+
 };
 
 #endif
