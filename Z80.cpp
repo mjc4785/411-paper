@@ -80,9 +80,25 @@ void z80_mem_load(const char *filename) {
 //CREATION OF THE Z80 FUNCTIONS====================================================================================================
 void z80_init(){
 
-    Z80 registers = RegInit();
+    Z80 registers;
 
     return;
+}
+
+/* this function takes in */
+int z80_execute(int CYCLES){
+
+    int CompletedCylces = 0;
+
+    for (int i = 0; i < CYCLES; i++){
+
+        // i believe that in here we need to fetch/read the mem
+        // once we get an address i think we should pass it to a new h file 
+        //      we should create that has every operation and switch case 
+
+    }
+
+    return CompletedCylces;
 }
 
 
@@ -98,7 +114,7 @@ void z80_halt(){
 
 //MAIN==============================================================================================================================
 int main(){
-    cout << "FUCK THIS AHHHHH" << endl; //File running check
+    cout << "Max Castle is feeling Goated" << endl; //File running check
 
     z80_mem_load(fileRun.c_str()); //Load into memory
     for (int i =0; i < MEMSIZE; i++)

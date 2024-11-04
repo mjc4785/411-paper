@@ -1,2 +1,5 @@
 11-4-24 // 1:23pm
     I created an initialization function in the registers.h function that creates all the regesters as NULL. 
+
+    - 2:35
+        1) I think i remember you saying that the registers are simply int pointers so i reqrote them as such so we could initialize them to nullptr.
