@@ -1,3 +1,8 @@
+/*
+Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411 
+*/
+
+//INCLUDES===================================================================================================================
 #include <stdio.h>
 #include <iostream>
 #include <string>
@@ -5,18 +10,19 @@
 #include <errno.h>
 #include <stdint.h>
 #include "registers.h"
-#define NUM_CYCLES 1024
-
 using namespace std;
-int const MEMORYSIZE = 65536;
+
+//FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
-const string filenameMAX ="";
+const string filenameMAX = ""; //Max change this if you want to run it 
+
+//DEFINING IMPORTNANT THINGS=======================================================================================================
+int const CYCLES = 1024;
+int const MEMSIZE = 65536;
+static uint8_t memory[MEMSIZE];
 Z80 registers;
 
-//extern void z80_init(void);
-//extern int z80_execute(int cycles);
-static uint8_t memory[MEMORYSIZE];
-
+//OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
     memory[addr] = value;
 }
@@ -70,14 +76,15 @@ void z80_mem_load(const char *filename) {
     return;
 }
  
+//MAIN==============================================================================================================================
 int main(){
-    cout << "FUCK THIS AHHHHH" << endl;
+    cout << "FUCK THIS AHHHHH" << endl; //File running check
 
-    z80_mem_load(filenameEMMA.c_str());
-    for (int i =0; i < MEMORYSIZE; i++){
-        if(memory[i] != 0){
-            printf("ram[%04x] = %02x\n", i, memory[i]);
-        }
+    z80_mem_load(filenameEMMA.c_str()); //Load into memory
+    for (int i =0; i < MEMSIZE; i++)
+    {
+        if(memory[i] != 0)
+            {printf("ram[%04x] = %02x\n", i, memory[i]);}
     }
     return 0;
 }
