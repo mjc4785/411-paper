@@ -15,7 +15,7 @@ using namespace std;
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
 const string filenameMAX = "C:\\Users\\Maxwell\\OneDrive\\Desktop\\411-paper\\load-regs.bin"; //Max change this if you want to run it 
-const string fileRun = filenameEMMA;
+const string fileRun = filenameMAX;
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
@@ -23,8 +23,11 @@ int const MEMSIZE = 65536;
 static uint8_t memory[MEMSIZE];
 Z80 cpu;
 
+
 //FUNCTION DEFINITIONS=========================================
 void decode();
+void printReg(Z80);
+
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -99,7 +102,7 @@ void decode()
     switch(memory[int(cpu.reg_PC)])
     {
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
-            cout << "HALT" << endl;
+            printReg(cpu);
             break;
         default:
             cout << "Unknown Instruction" << endl;
@@ -107,10 +110,43 @@ void decode()
     }
 }
 
+void printReg(Z80 cpu)
+{
+    cout << "\n*=================Z80========================*" << endl;
+    printf("regA: 0x%02X\n", cpu.regA) ;
+    printf("Flags: 0x%02X\n", cpu.Flags);
+    printf("regB: 0x%02X\n", cpu.regB) ;
+    printf("regC: 0x%02X\n", cpu.regC) ;
+    printf("regD: 0x%02X\n", cpu.regD) ;
+    printf("regE: 0x%02X\n", cpu.regE) ;
+    printf("regH: 0x%02X\n", cpu.regH) ;
+    printf("regL: 0x%02X\n", cpu.regL) ;
+
+    printf("reg_A: 0x%02X\n", cpu.reg_A);
+    printf("reg_F: 0x%02X\n", cpu.reg_F);
+    printf("reg_B: 0x%02X\n", cpu.reg_B);
+    printf("reg_C: 0x%02X\n", cpu.reg_C);
+    printf("reg_D: 0x%02X\n", cpu.reg_D);
+    printf("reg_E: 0x%02X\n", cpu.reg_E);
+    printf("reg_H: 0x%02X\n", cpu.reg_H);
+    printf("reg_L: 0x%02X\n", cpu.reg_L);
+
+    printf("reg_I: 0x%02X\n", cpu.reg_I);
+    printf("reg_R: 0x%02X\n", cpu.reg_R);
+
+    printf("reg_IX: 0x%04X\n", cpu.reg_IX);
+    printf("reg_IY: 0x%04X\n", cpu.reg_IY);
+    printf("reg_SP: 0x%04X\n", cpu.reg_SP);
+    printf("reg_PC: 0x%04X\n", cpu.reg_PC);
+
+    printf("Cycle Count: %d\n", cpu.cycleCnt);
+    cout << "*============================================*\n" << endl;
+}
+
 
 //MAIN==============================================================================================================================
 int main(){
-    cout << "Max Castle is feeling sleepy" << endl; //File running check
+    cout << "Max Castle is feeling up-really-cool-guy" << endl; //File running check
 
     z80_mem_load(fileRun.c_str()); //Load into memory
     for (int i =0; i < MEMSIZE; i++)
