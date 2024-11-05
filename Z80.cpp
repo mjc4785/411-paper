@@ -15,7 +15,7 @@ using namespace std;
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
 const string filenameMAX = "C:\\Users\\Maxwell\\OneDrive\\Desktop\\411-paper\\load-regs.bin"; //Max change this if you want to run it 
-const string fileRun = filenameEMMA;
+const string fileRun = filenameMAX;
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
@@ -149,10 +149,25 @@ void decode()
         
         //8-BIT ADDITION ARITHMETIC-------------------------------------------------
         case 0x80:
-            uint8_t sum = cpu.regA + cpu.regB;
-            bool halfCarry; //implement
-            bool overflow; //implement
-            bool carry; //implement
+
+            uint8_t sum;
+        
+            sum = cpu.regA + cpu.regB;
+        
+            bool halfCarry = ((cpu.regA & 0x0F) + (cpu.regB & 0x0F)) > 0x0F;
+            //& is bitwise AND. ff is 0000 1111 which isolates the four lower bits
+            // then you add them. if the sum of the two sets of the lower four bits is
+            // > 0000 1111 then theres a half carry 
+        
+            bool overflow; ((cpu.regA ^ sum) & (cpu.regB ^ sum) & 0x80) != 0;
+            //^ is bitwise XOR. thismeans that only when the the reg-a and the sum of a and b 
+            // is opposites that the outcome is 1. 
+            //then when both  aer bitwise ANDed, if the highest bit of both halves 
+            // are 1, then there is overflow since 0x08 == 1000 0000. 
+        
+            bool carry = (cpu.reg_A + cpu.reg_B) > 0xFF;
+            // if the summ of the two is greater than 1111 1111 then its a carry 
+        
             setflags(sum,halfCarry, overflow, false, carry);
 
         //UNIDENTIFIED INSTRUCTION--------------------------------------------------
