@@ -27,6 +27,7 @@ Z80 cpu;
 //FUNCTION DEFINITIONS=========================================
 void decode();
 void printReg(Z80);
+void setflags(uint8_t, bool, bool, bool, bool);
 
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
@@ -145,6 +146,14 @@ void decode()
             cpu.regL = memory[int(++cpu.reg_PC)];
             cpu.cycleCnt += 7;
             break;
+        
+        //8-BIT ADDITION ARITHMETIC-------------------------------------------------
+        case 0x80:
+            uint8_t sum = cpu.regA + cpu.regB;
+            bool halfCarry; //implement
+            bool overflow; //implement
+            bool carry; //implement
+            setflags(sum,halfCarry, overflow, false, carry);
 
         //UNIDENTIFIED INSTRUCTION--------------------------------------------------
         default:
@@ -153,6 +162,7 @@ void decode()
     }
 }
 
+//OTHER FUNCTIONS=====================================================================================================================
 //Print out all the registers in the cpu
 void printReg(Z80 cpu)
 {
@@ -187,6 +197,21 @@ void printReg(Z80 cpu)
     cout << "*============================================*\n" << endl;
 }
 
+
+//Edits the flag register according to the arithmetic opperation results - I DONT KNOW IF THIS WORKS YET
+void setflags(uint8_t result, bool halfCarry, bool overflow, bool subtraction, bool carry)
+{
+    cpu.Flags = 0; //Reset the flags for each result
+
+    if (result < 0)     {cpu.Flags = cpu.Flags || 0x10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
+    if (result == 0)    {cpu.Flags = cpu.Flags || 0x01000000;}  //(bit 6) Z-flag  [0: result!=0 | 1: result==0]
+    //Bit 5 unused 
+    if (halfCarry)      {cpu.Flags = cpu.Flags || 0x00010000;}  //(bit 4) H-Flag [0:carry absent | 1: carry present]
+    //Bit 3 unused
+    if(overflow)        {cpu.Flags = cpu.Flags || 0x00000100;}  //(bit 2) P/V-Flag [0: no overflow or odd number of 1 bits]
+    if(subtraction)     {cpu.Flags = cpu.Flags || 0x00000010;}  //(bit 1) N-Flag [0:Addition | 1: Subtraction]
+    if(carry)           {cpu.Flags = cpu.Flags || 0x00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
+}
 
 //MAIN==============================================================================================================================
 int main(){
