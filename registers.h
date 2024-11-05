@@ -52,6 +52,41 @@ struct Z80{
         //Z80 instance constructor
         //Z80 {}
 
+        void init(){
+
+                //REGISTERS--------------------------------
+                //General 8-bit registers
+                uint8_t *regA = nullptr;
+                uint8_t *Flags = nullptr; //Single Byte
+                uint8_t *regB = nullptr;
+                uint8_t *regC = nullptr;
+                uint8_t *regD = nullptr;
+                uint8_t *regE = nullptr;
+                uint8_t *regH = nullptr;
+                uint8_t *regL = nullptr;
+                
+                //Alternate 8-bit registers
+                uint8_t *reg_A = nullptr; 
+                uint8_t *reg_F = nullptr;
+                uint8_t *reg_B = nullptr;
+                uint8_t *reg_C = nullptr;
+                uint8_t *reg_D = nullptr;
+                uint8_t *reg_E = nullptr;
+                uint8_t *reg_H = nullptr;
+                uint8_t *reg_L = nullptr;
+
+                //Weird 8-bit registers
+                uint8_t *reg_I = nullptr; //Interrupt Page Address
+                uint8_t *reg_R = nullptr; //Memory Refresh
+
+                //16-bit registers
+                uint16_t *reg_IX = nullptr;
+                uint16_t *reg_IY = nullptr;
+                uint16_t *reg_SP = nullptr;//Stack Pointer 
+                uint16_t *reg_PC = 0;//Program Counter
+
+        }
+
 };
 
 #endif

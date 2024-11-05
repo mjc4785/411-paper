@@ -10,6 +10,7 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 #include <errno.h>
 #include <stdint.h>
 #include "registers.h"
+#include "execute.h"
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
@@ -78,27 +79,24 @@ void z80_mem_load(const char *filename) {
 }
 
 //CREATION OF THE Z80 FUNCTIONS====================================================================================================
-void z80_init(){
+void z80_reinit(){
 
-    Z80 registers;
+    //registers.init();
 
     return;
+
 }
 
 /* this function takes in */
-int z80_execute(int CYCLES){
+void z80_execute(){
 
-    int CompletedCylces = 0;
+    Fetch run;
 
-    for (int i = 0; i < CYCLES; i++){
+    run.execute(memory, CYCLES);
+    
+    // return CompletedCylces;
+    return;
 
-        // i believe that in here we need to fetch/read the mem
-        // once we get an address i think we should pass it to a new h file 
-        //      we should create that has every operation and switch case 
-
-    }
-
-    return CompletedCylces;
 }
 
 
@@ -122,5 +120,8 @@ int main(){
         if(memory[i] != 0)
             {printf("ram[%04x] = %02x\n", i, memory[i]);}
     }
+
+    z80_execute();
+
     return 0;
 }
