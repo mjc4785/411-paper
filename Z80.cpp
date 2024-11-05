@@ -10,7 +10,6 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 #include <errno.h>
 #include <stdint.h>
 #include "registers.h"
-#include "execute.h"
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
@@ -22,7 +21,10 @@ const string fileRun = filenameEMMA;
 int const CYCLES = 1024;
 int const MEMSIZE = 65536;
 static uint8_t memory[MEMSIZE];
-Z80 registers;
+Z80 cpu;
+
+//FUNCTION DEFINITIONS=========================================
+void decode();
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -82,12 +84,27 @@ void z80_mem_load(const char *filename) {
 //EXECUTION CODES==================================================================================================================
 void z80_execute(){
 
-    Fetch run;
-    run.execute(memory, &registers, CYCLES);
+    while(cpu.cycleCnt < CYCLES)
+    {
+        decode();
+        if(memory[int(cpu.reg_PC++)] == 0x76){break;} //Leave the loop if halting
+    }
     
     // return CompletedCylces;
     return;
+}
 
+void decode()
+{
+    switch(memory[int(cpu.reg_PC)])
+    {
+        case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
+            cout << "HALT" << endl;
+            break;
+        default:
+            cout << "Unknown Instruction" << endl;
+            break;
+    }
 }
 
 
