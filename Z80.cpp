@@ -15,7 +15,7 @@ using namespace std;
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
 const string filenameMAX = "C:\\Users\\Maxwell\\OneDrive\\Desktop\\411-paper\\load-regs.bin"; //Max change this if you want to run it 
-const string fileRun = filenameMAX;
+const string fileRun = filenameEMMA;
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
@@ -63,6 +63,7 @@ void z80_mem_dump(const char *filename) {
     }
 
     fclose(fileptr);
+    cout << "Successfully Dumped Z80 Memory to memory.bin :)" << endl;
 }
 
 void z80_mem_load(const char *filename) {
@@ -85,6 +86,7 @@ void z80_mem_load(const char *filename) {
 
 
 //EXECUTION CODES==================================================================================================================
+//Run loop
 void z80_execute(){
 
     while(cpu.cycleCnt < CYCLES)
@@ -97,19 +99,59 @@ void z80_execute(){
     return;
 }
 
+//Determine which instruction to run and execute it
 void decode()
 {
+    cout << "Performing instruction at: " << cpu.reg_PC << endl;
     switch(memory[int(cpu.reg_PC)])
     {
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
             printReg(cpu);
+            z80_mem_dump("memory.bin");
             break;
+        
+        case 0x3e: //LOAD INSTRUCTION - Load value at n into register A
+            cpu.regA = memory[int(++cpu.reg_PC)];
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x06: //LOAD INSTRUCTION - Load value at n into register B
+            cpu.regB = memory[int(++cpu.reg_PC)];
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x0e: //LOAD INSTRUCTION - Load value at n into register C
+            cpu.regC = memory[int(++cpu.reg_PC)];
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x16: //LOAD INSTRUCTION - Load value at n into register D
+            cpu.regD = memory[int(++cpu.reg_PC)];
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x1e: //LOAD INSTRUCTION - Load value at n into register E
+            cpu.regE = memory[int(++cpu.reg_PC)];
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x26: //LOAD INSTRUCTION - Load value at n into register H
+            cpu.regH = memory[int(++cpu.reg_PC)];
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x2e: //LOAD INSTRUCTION - Load value at n into register L
+            cpu.regL = memory[int(++cpu.reg_PC)];
+            cpu.cycleCnt += 7;
+            break;
+
         default:
             cout << "Unknown Instruction" << endl;
             break;
     }
 }
 
+//Print out all the registers in the cpu
 void printReg(Z80 cpu)
 {
     cout << "\n*=================Z80========================*" << endl;
