@@ -16,7 +16,7 @@ using namespace std;
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
 const string filenameMAX = "C:\\Users\\Maxwell\\OneDrive\\Desktop\\411-paper\\load-regs.bin"; //Max change this if you want to run it 
-const string fileRun = filenameMAX;
+const string fileRun = filenameEMMA;
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
@@ -78,21 +78,12 @@ void z80_mem_load(const char *filename) {
     return;
 }
 
-//CREATION OF THE Z80 FUNCTIONS====================================================================================================
-void z80_reinit(){
 
-    //registers.init();
-
-    return;
-
-}
-
-/* this function takes in */
+//EXECUTION CODES==================================================================================================================
 void z80_execute(){
 
     Fetch run;
-
-    run.execute(memory, CYCLES);
+    run.execute(memory, &registers, CYCLES);
     
     // return CompletedCylces;
     return;
@@ -100,19 +91,9 @@ void z80_execute(){
 }
 
 
-/* The HALT instruction halts the Z80; it does not increase the PC so that the instruction is 
-reexecuted, until a maskable or non-maskable interrupt is accepted. Only then does the Z80 increase
-the PC again and continues with the next instruction. During the HALT state, the HALT line is
-set. The PC is increased before the interrupt routine is called.*/
-void z80_halt(){
-
-    return;
-}
-
-
 //MAIN==============================================================================================================================
 int main(){
-    cout << "Max Castle is feeling Goated" << endl; //File running check
+    cout << "Max Castle is feeling sleepy" << endl; //File running check
 
     z80_mem_load(fileRun.c_str()); //Load into memory
     for (int i =0; i < MEMSIZE; i++)

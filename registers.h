@@ -49,9 +49,10 @@ struct Z80{
         uint8_t *reg_DE[2] = {reg_D, reg_E};
         uint8_t *reg_HL[2] = {reg_H, reg_L};
 
-        //Z80 instance constructor
-        //Z80 {}
+        //Holds the number of cycles performed
+        int cycleCnt;
 
+        //Initalizes everything to 0;
         void init(){
 
                 //REGISTERS--------------------------------
@@ -84,6 +85,9 @@ struct Z80{
                 uint16_t *reg_IY = nullptr;
                 uint16_t *reg_SP = nullptr;//Stack Pointer 
                 uint16_t *reg_PC = 0;//Program Counter
+
+                //Current cycle count
+                int cycleCnt = 0;
 
         }
 
