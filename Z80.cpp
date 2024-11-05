@@ -149,7 +149,7 @@ void decode()
         
         //8-BIT ADDITION ARITHMETIC-------------------------------------------------
         case 0x80:
-            uint8_t sum = cpu.regA + cpu.regB;
+            uint8_t sum;// = cpu.regA + cpu.regB;
             bool halfCarry; //implement
             bool overflow; //implement
             bool carry; //implement
