@@ -1,4 +1,4 @@
-objects = Z80.cpp test_framework.c
+objects = Z80.cpp
 all: $(objects)
 
 $(objects): %: %.c
