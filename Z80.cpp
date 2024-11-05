@@ -102,7 +102,6 @@ void z80_execute(){
 //Determine which instruction to run and execute it
 void decode()
 {
-    cout << "Performing instruction at: " << cpu.reg_PC << endl;
     switch(memory[int(cpu.reg_PC)])
     {
         //HALT------------------------------------------------------------------------
