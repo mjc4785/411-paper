@@ -105,11 +105,13 @@ void decode()
     cout << "Performing instruction at: " << cpu.reg_PC << endl;
     switch(memory[int(cpu.reg_PC)])
     {
+        //HALT------------------------------------------------------------------------
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
             printReg(cpu);
             z80_mem_dump("memory.bin");
             break;
         
+        //8-BIT GENERAL REGISTER LOADS------------------------------------------------
         case 0x3e: //LOAD INSTRUCTION - Load value at n into register A
             cpu.regA = memory[int(++cpu.reg_PC)];
             cpu.cycleCnt += 7;
@@ -145,6 +147,7 @@ void decode()
             cpu.cycleCnt += 7;
             break;
 
+        //UNIDENTIFIED INSTRUCTION--------------------------------------------------
         default:
             cout << "Unknown Instruction" << endl;
             break;
