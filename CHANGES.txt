@@ -3,8 +3,3 @@
 
     - 2:35
         1) I think i remember you saying that the registers are simply int pointers so i reqrote them as such so we could initialize them to nullptr.
-
-11/5/2024 2:45PM (Emma)
-    I just added in the first opcode for addition
-    I made a function called setFlags which changes the Flag register in the z80 according to the results and things done in arrithmetic 
-    Still need to figure out how to actually implement everything in the actual operation execution (carry, half carry, and overflow)
