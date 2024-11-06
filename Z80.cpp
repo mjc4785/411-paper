@@ -15,7 +15,7 @@ using namespace std;
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
 const string filenameMAX = "C:\\Users\\Maxwell\\OneDrive\\Desktop\\411-paper\\load-regs.bin"; //Max change this if you want to run it 
-const string fileRun = filenameEMMA;
+const string fileRun = filenameMAX;
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
@@ -27,7 +27,6 @@ Z80 cpu;
 //FUNCTION DEFINITIONS=========================================
 void decode();
 void printReg(Z80);
-void setflags(uint8_t, bool, bool, bool, bool);
 
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
@@ -64,7 +63,6 @@ void z80_mem_dump(const char *filename) {
     }
 
     fclose(fileptr);
-    cout << "Successfully Dumped Z80 Memory to memory.bin :)" << endl;
 }
 
 void z80_mem_load(const char *filename) {
@@ -87,7 +85,6 @@ void z80_mem_load(const char *filename) {
 
 
 //EXECUTION CODES==================================================================================================================
-//Run loop
 void z80_execute(){
 
     while(cpu.cycleCnt < CYCLES)
@@ -100,70 +97,19 @@ void z80_execute(){
     return;
 }
 
-//Determine which instruction to run and execute it
 void decode()
 {
     switch(memory[int(cpu.reg_PC)])
     {
-        //HALT------------------------------------------------------------------------
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
             printReg(cpu);
-            z80_mem_dump("memory.bin");
             break;
-        
-        //8-BIT GENERAL REGISTER LOADS------------------------------------------------
-        case 0x3e: //LOAD INSTRUCTION - Load value at n into register A
-            cpu.regA = memory[int(++cpu.reg_PC)];
-            cpu.cycleCnt += 7;
-            break;
-        
-        case 0x06: //LOAD INSTRUCTION - Load value at n into register B
-            cpu.regB = memory[int(++cpu.reg_PC)];
-            cpu.cycleCnt += 7;
-            break;
-        
-        case 0x0e: //LOAD INSTRUCTION - Load value at n into register C
-            cpu.regC = memory[int(++cpu.reg_PC)];
-            cpu.cycleCnt += 7;
-            break;
-        
-        case 0x16: //LOAD INSTRUCTION - Load value at n into register D
-            cpu.regD = memory[int(++cpu.reg_PC)];
-            cpu.cycleCnt += 7;
-            break;
-        
-        case 0x1e: //LOAD INSTRUCTION - Load value at n into register E
-            cpu.regE = memory[int(++cpu.reg_PC)];
-            cpu.cycleCnt += 7;
-            break;
-        
-        case 0x26: //LOAD INSTRUCTION - Load value at n into register H
-            cpu.regH = memory[int(++cpu.reg_PC)];
-            cpu.cycleCnt += 7;
-            break;
-        
-        case 0x2e: //LOAD INSTRUCTION - Load value at n into register L
-            cpu.regL = memory[int(++cpu.reg_PC)];
-            cpu.cycleCnt += 7;
-            break;
-        
-        //8-BIT ADDITION ARITHMETIC-------------------------------------------------
-        case 0x80:
-            uint8_t sum = cpu.regA + cpu.regB;
-            bool halfCarry; //implement
-            bool overflow; //implement
-            bool carry; //implement
-            setflags(sum,halfCarry, overflow, false, carry);
-
-        //UNIDENTIFIED INSTRUCTION--------------------------------------------------
         default:
             cout << "Unknown Instruction" << endl;
             break;
     }
 }
 
-//OTHER FUNCTIONS=====================================================================================================================
-//Print out all the registers in the cpu
 void printReg(Z80 cpu)
 {
     cout << "\n*=================Z80========================*" << endl;
@@ -197,21 +143,6 @@ void printReg(Z80 cpu)
     cout << "*============================================*\n" << endl;
 }
 
-
-//Edits the flag register according to the arithmetic opperation results - I DONT KNOW IF THIS WORKS YET
-void setflags(uint8_t result, bool halfCarry, bool overflow, bool subtraction, bool carry)
-{
-    cpu.Flags = 0; //Reset the flags for each result
-
-    if (result < 0)     {cpu.Flags = cpu.Flags || 0x10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
-    if (result == 0)    {cpu.Flags = cpu.Flags || 0x01000000;}  //(bit 6) Z-flag  [0: result!=0 | 1: result==0]
-    //Bit 5 unused 
-    if (halfCarry)      {cpu.Flags = cpu.Flags || 0x00010000;}  //(bit 4) H-Flag [0:carry absent | 1: carry present]
-    //Bit 3 unused
-    if(overflow)        {cpu.Flags = cpu.Flags || 0x00000100;}  //(bit 2) P/V-Flag [0: no overflow or odd number of 1 bits]
-    if(subtraction)     {cpu.Flags = cpu.Flags || 0x00000010;}  //(bit 1) N-Flag [0:Addition | 1: Subtraction]
-    if(carry)           {cpu.Flags = cpu.Flags || 0x00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
-}
 
 //MAIN==============================================================================================================================
 int main(){
