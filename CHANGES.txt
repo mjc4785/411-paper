@@ -8,3 +8,6 @@
     I just added in the first opcode for addition
     I made a function called setFlags which changes the Flag register in the z80 according to the results and things done in arrithmetic 
     Still need to figure out how to actually implement everything in the actual operation execution (carry, half carry, and overflow)
+
+11/5/24 (max) 
+    i tried to implement flags. i can explain better later if needed
