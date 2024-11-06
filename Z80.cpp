@@ -186,6 +186,53 @@ void decode()
             cpu.cycleCnt += 4;
             break;
 
+        case 0xc3:
+            {
+                uint16_t low = memory[++cpu.reg_PC];//increments the PC and sets it low
+                uint16_t high = memory[++cpu.reg_PC];//increments and sets it high
+
+                cpu.reg_PC = (high << 8) | low; // Set PC to the new address by shifting over a bytw
+                
+                cpu.cycleCnt += 10; //cycle count for JP
+                
+                break;
+            }
+
+        case 0x27: //shift left one byte A
+        {
+            bool msb = (cpu.regA & 0x80) != 0;
+            cpu.reg_A << 8;
+            (msb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+            (cpu.regA == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);  // zero flag
+            (cpu.regA & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80);  // sign flag
+
+            cpu.cycleCnt+=8;
+
+            break;
+        }
+
+        case 0x2f: //shift right one byte
+         {
+            bool lsb = (cpu.regA & 0x01) != 0; // since we shif tin this direction it is necessary to 
+            //make sure that when shifting, we dont lose any data.
+            //lsb flag lets us know if there is a value in the least bit of the word
+            
+            cpu.regA >> 8; //actual right shift
+
+            (lsb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);  // carry flag
+            //if the flag is there, set it. otherwise, set the flag to false
+
+            (cpu.regA == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);  // zero flag
+            // the zero flag is the 6th bit is either 1 or 0
+
+            (cpu.regA & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80);  // sign flag
+            //sets the sign flag to 1 or 0 depending on if the sign bit is 1 or 0 
+
+            cpu.cycleCnt += 8;
+
+            break;
+         }
+
         //UNIDENTIFIED INSTRUCTION--------------------------------------------------
         default:
             cout << "Unknown Instruction" << endl;
