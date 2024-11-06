@@ -9,6 +9,8 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
+#include <bitset>
+#include <cmath>
 #include "registers.h"
 using namespace std;
 
@@ -28,6 +30,7 @@ Z80 cpu;
 void decode();
 void printReg(Z80);
 void setflags(uint8_t, bool, bool, bool, bool);
+uint8_t addFlags(uint8_t, uint8_t);
 
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
@@ -95,7 +98,7 @@ void z80_execute(){
         decode();
         if(memory[int(cpu.reg_PC++)] == 0x76){break;} //Leave the loop if halting
     }
-    
+
     // return CompletedCylces;
     return;
 }
@@ -148,12 +151,40 @@ void decode()
             break;
         
         //8-BIT ADDITION ARITHMETIC-------------------------------------------------
-        case 0x80:
-            uint8_t sum;// = cpu.regA + cpu.regB;
-            bool halfCarry; //implement
-            bool overflow; //implement
-            bool carry; //implement
-            setflags(sum,halfCarry, overflow, false, carry);
+        case 0x80: //ADD INSTRUCTION - RegA += RegB
+            cpu.regA = addFlags(cpu.regA, cpu.regB);
+            cpu.cycleCnt += 4;
+            break;
+
+        case 0x81: //ADD INSTRUCTION - RegA += RegC
+            cpu.regA = addFlags(cpu.regA, cpu.regC);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x82: //ADD INSTRUCTION - RegA += RegD
+            cpu.regA = addFlags(cpu.regA, cpu.regD);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x83: //ADD INSTRUCTION - RegA += RegE 
+            cpu.regA = addFlags(cpu.regA, cpu.regE);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x84: //ADD INSTRUCTION - RegA += RegH 
+            cpu.regA = addFlags(cpu.regA, cpu.regH);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x85: //ADD INSTRUCTION - RegA += RegL 
+            cpu.regA = addFlags(cpu.regA, cpu.regL);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0xc6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
+            cpu.regA = addFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
+            cpu.cycleCnt += 4;
+            break;
 
         //UNIDENTIFIED INSTRUCTION--------------------------------------------------
         default:
@@ -167,31 +198,31 @@ void decode()
 void printReg(Z80 cpu)
 {
     cout << "\n*=================Z80========================*" << endl;
-    printf("regA: 0x%02X\n", cpu.regA) ;
-    printf("Flags: 0x%02X\n", cpu.Flags);
-    printf("regB: 0x%02X\n", cpu.regB) ;
-    printf("regC: 0x%02X\n", cpu.regC) ;
-    printf("regD: 0x%02X\n", cpu.regD) ;
-    printf("regE: 0x%02X\n", cpu.regE) ;
-    printf("regH: 0x%02X\n", cpu.regH) ;
-    printf("regL: 0x%02X\n", cpu.regL) ;
+    cout << "Flags:\t" << bitset<8>(cpu.Flags) << endl; // prints in binary to see each bit
+    printf("regA:\t0x%02X\n", cpu.regA) ;
+    printf("regB:\t0x%02X\n", cpu.regB) ;
+    printf("regC:\t0x%02X\n", cpu.regC) ;
+    printf("regD:\t0x%02X\n", cpu.regD) ;
+    printf("regE:\t0x%02X\n", cpu.regE) ;
+    printf("regH:\t0x%02X\n", cpu.regH) ;
+    printf("regL:\t0x%02X\n", cpu.regL) ;
 
-    printf("reg_A: 0x%02X\n", cpu.reg_A);
-    printf("reg_F: 0x%02X\n", cpu.reg_F);
-    printf("reg_B: 0x%02X\n", cpu.reg_B);
-    printf("reg_C: 0x%02X\n", cpu.reg_C);
-    printf("reg_D: 0x%02X\n", cpu.reg_D);
-    printf("reg_E: 0x%02X\n", cpu.reg_E);
-    printf("reg_H: 0x%02X\n", cpu.reg_H);
-    printf("reg_L: 0x%02X\n", cpu.reg_L);
+    printf("reg_A:\t0x%02X\n", cpu.reg_A);
+    printf("reg_F:\t0x%02X\n", cpu.reg_F);
+    printf("reg_B:\t0x%02X\n", cpu.reg_B);
+    printf("reg_C:\t0x%02X\n", cpu.reg_C);
+    printf("reg_D:\t0x%02X\n", cpu.reg_D);
+    printf("reg_E:\t0x%02X\n", cpu.reg_E);
+    printf("reg_H:\t0x%02X\n", cpu.reg_H);
+    printf("reg_L:\t0x%02X\n", cpu.reg_L);
 
-    printf("reg_I: 0x%02X\n", cpu.reg_I);
-    printf("reg_R: 0x%02X\n", cpu.reg_R);
+    printf("reg_I:\t0x%02X\n", cpu.reg_I);
+    printf("reg_R:\t0x%02X\n", cpu.reg_R);
 
-    printf("reg_IX: 0x%04X\n", cpu.reg_IX);
-    printf("reg_IY: 0x%04X\n", cpu.reg_IY);
-    printf("reg_SP: 0x%04X\n", cpu.reg_SP);
-    printf("reg_PC: 0x%04X\n", cpu.reg_PC);
+    printf("reg_IX:\t0x%04X\n", cpu.reg_IX);
+    printf("reg_IY:\t0x%04X\n", cpu.reg_IY);
+    printf("reg_SP:\t0x%04X\n", cpu.reg_SP);
+    printf("reg_PC:\t0x%04X\n", cpu.reg_PC);
 
     printf("Cycle Count: %d\n", cpu.cycleCnt);
     cout << "*============================================*\n" << endl;
@@ -203,21 +234,39 @@ void setflags(uint8_t result, bool halfCarry, bool overflow, bool subtraction, b
 {
     cpu.Flags = 0; //Reset the flags for each result
 
-    if (result < 0)     {cpu.Flags = cpu.Flags || 0x10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
-    if (result == 0)    {cpu.Flags = cpu.Flags || 0x01000000;}  //(bit 6) Z-flag  [0: result!=0 | 1: result==0]
+    if (result < 0)     {cpu.Flags |= 0b10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
+    if (result == 0)    {cpu.Flags |= 0b01000000;}  //(bit 6) Z-flag  [0: result!=0 | 1: result==0]
     //Bit 5 unused 
-    if (halfCarry)      {cpu.Flags = cpu.Flags || 0x00010000;}  //(bit 4) H-Flag [0:carry absent | 1: carry present]
+    if (halfCarry)      {cpu.Flags |= 0b00010000;}  //(bit 4) H-Flag [0:carry absent | 1: carry present]
     //Bit 3 unused
-    if(overflow)        {cpu.Flags = cpu.Flags || 0x00000100;}  //(bit 2) P/V-Flag [0: no overflow or odd number of 1 bits]
-    if(subtraction)     {cpu.Flags = cpu.Flags || 0x00000010;}  //(bit 1) N-Flag [0:Addition | 1: Subtraction]
-    if(carry)           {cpu.Flags = cpu.Flags || 0x00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
+    if(overflow)        {cpu.Flags |= 0b00000100;}  //(bit 2) P/V-Flag [0: no overflow or odd number of 1 bits]
+    if(subtraction)     {cpu.Flags |= 0b00000010;}  //(bit 1) N-Flag [0:Addition | 1: Subtraction]
+    if(carry)           {cpu.Flags |= 0b00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
+}
+
+//Does the logic for adding a register to another, returns their sum and sets their flags.
+uint8_t addFlags(uint8_t reg1, uint8_t reg2)
+{
+    uint8_t sum = reg1 + reg2;
+    bool halfCarry = (((reg1 & 0xf) + (reg2 & 0xf)) & 0x10) == 0x10; //FROM ROBM.DEV
+    bool overflow = ((reg1 ^ sum) & (reg2 ^ sum) & 0x80) != 0; //If the carries between bits dont result to 0, there was overflow
+    bool carry = (reg1 + reg2) > (pow(2,8)-1); //If sum is more than 8 bits can hold, there was a carry
+    setflags(sum,halfCarry, overflow, false, carry);
+    return sum;
 }
 
 //MAIN==============================================================================================================================
 int main(){
     cout << "Max Castle is feeling up-really-cool-guy" << endl; //File running check
 
-    z80_mem_load(fileRun.c_str()); //Load into memory
+    //z80_mem_load(fileRun.c_str()); //Load into memory
+    z80_mem_write(0x00, 0x2e);//load R
+    z80_mem_write(0x01, 0x01);//into R
+    z80_mem_write(0x02, 0x3e);//load a
+    z80_mem_write(0x03, 0x02);//into a
+    z80_mem_write(0x04, 0x85);//a = a+b 
+    z80_mem_write(0x05, 0x76);//halt
+    
     for (int i =0; i < MEMSIZE; i++)
     {
         if(memory[i] != 0)
