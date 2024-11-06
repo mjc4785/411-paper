@@ -31,6 +31,7 @@ void decode();
 void printReg(Z80);
 void setflags(uint8_t, bool, bool, bool, bool);
 uint8_t addFlags(uint8_t, uint8_t);
+uint8_t subFlags(uint8_t, uint8_t);
 
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
@@ -183,8 +184,14 @@ void decode()
         
         case 0xc6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
             cpu.regA = addFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
+        
+        //8-BIT SUBTRACTION ARITHMETIC-------------------------------------------------
+        /*case 0x90: //SUBTRACTION INSTRUCTiON - RegA -= RegB
+            cpu.regA = subFlags(cpu.regA, cpu.regB);
+            cpu.cycleCnt += 4;
+            break;*/
 
         //UNIDENTIFIED INSTRUCTION--------------------------------------------------
         default:
@@ -232,6 +239,7 @@ void printReg(Z80 cpu)
 //Edits the flag register according to the arithmetic opperation results - I DONT KNOW IF THIS WORKS YET
 void setflags(uint8_t result, bool halfCarry, bool overflow, bool subtraction, bool carry)
 {
+    //FLAGS: Sign | Zero | unused X | Half carry | unused X | Parity/oVerflow | add/subtract N | Carry
     cpu.Flags = 0; //Reset the flags for each result
 
     if (result < 0)     {cpu.Flags |= 0b10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
@@ -255,16 +263,23 @@ uint8_t addFlags(uint8_t reg1, uint8_t reg2)
     return sum;
 }
 
+//Does the logic for subtracting a register to another, returns their differents and sets their flags. 
+uint8_t subFlags(uint8_t reg1, uint8_t reg2)
+{
+    //uint8_t diff = reg1 - reg2;
+    return 0;
+}
+
 //MAIN==============================================================================================================================
 int main(){
     cout << "Max Castle is feeling up-really-cool-guy" << endl; //File running check
 
     //z80_mem_load(fileRun.c_str()); //Load into memory
-    z80_mem_write(0x00, 0x2e);//load R
+    z80_mem_write(0x00, 0x06);//load R
     z80_mem_write(0x01, 0x01);//into R
     z80_mem_write(0x02, 0x3e);//load a
     z80_mem_write(0x03, 0x02);//into a
-    z80_mem_write(0x04, 0x85);//a = a+b 
+    //z80_mem_write(0x04, 0x90);//a = a-b 
     z80_mem_write(0x05, 0x76);//halt
     
     for (int i =0; i < MEMSIZE; i++)
