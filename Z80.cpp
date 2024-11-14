@@ -29,8 +29,10 @@ Z80 cpu;
 //FUNCTION DEFINITIONS=========================================
 void decode();
 void printReg(Z80);
-void setflags(uint8_t, bool, bool, bool, bool);
+void setflags(uint8_t, bool, bool, bool, bool, bool);
 uint8_t addFlags(uint8_t, uint8_t);
+uint8_t subFlags(uint8_t, uint8_t);
+uint8_t twosComp(uint8_t reg);
 
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
@@ -183,7 +185,43 @@ void decode()
         
         case 0xc6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
             cpu.regA = addFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
+            cpu.cycleCnt += 7;
+            break;
+        
+        //8-BIT SUBTRACTION ARITHMETIC-------------------------------------------------
+        case 0x90: //SUBTRACTION INSTRUCTiON - RegA -= RegB
+            cpu.regA = subFlags(cpu.regA, cpu.regB);
             cpu.cycleCnt += 4;
+            break;
+        
+        case 0x91: //SUBTRACTION INSTRUCTiON - RegA -= RegC
+            cpu.regA = subFlags(cpu.regA, cpu.regC);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x92: //SUBTRACTION INSTRUCTiON - RegA -= RegD
+            cpu.regA = subFlags(cpu.regA, cpu.regD);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x93: //SUBTRACTION INSTRUCTiON - RegA -= RegE
+            cpu.regA = subFlags(cpu.regA, cpu.regE);
+            cpu.cycleCnt += 4;
+            break;
+
+        case 0x94: //SUBTRACTION INSTRUCTiON - RegA -= RegH
+            cpu.regA = subFlags(cpu.regA, cpu.regH);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x95: //SUBTRACTION INSTRUCTiON - RegA -= RegL
+            cpu.regA = subFlags(cpu.regA, cpu.regL);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0xd6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
+            cpu.regA = subFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
+            cpu.cycleCnt += 7;
             break;
 
         case 0xc3:
@@ -275,13 +313,13 @@ void printReg(Z80 cpu)
     cout << "*============================================*\n" << endl;
 }
 
-
-//Edits the flag register according to the arithmetic opperation results - I DONT KNOW IF THIS WORKS YET
-void setflags(uint8_t result, bool halfCarry, bool overflow, bool subtraction, bool carry)
+//Edits the flag register according to the arithmetic opperation results ***NEGATIVE FLAG?***
+void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool subtraction, bool carry)
 {
+    //FLAGS: Sign | Zero | unused X | Half carry | unused X | Parity/oVerflow | add/subtract N | Carry
     cpu.Flags = 0; //Reset the flags for each result
 
-    if (result < 0)     {cpu.Flags |= 0b10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
+    if (negative)     {cpu.Flags |= 0b10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
     if (result == 0)    {cpu.Flags |= 0b01000000;}  //(bit 6) Z-flag  [0: result!=0 | 1: result==0]
     //Bit 5 unused 
     if (halfCarry)      {cpu.Flags |= 0b00010000;}  //(bit 4) H-Flag [0:carry absent | 1: carry present]
@@ -291,28 +329,47 @@ void setflags(uint8_t result, bool halfCarry, bool overflow, bool subtraction, b
     if(carry)           {cpu.Flags |= 0b00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
 }
 
-//Does the logic for adding a register to another, returns their sum and sets their flags.
+//Does the logic for adding a register to another, returns their sum and sets their flags. ***NOT FULLY WORKING***
 uint8_t addFlags(uint8_t reg1, uint8_t reg2)
 {
-    uint8_t sum = reg1 + reg2;
+    int8_t sum = reg1 + reg2;
     bool halfCarry = (((reg1 & 0xf) + (reg2 & 0xf)) & 0x10) == 0x10; //FROM ROBM.DEV
     bool overflow = ((reg1 ^ sum) & (reg2 ^ sum) & 0x80) != 0; //If the carries between bits dont result to 0, there was overflow
     bool carry = (reg1 + reg2) > (pow(2,8)-1); //If sum is more than 8 bits can hold, there was a carry
-    setflags(sum,halfCarry, overflow, false, carry);
+    setflags(sum, (sum < 0), halfCarry, overflow, false, carry);
     return sum;
 }
+
+//Does the logic for subtracting a register to another, returns their differents and sets their flags. ***NOT FULLY WORKING***
+uint8_t subFlags(uint8_t reg1, uint8_t reg2)
+{
+    uint8_t negativeReg2 = twosComp(reg2);
+    uint8_t diff = reg1 + negativeReg2;
+
+    cout << bitset<8>(reg1) << "-" << bitset<8>(reg2) << "=" << bitset<8>(diff)  << "=" << int(diff) << endl;
+
+    bool halfCarry = (((reg1 & 0xf) + (negativeReg2 & 0xf)) & 0x10) == 0x10; //FROM ROBM.DEV
+    bool overflow = ((reg1 ^ diff) & (negativeReg2 ^ diff) & 0x80) != 0; //If the carries between bits dont result to 0, there was overflow
+    bool carry = reg2 > reg1; //If reg 2 is bigger, then there was a carry
+    setflags(int(diff),(reg2 > reg1), halfCarry, overflow, true, carry);
+    return diff;
+}
+
+uint8_t twosComp(uint8_t reg)
+    {return (~reg) + 1;}
 
 //MAIN==============================================================================================================================
 int main(){
     cout << "Max Castle is feeling up-really-cool-guy" << endl; //File running check
 
     //z80_mem_load(fileRun.c_str()); //Load into memory
-    z80_mem_write(0x00, 0x2e);//load R
-    z80_mem_write(0x01, 0x01);//into R
+    z80_mem_write(0x00, 0x06);//load R
+    z80_mem_write(0x01, 0x03);//into R
     z80_mem_write(0x02, 0x3e);//load a
-    z80_mem_write(0x03, 0x02);//into a
-    z80_mem_write(0x04, 0x85);//a = a+b 
-    z80_mem_write(0x05, 0x76);//halt
+    z80_mem_write(0x03, 0x07);//into a
+    z80_mem_write(0x04, 0xd6);//a = a-b 
+    z80_mem_write(0x05, 0x09);//a = a-b 
+    z80_mem_write(0x06, 0x76);//halt
     
     for (int i =0; i < MEMSIZE; i++)
     {
