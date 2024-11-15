@@ -332,6 +332,7 @@ int decode()
          case 0xcb:
             {
                 // this just means that we need to prepare to use bit instructions. 
+                break;
             }
 
         //UNIDENTIFIED INSTRUCTION--------------------------------------------------
