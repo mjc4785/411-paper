@@ -16,8 +16,14 @@ using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
-const string filenameMAX = "C:\\411\\simple-add.bin"; //Max change this if you want to run it 
+const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameMAX;
+/*
+what I did 11/15/24
+    - spaced out switch statement blocks
+    - STARTED DIVIDE-8
+    - jump and jump-relative.bin files both should work now. 
+*/
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
@@ -43,6 +49,8 @@ void z80_mem_write(uint16_t addr, uint8_t value) {
 uint8_t z80_mem_read(uint16_t addr) {
     return memory[addr];
 }
+
+//i dont know what this is used for
 
 void z80_mem_write16(uint16_t addr, uint16_t value) {
     memory[addr] = (uint8_t)(value & 0xff);
@@ -97,8 +105,10 @@ void z80_execute(){
 
     while(cpu.cycleCnt < CYCLES)
     {
-        if(decode()) {break;}
-        //if(memory[int(cpu.reg_PC++)] == 0x76){break;} //Leave the loop if halting
+        if(decode()) {break;} // if decode returns 1 (either halt or unknown inst), break
+                              // otherwise, keep looping. 
+
+        
     }
 
     // return CompletedCylces;
@@ -111,12 +121,19 @@ int decode()
     uint8_t inst = z80_mem_read(cpu.reg_PC++);
     switch(inst)
     {
+
+
+
+
         //HALT------------------------------------------------------------------------
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
             printReg(cpu);
             z80_mem_dump("memory.bin");
             return 1;
             break;
+
+
+
         
         //8-BIT GENERAL REGISTER LOADS------------------------------------------------
         case 0x3e: //LOAD INSTRUCTION - Load value at n into register A
@@ -153,6 +170,11 @@ int decode()
             cpu.regL = memory[int(cpu.reg_PC++)];
             cpu.cycleCnt += 7;
             break;
+
+
+
+
+
         
         //8-BIT ADDITION ARITHMETIC-------------------------------------------------
         case 0x80: //ADD INSTRUCTION - RegA += RegB
@@ -190,6 +212,11 @@ int decode()
             cpu.cycleCnt += 7;
             break;
         
+
+
+
+
+
         //8-BIT SUBTRACTION ARITHMETIC-------------------------------------------------
         case 0x90: //SUBTRACTION INSTRUCTiON - RegA -= RegB
             cpu.regA = subFlags(cpu.regA, cpu.regB);
@@ -226,18 +253,44 @@ int decode()
             cpu.cycleCnt += 7;
             break;
 
-// JUMP INST
-        case 0xc3:
-            {
-                uint16_t low = memory[++cpu.reg_PC];//increments the PC and sets it low
-                uint16_t high = memory[++cpu.reg_PC];//increments and sets it high
 
-                cpu.reg_PC = (high << 8) | low; // Set PC to the new address by shifting over a bytw
-                
+
+
+
+
+        // JUMP INST ---------------------------------------------------------
+        case 0xc3: //set pc to next value
+            {
+                //takes pc
+                cpu.reg_PC = memory[int(cpu.reg_PC++)];
+                // takes new ram address needed
+                //increments it to that
+
                 cpu.cycleCnt += 10; //cycle count for JP
                 
                 break;
             }
+
+        case 0x18:
+            cpu.reg_PC += memory[int(cpu.reg_PC++)];
+            break;
+
+
+
+
+
+
+// INCREMENT INST ===================================================================================
+        case 0x04: // incrememnt b by one
+            {
+                cout << "inc b by one" << endl;
+                cpu.reg_B++;
+                break;
+            }
+
+
+
+
 
 
 //SHIFT IN STRUCNT ION S
@@ -275,6 +328,11 @@ int decode()
 
             break;
          }
+
+         case 0xcb:
+            {
+                // this just means that we need to prepare to use bit instructions. 
+            }
 
         //UNIDENTIFIED INSTRUCTION--------------------------------------------------
         default:
