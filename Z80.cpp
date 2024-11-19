@@ -16,7 +16,7 @@ using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
-const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
+const string filenameMAX = "C:\\411\\multiply-4.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameMAX;
 /*
 what I did 11/15/24
@@ -297,7 +297,7 @@ int decode()
         case 0x27: //shift left one byte A
         {
             bool msb = (cpu.regA & 0x80) != 0;
-            cpu.reg_A << 8;
+            cpu.reg_A <<= 1;
             (msb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
             (cpu.regA == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);  // zero flag
             (cpu.regA & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80);  // sign flag
@@ -309,11 +309,11 @@ int decode()
 
         case 0x2f: //shift right one byte
          {
-            bool lsb = (cpu.regA & 0x01) != 0; // since we shif tin this direction it is necessary to 
+            bool lsb = (cpu.regA & 0x01) != 0; // since we shift in this direction it is necessary to 
             //make sure that when shifting, we dont lose any data.
             //lsb flag lets us know if there is a value in the least bit of the word
             
-            cpu.regA >> 8; //actual right shift
+            cpu.regA >>= 1; //actual right shift
 
             (lsb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);  // carry flag
             //if the flag is there, set it. otherwise, set the flag to false
