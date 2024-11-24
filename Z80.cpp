@@ -25,6 +25,12 @@ what I did 11/15/24
     - jump and jump-relative.bin files both should work now. 
 */
 
+/*
+    Fixed addition flags. 
+    I still dont know how the subtraction flags work 
+    But I added in the bit 3 and 5 flags - they were undoccumented 
+*/
+
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
 int const MEMSIZE = 65536;
@@ -38,7 +44,8 @@ void printReg(Z80);
 void setflags(uint8_t, bool, bool, bool, bool, bool);
 uint8_t addFlags(uint8_t, uint8_t);
 uint8_t subFlags(uint8_t, uint8_t);
-uint8_t twosComp(uint8_t reg);
+uint8_t incFlags(uint8_t);
+uint8_t twosComp(uint8_t);
 
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
@@ -132,8 +139,10 @@ int decode()
             return 1;
             break;
 
-
-
+        //NOP INSTUCTION---------------------------------------------------------------
+        case 0x00: //NOP INSTRUCTION
+            cpu.cycleCnt += 4;
+            break;
         
         //8-BIT GENERAL REGISTER LOADS------------------------------------------------
         case 0x3e: //LOAD INSTRUCTION - Load value at n into register A
@@ -207,6 +216,11 @@ int decode()
             cpu.cycleCnt += 4;
             break;
         
+        case 0x87: //ADD INSTRUCTION - RegA += RegA
+            cpu.regA = addFlags(cpu.regA, cpu.regA);
+            cpu.cycleCnt += 4;
+            break;
+        
         case 0xc6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
             cpu.regA = addFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
             cpu.cycleCnt += 7;
@@ -248,6 +262,11 @@ int decode()
             cpu.cycleCnt += 4;
             break;
         
+        case 0x97: //SUBTRACTION INSTRUCTiON - RegA -= RegA
+            cpu.regA = subFlags(cpu.regA, cpu.regA);
+            cpu.cycleCnt += 4;
+            break;
+        
         case 0xd6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
             cpu.regA = subFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
             cpu.cycleCnt += 7;
@@ -280,13 +299,43 @@ int decode()
 
 
 
-// INCREMENT INST ===================================================================================
-        case 0x04: // incrememnt b by one
-            {
-                cout << "inc b by one" << endl;
-                cpu.reg_B++;
-                break;
-            }
+        // INCREMENT INST ===================================================================================
+        case 0x04: //INCRAMENT INSTRUCTION - Adds 1 to Register B
+            cpu.regB = incFlags(cpu.regB);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x14: //INCRAMENT INSTRUCTION - Adds 1 to Register D
+            cpu.regD = incFlags(cpu.regD);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x24: //INCRAMENT INSTRUCTION - Adds 1 to Register H
+            cpu.regH = incFlags(cpu.regH);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x0c: //INCRAMENT INSTRUCTION - Adds 1 to Register C
+            cpu.regC = incFlags(cpu.regC);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x1c: //INCRAMENT INSTRUCTION - Adds 1 to Register E
+            cpu.regE = incFlags(cpu.regE);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x2c: //INCRAMENT INSTRUCTION - Adds 1 to Register L
+            cpu.regL = incFlags(cpu.regL);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x3c: //INCRAMENT INSTRUCTION - Adds 1 to Register A
+            cpu.regA = incFlags(cpu.regA);
+            cpu.cycleCnt += 4;
+            break;
+        
+
 
 
 
@@ -381,7 +430,7 @@ void printReg(Z80 cpu)
     cout << "*============================================*\n" << endl;
 }
 
-//Edits the flag register according to the arithmetic opperation results ***NEGATIVE FLAG?***
+//Edits the flag register according to the arithmetic opperation results
 void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool subtraction, bool carry)
 {
     //FLAGS: Sign | Zero | UNDOC:Copy of bit 5 of reesult| Half carry | UNDOC:Copy of bit 3 of reesult | Parity/oVerflow | add/subtract N | Carry
@@ -397,7 +446,7 @@ void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool
     if(carry)           {cpu.Flags |= 0b00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
 }
 
-//Does the logic for adding a register to another, returns their sum and sets their flags. ***NOT FULLY WORKING***
+//Does the logic for adding a register to another, returns their sum and sets their flags.
 uint8_t addFlags(uint8_t reg1, uint8_t reg2)
 {
     int32_t sum = reg1 + reg2;
@@ -424,6 +473,17 @@ uint8_t subFlags(uint8_t reg1, uint8_t reg2)
     return diff;
 }
 
+//Does the logic for incramenting a register by 1 - Cannot use addFlags, bc carry bit is unaffected
+uint8_t incFlags(uint8_t reg1)
+{
+    int32_t sum = reg1 + uint8_t(1);
+    bool halfCarry = (sum ^ reg1 ^ uint8_t(1)) & 0x10; //Demonstrated in class
+    bool overflow = (reg1 == 0x7F); //Overflows at 0x80
+    bool carry = cpu.Flags & 1; //CARRY IS UNAFFECTED
+    setflags(sum, (sum < 0), halfCarry, overflow, false, carry);
+    return sum;
+}
+
 uint8_t twosComp(uint8_t reg)
     {return (~reg) + 1;}
 
@@ -432,12 +492,13 @@ int main(){
     cout << "Max Castle is feeling splendid" << endl; //File running check
 
     z80_mem_load(fileRun.c_str()); //Load into memory
-    /*z80_mem_write(0x00, 0x06);//load B
-    z80_mem_write(0x01, 0x1F);//goes into b 
+    z80_mem_write(0x00, 0x06);//load B
+    z80_mem_write(0x01, 0x7F);//goes into b 
     z80_mem_write(0x02, 0x3e);//load a
     z80_mem_write(0x03, 0x00);//goes into b 
-    z80_mem_write(0x04, 0x80); //a= a+b
-    z80_mem_write(0x05, 0x76);//halt*/
+    //z80_mem_write(0x04, 0x80); //a= a+b
+    z80_mem_write(0x04, 0x04); //b++
+    z80_mem_write(0x05, 0x76);//halt
     
     for (int i =0; i < MEMSIZE; i++)
     {

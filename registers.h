@@ -13,7 +13,7 @@ struct Z80{
 
         //REGISTERS--------------------------------
         //General 8-bit registers
-        uint8_t regA = 0;
+        uint8_t regA = 0; //Accumulator
         uint8_t Flags = 0; //Single Byte
         uint8_t regB = 0;
         uint8_t regC = 0;
