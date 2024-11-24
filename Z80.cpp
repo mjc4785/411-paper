@@ -17,7 +17,7 @@ using namespace std;
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
-const string fileRun = filenameMAX;
+const string fileRun = filenameEMMA;
 /*
 what I did 11/15/24
     - spaced out switch statement blocks
@@ -384,14 +384,14 @@ void printReg(Z80 cpu)
 //Edits the flag register according to the arithmetic opperation results ***NEGATIVE FLAG?***
 void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool subtraction, bool carry)
 {
-    //FLAGS: Sign | Zero | unused X | Half carry | unused X | Parity/oVerflow | add/subtract N | Carry
+    //FLAGS: Sign | Zero | UNDOC:Copy of bit 5 of reesult| Half carry | UNDOC:Copy of bit 3 of reesult | Parity/oVerflow | add/subtract N | Carry
     cpu.Flags = 0; //Reset the flags for each result
 
     if (negative)     {cpu.Flags |= 0b10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
     if (result == 0)    {cpu.Flags |= 0b01000000;}  //(bit 6) Z-flag  [0: result!=0 | 1: result==0]
-    //Bit 5 unused 
+    cpu.Flags |= ((result >> 4) & 1) << 5; //(bit 5) Undoccumented - 5th bit of the result
     if (halfCarry)      {cpu.Flags |= 0b00010000;}  //(bit 4) H-Flag [0:carry absent | 1: carry present]
-    //Bit 3 unused
+    cpu.Flags |= ((result >> 2) & 1) << 3; //(bit 3) Undoccumented - 3rd bit of the result
     if(overflow)        {cpu.Flags |= 0b00000100;}  //(bit 2) P/V-Flag [0: no overflow or odd number of 1 bits]
     if(subtraction)     {cpu.Flags |= 0b00000010;}  //(bit 1) N-Flag [0:Addition | 1: Subtraction]
     if(carry)           {cpu.Flags |= 0b00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
@@ -400,10 +400,13 @@ void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool
 //Does the logic for adding a register to another, returns their sum and sets their flags. ***NOT FULLY WORKING***
 uint8_t addFlags(uint8_t reg1, uint8_t reg2)
 {
-    int8_t sum = reg1 + reg2;
-    bool halfCarry = (((reg1 & 0xf) + (reg2 & 0xf)) & 0x10) == 0x10; //FROM ROBM.DEV
-    bool overflow = ((reg1 ^ sum) & (reg2 ^ sum) & 0x80) != 0; //If the carries between bits dont result to 0, there was overflow
-    bool carry = (reg1 + reg2) > (pow(2,8)-1); //If sum is more than 8 bits can hold, there was a carry
+    int32_t sum = reg1 + reg2;
+    cout << bitset<8>(reg1) << "+" << bitset<8>(reg2) << "=" << bitset<8>(sum)  << "=" << int(sum) << endl;
+
+    //bool halfCarry = (((reg1 & 0xf) + (reg2 & 0xf)) & 0x10) == 0x10; //FROM ROBM.DEV
+    bool halfCarry = (sum ^ reg1 ^ reg2) & 0x10; //Demonstrated in class
+    bool overflow = (reg1 >> 7 == reg2 >> 7) && (sum >> 7 != reg1 >> 7); //If operants have same sign, but sum sign changes
+    bool carry = sum > 0xFF; //If sum is more than 8 bits can hold, there was a carry
     setflags(sum, (sum < 0), halfCarry, overflow, false, carry);
     return sum;
 }
@@ -428,16 +431,15 @@ uint8_t twosComp(uint8_t reg)
 
 //MAIN==============================================================================================================================
 int main(){
-    cout << "Max Castle is feeling up-really-cool-guy" << endl; //File running check
+    cout << "Max Castle is feeling splendid" << endl; //File running check
 
-    z80_mem_load(fileRun.c_str()); //Load into memory
-    // z80_mem_write(0x00, 0x06);//load R
-    // z80_mem_write(0x01, 0x03);//into R
-    // z80_mem_write(0x02, 0x3e);//load a
-    // z80_mem_write(0x03, 0x07);//into a
-    // z80_mem_write(0x04, 0xd6);//a = a-b 
-    // z80_mem_write(0x05, 0x09);//a = a-b 
-    // z80_mem_write(0x06, 0x76);//halt
+    //z80_mem_load(fileRun.c_str()); //Load into memory
+    z80_mem_write(0x00, 0x06);//load B
+    z80_mem_write(0x01, 0x1F);//goes into b 
+    z80_mem_write(0x02, 0x3e);//load a
+    z80_mem_write(0x03, 0x00);//goes into b 
+    z80_mem_write(0x04, 0x80); //a= a+b
+    z80_mem_write(0x05, 0x76);//halt
     
     for (int i =0; i < MEMSIZE; i++)
     {
