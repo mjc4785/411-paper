@@ -401,8 +401,6 @@ void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool
 uint8_t addFlags(uint8_t reg1, uint8_t reg2)
 {
     int32_t sum = reg1 + reg2;
-    cout << bitset<8>(reg1) << "+" << bitset<8>(reg2) << "=" << bitset<8>(sum)  << "=" << int(sum) << endl;
-
     //bool halfCarry = (((reg1 & 0xf) + (reg2 & 0xf)) & 0x10) == 0x10; //FROM ROBM.DEV
     bool halfCarry = (sum ^ reg1 ^ reg2) & 0x10; //Demonstrated in class
     bool overflow = (reg1 >> 7 == reg2 >> 7) && (sum >> 7 != reg1 >> 7); //If operants have same sign, but sum sign changes
@@ -433,13 +431,13 @@ uint8_t twosComp(uint8_t reg)
 int main(){
     cout << "Max Castle is feeling splendid" << endl; //File running check
 
-    //z80_mem_load(fileRun.c_str()); //Load into memory
-    z80_mem_write(0x00, 0x06);//load B
+    z80_mem_load(fileRun.c_str()); //Load into memory
+    /*z80_mem_write(0x00, 0x06);//load B
     z80_mem_write(0x01, 0x1F);//goes into b 
     z80_mem_write(0x02, 0x3e);//load a
     z80_mem_write(0x03, 0x00);//goes into b 
     z80_mem_write(0x04, 0x80); //a= a+b
-    z80_mem_write(0x05, 0x76);//halt
+    z80_mem_write(0x05, 0x76);//halt*/
     
     for (int i =0; i < MEMSIZE; i++)
     {
