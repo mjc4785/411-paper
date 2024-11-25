@@ -11,6 +11,25 @@ using namespace std;
 
 struct Z80{
 
+        // https://jnz.dk/z80/flags.html
+
+        /*
+        how the flags work for max's reference 
+        
+        bit position(in binary)     ->   7  |6  |5  |4  |3  |2  |1  |0
+        flag                        ->   S  |Z  |x  |H  |y  |P/V|N  |C
+
+        C == carry flag -> 0x00 - 0x01
+        N == add/subtract -> 0x02
+        P/V == parity/overflow flag -> 0x04
+        y == unused bit
+        H == half carry flag -> 0x08
+        x == unused bit 
+        Z == zero flag -> 0x40
+        S == sign flag  -> 0x80
+
+        */
+
         //REGISTERS--------------------------------
         //General 8-bit registers
         uint8_t regA = 0; //Accumulator

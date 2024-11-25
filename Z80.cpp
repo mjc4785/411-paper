@@ -384,6 +384,77 @@ int decode()
                 break;
             }
 
+        
+
+
+
+        //AND INSTRUCTIONS -----------------------------------------------
+        case 0xa0: //bitwise and register A with B
+            cpu.reg_A = cpu.reg_A & cpu.reg_B; //bitwise AND for reg a with b 
+
+            //flags (move this into a func that gets passed reg a) 
+            cpu.Flags |= ~0x01; // sets the carry flag to 0 
+            cpu.Flags |= ~0x02; // sets the sub flag 
+            //cpu.Flags |= 
+            
+            cpu.cycleCnt += 4;
+            
+            break;
+
+        case 0xa1: //bitwise and register A with C
+            cpu.reg_A = cpu.reg_A & cpu.reg_C; //bitwise AND for reg a with c
+            
+            cpu.cycleCnt += 4;
+            
+            break;
+
+        case 0xa2: //bitwise and register A with D
+            cpu.reg_A = cpu.reg_A & cpu.reg_D; //bitwise AND for reg a with d 
+            
+            cpu.cycleCnt += 4;
+            
+            break;
+
+        case 0xa3: //bitwise and register A with E
+            cpu.reg_A = cpu.reg_A & cpu.reg_E; //bitwise AND for reg a with e 
+            
+            cpu.cycleCnt += 4;
+            
+            break;
+
+        case 0xa4: //bitwise and register A with H
+            cpu.reg_A = cpu.reg_A & cpu.reg_H; //bitwise AND for reg a with H 
+            
+            cpu.cycleCnt += 4;
+            
+            break;
+
+        case 0xa5: //bitwise and register A with L
+            cpu.reg_A = cpu.reg_A & cpu.reg_B; //bitwise AND for reg a with l 
+            
+            cpu.cycleCnt += 4;
+            
+            break;
+
+        case 0xa6: //bitwise and register A with HL
+            cpu.reg_A = cpu.reg_A & cpu.reg_HL[0]; //bitwise AND for reg a with HL 
+            
+            cpu.cycleCnt += 4;
+            
+            break;
+
+        case 0xa7: //bitwise and register A with A
+            cpu.reg_A = cpu.reg_A & cpu.reg_A; //bitwise AND for reg a with a 
+            
+            cpu.cycleCnt += 4;
+            
+            break;
+
+
+
+
+
+
         //UNIDENTIFIED INSTRUCTION--------------------------------------------------
         default:
             cout << "Unknown Instruction " << hex << int(inst) << endl;
