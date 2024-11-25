@@ -11,6 +11,7 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 #include <stdint.h>
 #include <bitset>
 #include <cmath>
+#include <bit>
 #include "registers.h"
 using namespace std;
 
@@ -46,6 +47,7 @@ uint8_t addFlags(uint8_t, uint8_t);
 uint8_t subFlags(uint8_t, uint8_t);
 uint8_t incFlags(uint8_t);
 uint8_t twosComp(uint8_t);
+void andFlags(uint8_t);
 
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
@@ -392,10 +394,7 @@ int decode()
         case 0xa0: //bitwise and register A with B
             cpu.reg_A = cpu.reg_A & cpu.reg_B; //bitwise AND for reg a with b 
 
-            //flags (move this into a func that gets passed reg a) 
-            cpu.Flags |= ~0x01; // sets the carry flag to 0 
-            cpu.Flags |= ~0x02; // sets the sub flag 
-            //cpu.Flags |= 
+            andFlags(cpu.reg_A);
             
             cpu.cycleCnt += 4;
             
@@ -403,6 +402,8 @@ int decode()
 
         case 0xa1: //bitwise and register A with C
             cpu.reg_A = cpu.reg_A & cpu.reg_C; //bitwise AND for reg a with c
+
+            andFlags(cpu.reg_A);
             
             cpu.cycleCnt += 4;
             
@@ -411,6 +412,8 @@ int decode()
         case 0xa2: //bitwise and register A with D
             cpu.reg_A = cpu.reg_A & cpu.reg_D; //bitwise AND for reg a with d 
             
+            andFlags(cpu.reg_A);
+
             cpu.cycleCnt += 4;
             
             break;
@@ -418,12 +421,16 @@ int decode()
         case 0xa3: //bitwise and register A with E
             cpu.reg_A = cpu.reg_A & cpu.reg_E; //bitwise AND for reg a with e 
             
+            andFlags(cpu.reg_A);
+
             cpu.cycleCnt += 4;
             
             break;
 
         case 0xa4: //bitwise and register A with H
             cpu.reg_A = cpu.reg_A & cpu.reg_H; //bitwise AND for reg a with H 
+            
+            andFlags(cpu.reg_A);
             
             cpu.cycleCnt += 4;
             
@@ -432,6 +439,8 @@ int decode()
         case 0xa5: //bitwise and register A with L
             cpu.reg_A = cpu.reg_A & cpu.reg_B; //bitwise AND for reg a with l 
             
+            andFlags(cpu.reg_A);
+            
             cpu.cycleCnt += 4;
             
             break;
@@ -439,6 +448,8 @@ int decode()
         case 0xa6: //bitwise and register A with HL
             cpu.reg_A = cpu.reg_A & cpu.reg_HL[0]; //bitwise AND for reg a with HL 
             
+            andFlags(cpu.reg_A);
+
             cpu.cycleCnt += 4;
             
             break;
@@ -446,6 +457,8 @@ int decode()
         case 0xa7: //bitwise and register A with A
             cpu.reg_A = cpu.reg_A & cpu.reg_A; //bitwise AND for reg a with a 
             
+            andFlags(cpu.reg_A);
+
             cpu.cycleCnt += 4;
             
             break;
@@ -517,12 +530,25 @@ void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool
     if(carry)           {cpu.Flags |= 0b00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
 }
 
+void andFlags(uint8_t reg){
+
+            //flags (move this into a func that gets passed reg a) 
+    cpu.Flags |= ~0x01; // sets the carry flag to 0 
+    cpu.Flags |= ~0x02; // sets the sub flag 
+    (__builtin_popcount(reg) % 2) ? (cpu.Flags |= ~0x04) : (cpu.Flags |= 0x04); // sets the parity flag
+    cpu.Flags |= ~0x08;
+    (reg = 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags |= ~0x40);
+    (reg >= 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags |= ~0x80);
+
+}
+
 //Does the logic for adding a register to another, returns their sum and sets their flags.
 uint8_t addFlags(uint8_t reg1, uint8_t reg2)
 {
     int32_t sum = reg1 + reg2;
     //bool halfCarry = (((reg1 & 0xf) + (reg2 & 0xf)) & 0x10) == 0x10; //FROM ROBM.DEV
     bool halfCarry = (sum ^ reg1 ^ reg2) & 0x10; //Demonstrated in class
+    
     bool overflow = (reg1 >> 7 == reg2 >> 7) && (sum >> 7 != reg1 >> 7); //If operants have same sign, but sum sign changes
     bool carry = sum > 0xFF; //If sum is more than 8 bits can hold, there was a carry
     setflags(sum, (sum < 0), halfCarry, overflow, false, carry);
