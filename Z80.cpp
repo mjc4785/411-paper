@@ -180,10 +180,251 @@ int decode()
             cpu.cycleCnt += 7;
             break;
 
+        //LOAD FROM REGISTER INSTRUCTIONS------------------------------------------
+        case 0x40: //LOAD INSTUCTION - Load Register B with Register B
+            cpu.regB = cpu.regB;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x41: //LOAD INSTUCTION - Load Register B with Register C
+            cpu.regB = cpu.regC;
+            cpu.cycleCnt += 4;
+            break;
 
+        case 0x42: //LOAD INSTUCTION - Load Register B with Register D
+            cpu.regB = cpu.regD;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x43: //LOAD INSTUCTION - Load Register B with Register E
+            cpu.regB = cpu.regE;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x44: //LOAD INSTUCTION - Load Register B with Register H
+            cpu.regB = cpu.regH;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x45: //LOAD INSTUCTION - Load Register B with Register L
+            cpu.regB = cpu.regL;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x47: //LOAD INSTUCTION - Load Register B with Register A
+            cpu.regB = cpu.regA;
+            cpu.cycleCnt += 4;
+            break;
 
+        case 0x48: //LOAD INSTUCTION - Load Register C with Register B
+            cpu.regC = cpu.regB;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x49: //LOAD INSTUCTION - Load Register C with Register C
+            cpu.regC = cpu.regC;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x4A: //LOAD INSTUCTION - Load Register C with Register D
+            cpu.regC = cpu.regD;
+            cpu.cycleCnt += 4;
+            break;
 
+        case 0x4B: //LOAD INSTUCTION - Load Register C with Register E
+            cpu.regC = cpu.regE;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x4C: //LOAD INSTUCTION - Load Register C with Register H
+            cpu.regC = cpu.regH;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x4D: //LOAD INSTUCTION - Load Register C with Register L
+            cpu.regC = cpu.regL;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x4F: //LOAD INSTUCTION - Load Register C with Register A
+            cpu.regC = cpu.regA;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x50: //LOAD INSTUCTION - Load Register D with Register B
+            cpu.regD = cpu.regB;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x51: //LOAD INSTUCTION - Load Register D with Register C
+            cpu.regD = cpu.regC;
+            cpu.cycleCnt += 4;
+            break;
 
+        case 0x52: //LOAD INSTUCTION - Load Register D with Register D
+            cpu.regD = cpu.regD;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x53: //LOAD INSTUCTION - Load Register D with Register E
+            cpu.regD = cpu.regE;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x54: //LOAD INSTUCTION - Load Register D with Register H
+            cpu.regD = cpu.regH;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x55: //LOAD INSTUCTION - Load Register D with Register L
+            cpu.regD = cpu.regL;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x57: //LOAD INSTUCTION - Load Register D with Register A
+            cpu.regD = cpu.regA;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x58: //LOAD INSTUCTION - Load Register E with Register B
+            cpu.regE = cpu.regB;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x59: //LOAD INSTUCTION - Load Register E with Register C
+            cpu.regE = cpu.regC;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x5A: //LOAD INSTUCTION - Load Register E with Register D
+            cpu.regE = cpu.regD;
+            cpu.cycleCnt += 4;
+            break;
+
+        case 0x5B: //LOAD INSTUCTION - Load Register E with Register E
+            cpu.regE = cpu.regE;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x5C: //LOAD INSTUCTION - Load Register E with Register H
+            cpu.regE = cpu.regH;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x5D: //LOAD INSTUCTION - Load Register E with Register L
+            cpu.regE = cpu.regL;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x5F: //LOAD INSTUCTION - Load Register E with Register A
+            cpu.regE = cpu.regA;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x60: //LOAD INSTUCTION - Load Register H with Register B
+            cpu.regH = cpu.regB;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x61: //LOAD INSTUCTION - Load Register H with Register C
+            cpu.regH = cpu.regC;
+            cpu.cycleCnt += 4;
+            break;
+
+        case 0x62: //LOAD INSTUCTION - Load Register H with Register D
+            cpu.regH = cpu.regD;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x63: //LOAD INSTUCTION - Load Register H with Register E
+            cpu.regH = cpu.regE;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x64: //LOAD INSTUCTION - Load Register H with Register H
+            cpu.regH = cpu.regH;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x65: //LOAD INSTUCTION - Load Register H with Register L
+            cpu.regH = cpu.regL;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x67: //LOAD INSTUCTION - Load Register H with Register A
+            cpu.regH = cpu.regA;
+            cpu.cycleCnt += 4;
+            break;
+
+        case 0x68: //LOAD INSTUCTION - Load Register L with Register B
+            cpu.regL = cpu.regB;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x69: //LOAD INSTUCTION - Load Register L with Register C
+            cpu.regL = cpu.regC;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x6A: //LOAD INSTUCTION - Load Register L with Register D
+            cpu.regL = cpu.regD;
+            cpu.cycleCnt += 4;
+            break;
+
+        case 0x6B: //LOAD INSTUCTION - Load Register L with Register E
+            cpu.regL = cpu.regE;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x6C: //LOAD INSTUCTION - Load Register L with Register H
+            cpu.regL = cpu.regH;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x6D: //LOAD INSTUCTION - Load Register L with Register L
+            cpu.regL = cpu.regL;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x6F: //LOAD INSTUCTION - Load Register L with Register A
+            cpu.regL = cpu.regA;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x78: //LOAD INSTUCTION - Load Register A with Register B
+            cpu.regA = cpu.regB;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x79: //LOAD INSTUCTION - Load Register A with Register C
+            cpu.regA = cpu.regC;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x7A: //LOAD INSTUCTION - Load Register A with Register D
+            cpu.regA = cpu.regD;
+            cpu.cycleCnt += 4;
+            break;
+
+        case 0x7B: //LOAD INSTUCTION - Load Register A with Register E
+            cpu.regA = cpu.regE;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x7C: //LOAD INSTUCTION - Load Register A with Register H
+            cpu.regA = cpu.regH;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x7D: //LOAD INSTUCTION - Load Register A with Register L
+            cpu.regA = cpu.regL;
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x7F: //LOAD INSTUCTION - Load Register A with Register A
+            cpu.regA = cpu.regA;
+            cpu.cycleCnt += 4;
+            break;
         
         //8-BIT ADDITION ARITHMETIC-------------------------------------------------
         case 0x80: //ADD INSTRUCTION - RegA += RegB
@@ -491,13 +732,13 @@ uint8_t twosComp(uint8_t reg)
 int main(){
     cout << "Max Castle is feeling splendid" << endl; //File running check
 
-    z80_mem_load(fileRun.c_str()); //Load into memory
+    //z80_mem_load(fileRun.c_str()); //Load into memory
     z80_mem_write(0x00, 0x06);//load B
     z80_mem_write(0x01, 0x7F);//goes into b 
     z80_mem_write(0x02, 0x3e);//load a
-    z80_mem_write(0x03, 0x00);//goes into b 
+    z80_mem_write(0x03, 0x64);//goes into b 
     //z80_mem_write(0x04, 0x80); //a= a+b
-    z80_mem_write(0x04, 0x04); //b++
+    z80_mem_write(0x04, 0x47);
     z80_mem_write(0x05, 0x76);//halt
     
     for (int i =0; i < MEMSIZE; i++)
