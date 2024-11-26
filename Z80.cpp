@@ -704,6 +704,230 @@ int decode()
             
             break;
 
+        case 0xe6:
+            cpu.reg_A = cpu.reg_A & memory[int(cpu.reg_PC++)]; //bitwise AND for reg a with n 
+            
+            andFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+            break;
+
+
+
+
+
+        //XOR Instruction --------------------------------------------------------
+        case 0xa8: // XOR A with B 
+            cpu.reg_A = cpu.reg_A ^ cpu.reg_B; //bitwise XOR for reg a with a 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xa9: // XOR A with C 
+            cpu.reg_A = cpu.reg_A ^ cpu.reg_C; //bitwise XOR for reg a with a 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xaa: // XOR A with D 
+            cpu.reg_A = cpu.reg_A ^ cpu.reg_D; //bitwise XOR for reg a with a 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xab: // XOR A with E 
+            cpu.reg_A = cpu.reg_A ^ cpu.reg_E; //bitwise XOR for reg a with e  
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xac: // XOR A with H 
+            cpu.reg_A = cpu.reg_A ^ cpu.reg_H; //bitwise XOR for reg a with h 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xad: // XOR A with L 
+            cpu.reg_A = cpu.reg_A ^ cpu.reg_L; //bitwise XOR for reg a with l 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xae: // XOR A with HL 
+            cpu.reg_A = cpu.reg_A ^ cpu.reg_HL[0]; //bitwise XOR for reg a with hl 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xaf: // XOR A with A 
+            cpu.reg_A = cpu.reg_A ^ cpu.reg_B; //bitwise XOR for reg a with a 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+            //im sorry, i swear this didn't take me long 
+
+                          //////      ////////
+                        //    ////    //      //
+                        //   // //    //      //    ===========|
+                        //  //  //    ////////                ||
+                        ////    //    //      //           \  ||  /
+                          //////      //      //            \ || /
+//                                                            \ /
+
+        //OR INSTRUCTIONS =================================================================
+        case 0xb0: // OR A with B 
+            cpu.reg_A = cpu.reg_A | cpu.reg_B; //bitwise OR for reg a with a 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xb1: // OR A with C 
+            cpu.reg_A = cpu.reg_A | cpu.reg_C; //bitwise OR for reg a with a 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xb2: // OR A with D 
+            cpu.reg_A = cpu.reg_A | cpu.reg_D; //bitwise OR for reg a with a 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xb3: // OR A with E 
+            cpu.reg_A = cpu.reg_A | cpu.reg_E; //bitwise OR for reg a with e  
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xb4: // OR A with H 
+            cpu.reg_A = cpu.reg_A | cpu.reg_H; //bitwise OR for reg a with h 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xb5: // OR A with L 
+            cpu.reg_A = cpu.reg_A | cpu.reg_L; //bitwise OR for reg a with l 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xb6: // OR A with HL 
+            cpu.reg_A = cpu.reg_A | cpu.reg_HL[0]; //bitwise OR for reg a with hl 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+        case 0xb7: // OR A with A 
+            cpu.reg_A = cpu.reg_A | cpu.reg_B; //bitwise OR for reg a with a 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+        
+        case 0xf6:// OR A with n memory[int(cpu.reg_PC++)];
+            cpu.reg_A = cpu.reg_A | memory[int(cpu.reg_PC++)]; //bitwise OR for reg a with a 
+            
+            xorFlags(cpu.reg_A);
+
+            cpu.cycleCnt += 4;
+
+            break;
+
+
+
+
+
+
+        // SUBTRACT WITH THE FLAGS CHANGE =========================================================
+        case 0xb8: //cp B from A
+            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_B);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xb9: //cp C from A
+            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_C);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xba: //cp D from A
+            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_D);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbb: //cp E from A
+            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_E);
+            cpu.cycleCnt+=4;
+            break; 
+
+        case 0xbc: //cp H from A
+            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_H);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbd: //cp L from A
+            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_L);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbe: //cp HL from A
+            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_HL[0]);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbf: //cp A from A
+            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_A);
+            cpu.cycleCnt+=4;
+            break;
+
+
 
 
 
@@ -719,6 +943,10 @@ int decode()
 
     return 0;
 }
+
+
+
+
 
 //OTHER FUNCTIONS=====================================================================================================================
 //Print out all the registers in the cpu
@@ -755,6 +983,11 @@ void printReg(Z80 cpu)
     cout << "*============================================*\n" << endl;
 }
 
+
+
+
+
+
 //Edits the flag register according to the arithmetic opperation results
 void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool subtraction, bool carry)
 {
@@ -774,6 +1007,17 @@ void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool
 void andFlags(uint8_t reg){
 
             //flags (move this into a func that gets passed reg a) 
+    cpu.Flags |= ~0x01; // sets the carry flag to 0 
+    cpu.Flags |= ~0x02; // sets the sub flag 
+    (__builtin_popcount(reg) % 2) ? (cpu.Flags |= ~0x04) : (cpu.Flags |= 0x04); // sets the parity flag
+    cpu.Flags |= ~0x08;
+    (reg = 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags |= ~0x40);
+    (reg >= 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags |= ~0x80);
+
+}
+
+void xorFlags(uint8_t reg){
+
     cpu.Flags |= ~0x01; // sets the carry flag to 0 
     cpu.Flags |= ~0x02; // sets the sub flag 
     (__builtin_popcount(reg) % 2) ? (cpu.Flags |= ~0x04) : (cpu.Flags |= 0x04); // sets the parity flag
@@ -821,6 +1065,12 @@ uint8_t incFlags(uint8_t reg1)
     setflags(sum, (sum < 0), halfCarry, overflow, false, carry);
     return sum;
 }
+
+
+
+
+
+
 
 uint8_t twosComp(uint8_t reg)
     {return (~reg) + 1;}
