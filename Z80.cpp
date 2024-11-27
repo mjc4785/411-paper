@@ -940,9 +940,9 @@ void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool
 
     if (negative)     {cpu.Flags |= 0b10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
     if (result == 0)    {cpu.Flags |= 0b01000000;}  //(bit 6) Z-flag  [0: result!=0 | 1: result==0]
-    cpu.Flags |= ((result >> 4) & 1) << 5; //(bit 5) Undoccumented - 5th bit of the result
+    cpu.Flags |= ((result >> 5) & 1) << 5; //(bit 5) Undoccumented - 5th bit of the result
     if (halfCarry)      {cpu.Flags |= 0b00010000;}  //(bit 4) H-Flag [0:carry absent | 1: carry present]
-    cpu.Flags |= ((result >> 2) & 1) << 3; //(bit 3) Undoccumented - 3rd bit of the result
+    cpu.Flags |= ((result >> 3) & 1) << 3; //(bit 3) Undoccumented - 3rd bit of the result
     if(overflow)        {cpu.Flags |= 0b00000100;}  //(bit 2) P/V-Flag [0: no overflow or odd number of 1 bits]
     if(subtraction)     {cpu.Flags |= 0b00000010;}  //(bit 1) N-Flag [0:Addition | 1: Subtraction]
     if(carry)           {cpu.Flags |= 0b00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
@@ -992,7 +992,7 @@ uint8_t subFlags(uint8_t reg1, uint8_t reg2)
 
     cout << bitset<8>(reg1) << "-" << bitset<8>(reg2) << "=" << bitset<8>(diff)  << "=" << int(diff) << endl;
 
-    bool halfCarry = (((reg1 & 0xf) + (negativeReg2 & 0xf)) & 0x10) == 0x10; //FROM ROBM.DEV
+    bool halfCarry = ((reg1 & 0x0f) < (reg2 & 0x0f)); 
     bool overflow = ((reg1 ^ diff) & (negativeReg2 ^ diff) & 0x80) != 0; //If the carries between bits dont result to 0, there was overflow
     bool carry = reg2 > reg1; //If reg 2 is bigger, then there was a carry
     setflags(int(diff),(reg2 > reg1), halfCarry, overflow, true, carry);

@@ -22,9 +22,9 @@ struct Z80{
         C == carry flag -> 0x00 - 0x01
         N == add/subtract -> 0x02
         P/V == parity/overflow flag -> 0x04
-        y == unused bit
+        y == undoccumented bit - 3rd bit of the result
         H == half carry flag -> 0x08
-        x == unused bit 
+        x == undoccumented bit - 5th bit of the result
         Z == zero flag -> 0x40
         S == sign flag  -> 0x80
 
