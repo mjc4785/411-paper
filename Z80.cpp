@@ -16,7 +16,7 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\multiply-4.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameEMMA;
 
@@ -114,7 +114,7 @@ int z80_execute(){
 //Determine which instruction to run and execute it
 int decode()
 {
-    uint8_t inst = z80_mem_read(cpu.reg_PC++);
+    uint8_t inst = z80_mem_read(cpu.reg_PC++); //Reads the next instuction and incraments program counter
     switch(inst)
     {
 
@@ -132,43 +132,67 @@ int decode()
             cpu.cycleCnt += 4;
             break;
         
-        //8-BIT GENERAL REGISTER LOADS------------------------------------------------
+        //LOAD REGISTER FROM IMMEDIATE------------------------------------------------
         case 0x3e: //LOAD INSTRUCTION - Load value at n into register A
-            cpu.regA = memory[int(cpu.reg_PC++)];
+            //cpu.regA = memory[int(cpu.reg_PC++)]; //OLD WAY - WORKS BUT REPLACED WITH FUNCTION JUST INCASE
+            cpu.regA = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 7;
             break;
         
         case 0x06: //LOAD INSTRUCTION - Load value at n into register B
-            cpu.regB = memory[int(cpu.reg_PC++)];
+            cpu.regB = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 7;
             break;
         
         case 0x0e: //LOAD INSTRUCTION - Load value at n into register C
-            cpu.regC = memory[int(cpu.reg_PC++)];
+            cpu.regC = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 7;
             break;
         
         case 0x16: //LOAD INSTRUCTION - Load value at n into register D
-            cpu.regD = memory[int(cpu.reg_PC++)];
+            cpu.regD = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 7;
             break;
         
         case 0x1e: //LOAD INSTRUCTION - Load value at n into register E
-            cpu.regE = memory[int(cpu.reg_PC++)];
+            cpu.regE = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 7;
             break;
         
         case 0x26: //LOAD INSTRUCTION - Load value at n into register H
-            cpu.regH = memory[int(cpu.reg_PC++)];
+            cpu.regH = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 7;
             break;
         
         case 0x2e: //LOAD INSTRUCTION - Load value at n into register L
-            cpu.regL = memory[int(cpu.reg_PC++)];
+            cpu.regL = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 7;
             break;
+        
+        case 0x01: //LOAD INSTRUCTION - Load 16 bit value nn into paired register BC
+            cpu.regB = z80_mem_read(int(cpu.reg_PC++));
+            cpu.regC = z80_mem_read(int(cpu.reg_PC++));
+            cpu.cycleCnt += 10;
+            break;
+        
+        case 0x11: //LOAD INSTRUCTION - Load 16 bit value nn into paired register DE
+            cpu.regD = z80_mem_read(int(cpu.reg_PC++));
+            cpu.regE = z80_mem_read(int(cpu.reg_PC++));
+            cpu.cycleCnt += 10;
+            break;
+        
+        case 0x21: //LOAD INSTRUCTION - Load 16 bit value nn into paired register HL
+            cpu.regH = z80_mem_read(int(cpu.reg_PC++));
+            cpu.regL = z80_mem_read(int(cpu.reg_PC++));
+            cpu.cycleCnt += 10;
+            break;
+        
+        case 0x31: //LOAD INSTRUCTION - Load 16 bit value nn into paired register DE
+            cpu.reg_SP = ((z80_mem_read(int(cpu.reg_PC++)) << 8) | z80_mem_read(int(cpu.reg_PC++)));
+            cpu.cycleCnt += 10;
+            break;
 
-        //LOAD FROM REGISTER INSTRUCTIONS------------------------------------------
+        //LOAD REGISTER FROM REGISTER INSTRUCTIONS------------------------------------------
         case 0x40: //LOAD INSTUCTION - Load Register B with Register B
             cpu.regB = cpu.regB;
             cpu.cycleCnt += 4;
@@ -190,6 +214,7 @@ int decode()
             break;
         
         case 0x44: //LOAD INSTUCTION - Load Register B with Register H
+            cout << "IN THE WRONG PLACE " << endl;
             cpu.regB = cpu.regH;
             cpu.cycleCnt += 4;
             break;
@@ -413,7 +438,143 @@ int decode()
             cpu.regA = cpu.regA;
             cpu.cycleCnt += 4;
             break;
+
+        case 0xfa: //LOAD INSTRUCTION - Load 16 bit Register SP with Paired Register HL
+            cpu.reg_SP = ((cpu.regH << 8) | cpu.regL);
+            cpu.cycleCnt += 6;
+            break;
         
+        //LOAD REGISTER FROM MEMORY ADDRESS-------------------------------------------------
+        case 0x46: //LOAD INSTRUCTION - Load Register B with data from memory address stored in (HL)
+            cpu.regB = z80_mem_read(int((((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x4e: //LOAD INSTRUCTION - Load Register C with data from memory address stored in (HL)
+            cpu.regC = z80_mem_read(int((((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x56: //LOAD INSTRUCTION - Load Register D with data from memory address stored in (HL)
+            cpu.regD = z80_mem_read(int((((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x5e: //LOAD INSTRUCTION - Load Register E with data from memory address stored in (HL)
+            cpu.regE = z80_mem_read(int((((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x66: //LOAD INSTRUCTION - Load Register H with data from memory address stored in (HL)
+            cpu.regH = z80_mem_read(int((((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x6e: //LOAD INSTRUCTION - Load Register L with data from memory address stored in (HL)
+            cpu.regL = z80_mem_read(int((((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x7e: //LOAD INSTRUCTION - Load Register A with data from memory address stored in (HL)
+            cpu.regA = z80_mem_read(int((((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x0a: //LOAD INSTRUCTION - Load Register A with data from memory address stored in (BC)
+            cpu.regA = z80_mem_read(int((((cpu.regB << 8) | cpu.regC))));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x1a: //LOAD INSTRUCTION - Load Register A with data from memory address stored in (DE)
+            cpu.regA = z80_mem_read(int((((cpu.regD << 8) | cpu.regE))));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x2a: //LOAD INSTRUCTION - Load Paired Register HL with data from memory address nn, and nn+1
+        {    
+            uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+            cpu.regL = z80_mem_read(addr); //NOTE THE NN GOES INTO L
+            cpu.regH = z80_mem_read(addr + 1); //NOTE THE NN+1 GOES INTO H
+            cpu.cycleCnt += 16;
+            break;
+        }
+
+        case 0x3a: //LOAD INSTRUCTION - Load Register A with data from memory address stored in (nn)
+            cpu.regA = z80_mem_read(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1)));
+            cpu.cycleCnt += 13;
+            break;
+        
+        //LOAD MEMORY ADDRESS FROM REGISTER-------------------------------------------------------------------
+        case 0x70: //LOAD INSTRUCTION - Load Memory Address stored in (HL) with data from Register B
+            z80_mem_write(int((((cpu.regH << 8) | cpu.regL))), cpu.regB);
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x71: //LOAD INSTRUCTION - Load Memory Address stored in (HL) with data from Register C
+            z80_mem_write(int((((cpu.regH << 8) | cpu.regL))), cpu.regC);
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x72: //LOAD INSTRUCTION - Load Memory Address stored in (HL) with data from Register D
+            z80_mem_write(int((((cpu.regH << 8) | cpu.regL))), cpu.regD);
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x73: //LOAD INSTRUCTION - Load Memory Address stored in (HL) with data from Register E
+            z80_mem_write(int((((cpu.regH << 8) | cpu.regL))), cpu.regE);
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x74: //LOAD INSTRUCTION - Load Memory Address stored in (HL) with data from Register H
+            z80_mem_write(int((((cpu.regH << 8) | cpu.regL))), cpu.regH);
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x75: //LOAD INSTRUCTION - Load Memory Address stored in (HL) with data from Register L
+            z80_mem_write(int((((cpu.regH << 8) | cpu.regL))), cpu.regL);
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x77: //LOAD INSTRUCTION - Load Memory Address stored in (HL) with data from Register A
+            z80_mem_write(int((((cpu.regH << 8) | cpu.regL))), cpu.regA);
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x02: //LOAD INSTRUCTION - Load Memory Address stored in (BC) with data from Register A
+            z80_mem_write(int((((cpu.regB << 8) | cpu.regC))), cpu.regA);
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x12: //LOAD INSTRUCTION - Load Memory Address stored in (DE) with data from Register A
+            z80_mem_write(int((((cpu.regD << 8) | cpu.regE))), cpu.regA);
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0x32: //LOAD INSTRUCTION - Load Memory Address nn with data from register A
+            z80_mem_write(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1)), cpu.regA);
+            cpu.cycleCnt += 13;
+            break;
+        
+        case 0x22: //LOAD INSTRUCTION - Load Memory Address nn with data from paired register HL
+        {
+            uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+            z80_mem_write(addr, cpu.regL); //L goes into (nn)
+            z80_mem_write(addr+1, cpu.regH); //H goes into (nn+1)
+            cpu.cycleCnt += 16;
+            break;
+        }
+        
+        //LOAD MEMORY ADDRESS FROM IMMEDIATE ----------------------------------------------------------------
+        case 0x36: //LOAD INSTRUCTION - Load Memory Address stored in (HL) with data in next instruction
+            z80_mem_write(int((((cpu.regH << 8) | cpu.regL))), z80_mem_read(int(cpu.reg_PC++)));
+            cpu.cycleCnt += 10;
+            break;
+        
+
+
+
+
+
         //8-BIT ADDITION ARITHMETIC-------------------------------------------------
         case 0x80: //ADD INSTRUCTION - RegA += RegB
             cpu.regA = addFlags(cpu.regA, cpu.regB);
@@ -1010,14 +1171,28 @@ uint8_t twosComp(uint8_t reg)
 int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
 
-    z80_mem_load(fileRun.c_str()); //Load into memory
-    // z80_mem_write(0x00, 0x06);//load B
-    // z80_mem_write(0x01, 0x7F);//goes into b 
-    // z80_mem_write(0x02, 0x3e);//load a
-    // z80_mem_write(0x03, 0x64);//goes into b 
-    // //z80_mem_write(0x04, 0x80); //a= a+b
-    // z80_mem_write(0x04, 0x47);
-    // z80_mem_write(0x05, 0x76);//halt
+    //z80_mem_load(fileRun.c_str()); //Load into memory
+    z80_mem_write(0x00, 0x01);//load BC
+    z80_mem_write(0x01, 0x55);//goes into B 
+    z80_mem_write(0x02, 0x44);//goes into C
+    z80_mem_write(0x03, 0x3e);//load A
+    z80_mem_write(0x04, 0x47);// goes into A
+    z80_mem_write(0x05, 0x02);//load a into mem location (BC)
+
+    z80_mem_write(0x06, 0x3e);//load A
+    z80_mem_write(0x07, 0x20);// goes into A
+
+    z80_mem_write(0x08, 0x3a);//load A from nn
+    z80_mem_write(0x09, 0x55);// n
+    z80_mem_write(0x0a, 0x44);// n 
+
+    z80_mem_write(0x0b, 0x32);//load A from nn
+    z80_mem_write(0x0c, 0x55);// n
+    z80_mem_write(0x0d, 0x40);// n 
+
+    z80_mem_write(0x0e, 0x76);//halt
+
+     
     
     for (int i =0; i < MEMSIZE; i++)
     {
@@ -1026,6 +1201,13 @@ int main(){
     }
 
     z80_execute();
+
+
+    for (int i =0x5540; i < 0x5547; i++)
+    {
+        {printf("ram[%04x] = %02x\n", i, memory[i]);}
+    }
+    printf("num: %02x", z80_mem_read((cpu.regB << 8)|cpu.regC));
 
     return 0;
 }
