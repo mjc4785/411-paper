@@ -16,21 +16,10 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\simple-sub.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
-const string fileRun = filenameMAX;
-/*
-what I did 11/15/24
-    - spaced out switch statement blocks
-    - STARTED DIVIDE-8
-    - jump and jump-relative.bin files both should work now. 
-*/
+const string fileRun = filenameEMMA;
 
-/*
-    Fixed addition flags. 
-    I still dont know how the subtraction flags work 
-    But I added in the bit 3 and 5 flags - they were undoccumented 
-*/
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
@@ -42,13 +31,14 @@ Z80 cpu;
 //FUNCTION DEFINITIONS=========================================
 int decode();
 void printReg(Z80);
+void printRegTest(Z80);
 void setflags(uint8_t, bool, bool, bool, bool, bool);
 uint8_t addFlags(uint8_t, uint8_t);
 uint8_t subFlags(uint8_t, uint8_t);
 uint8_t incFlags(uint8_t);
 uint8_t twosComp(uint8_t);
 void andFlags(uint8_t);
-
+void xorFlags(uint8_t);
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -60,7 +50,6 @@ uint8_t z80_mem_read(uint16_t addr) {
 }
 
 //i dont know what this is used for
-
 void z80_mem_write16(uint16_t addr, uint16_t value) {
     memory[addr] = (uint8_t)(value & 0xff);
     memory[addr + 1] = (uint8_t)(value >> 8);
@@ -110,18 +99,16 @@ void z80_mem_load(const char *filename) {
 
 //EXECUTION CODES==================================================================================================================
 //Run loop
-void z80_execute(){
+int z80_execute(){
 
     while(cpu.cycleCnt < CYCLES)
     {
+        cpu.reg_R++; //INCRAMENT THE R RESGISTER ON ALL PREFIXES EXCEPT IY CB IX CB
         if(decode()) {break;} // if decode returns 1 (either halt or unknown inst), break
                               // otherwise, keep looping. 
-
-        
     }
-
-    // return CompletedCylces;
-    return;
+    
+    return cpu.cycleCnt; // return CompletedCylces;
 }
 
 //Determine which instruction to run and execute it
@@ -131,12 +118,11 @@ int decode()
     switch(inst)
     {
 
-
-
-
         //HALT------------------------------------------------------------------------
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
-            printReg(cpu);
+            cpu.cycleCnt += 4; // 4 Cycles for halt
+            //printReg(cpu); //OUR VERSION OF PRINT
+            printRegTest(cpu); //SEBALD VERSION OF PRINT
             z80_mem_dump("memory.bin");
             return 1;
             break;
@@ -535,10 +521,8 @@ int decode()
 
         case 0x18:
             cpu.reg_PC += memory[int(cpu.reg_PC++)];
+            cpu.cycleCnt += 12; 
             break;
-
-
-
 
 
 
@@ -634,81 +618,55 @@ int decode()
         //AND INSTRUCTIONS -----------------------------------------------
         case 0xa0: //bitwise and register A with B
             cpu.reg_A = cpu.reg_A & cpu.reg_B; //bitwise AND for reg a with b 
-
             andFlags(cpu.reg_A);
-            
             cpu.cycleCnt += 4;
-            
             break;
 
         case 0xa1: //bitwise and register A with C
             cpu.reg_A = cpu.reg_A & cpu.reg_C; //bitwise AND for reg a with c
-
             andFlags(cpu.reg_A);
-            
             cpu.cycleCnt += 4;
-            
             break;
 
         case 0xa2: //bitwise and register A with D
             cpu.reg_A = cpu.reg_A & cpu.reg_D; //bitwise AND for reg a with d 
-            
             andFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-            
             break;
 
         case 0xa3: //bitwise and register A with E
             cpu.reg_A = cpu.reg_A & cpu.reg_E; //bitwise AND for reg a with e 
-            
             andFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-            
             break;
 
         case 0xa4: //bitwise and register A with H
             cpu.reg_A = cpu.reg_A & cpu.reg_H; //bitwise AND for reg a with H 
-            
             andFlags(cpu.reg_A);
-            
             cpu.cycleCnt += 4;
-            
             break;
 
         case 0xa5: //bitwise and register A with L
             cpu.reg_A = cpu.reg_A & cpu.reg_B; //bitwise AND for reg a with l 
-            
             andFlags(cpu.reg_A);
-            
             cpu.cycleCnt += 4;
-            
             break;
 
         case 0xa6: //bitwise and register A with HL
             cpu.reg_A = cpu.reg_A & cpu.reg_HL[0]; //bitwise AND for reg a with HL 
-            
             andFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-            
             break;
 
         case 0xa7: //bitwise and register A with A
             cpu.reg_A = cpu.reg_A & cpu.reg_A; //bitwise AND for reg a with a 
-            
             andFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-            
             break;
 
         case 0xe6:
             cpu.reg_A = cpu.reg_A & memory[int(cpu.reg_PC++)]; //bitwise AND for reg a with n 
-            
             andFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
             break;
 
@@ -719,74 +677,50 @@ int decode()
         //XOR Instruction --------------------------------------------------------
         case 0xa8: // XOR A with B 
             cpu.reg_A = cpu.reg_A ^ cpu.reg_B; //bitwise XOR for reg a with a 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xa9: // XOR A with C 
             cpu.reg_A = cpu.reg_A ^ cpu.reg_C; //bitwise XOR for reg a with a 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xaa: // XOR A with D 
             cpu.reg_A = cpu.reg_A ^ cpu.reg_D; //bitwise XOR for reg a with a 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xab: // XOR A with E 
             cpu.reg_A = cpu.reg_A ^ cpu.reg_E; //bitwise XOR for reg a with e  
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xac: // XOR A with H 
             cpu.reg_A = cpu.reg_A ^ cpu.reg_H; //bitwise XOR for reg a with h 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xad: // XOR A with L 
             cpu.reg_A = cpu.reg_A ^ cpu.reg_L; //bitwise XOR for reg a with l 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xae: // XOR A with HL 
             cpu.reg_A = cpu.reg_A ^ cpu.reg_HL[0]; //bitwise XOR for reg a with hl 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xaf: // XOR A with A 
             cpu.reg_A = cpu.reg_A ^ cpu.reg_B; //bitwise XOR for reg a with a 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
             //im sorry, i swear this didn't take me long 
@@ -802,83 +736,56 @@ int decode()
         //OR INSTRUCTIONS =================================================================
         case 0xb0: // OR A with B 
             cpu.reg_A = cpu.reg_A | cpu.reg_B; //bitwise OR for reg a with a 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xb1: // OR A with C 
             cpu.reg_A = cpu.reg_A | cpu.reg_C; //bitwise OR for reg a with a 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xb2: // OR A with D 
             cpu.reg_A = cpu.reg_A | cpu.reg_D; //bitwise OR for reg a with a 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xb3: // OR A with E 
             cpu.reg_A = cpu.reg_A | cpu.reg_E; //bitwise OR for reg a with e  
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xb4: // OR A with H 
             cpu.reg_A = cpu.reg_A | cpu.reg_H; //bitwise OR for reg a with h 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xb5: // OR A with L 
             cpu.reg_A = cpu.reg_A | cpu.reg_L; //bitwise OR for reg a with l 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xb6: // OR A with HL 
             cpu.reg_A = cpu.reg_A | cpu.reg_HL[0]; //bitwise OR for reg a with hl 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
         case 0xb7: // OR A with A 
             cpu.reg_A = cpu.reg_A | cpu.reg_B; //bitwise OR for reg a with a 
-            
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
         
         case 0xf6:// OR A with n memory[int(cpu.reg_PC++)];
-            cpu.reg_A = cpu.reg_A | memory[int(cpu.reg_PC++)]; //bitwise OR for reg a with a 
-            
+            cpu.reg_A = cpu.reg_A | memory[int(cpu.reg_PC++)]; //bitwise OR for reg a with a             
             xorFlags(cpu.reg_A);
-
             cpu.cycleCnt += 4;
-
             break;
 
 
@@ -983,8 +890,45 @@ void printReg(Z80 cpu)
     cout << "*============================================*\n" << endl;
 }
 
+//Sebald Version of printing all the registers in the CPU
+void printRegTest(Z80 cpu)
+{
+    cout << "\n*=================Z80========================*" << endl;
+    printf("A:\t%02X\n", cpu.regA);
+    printf("F:\t%02X\n", cpu.Flags);
+    printf("B:\t%02X\n", cpu.regB);
+    printf("C:\t%02X\n", cpu.regC);
+    printf("D:\t%02X\n", cpu.regD);
+    printf("E:\t%02X\n", cpu.regE);
+    printf("H:\t%02X\n", cpu.regH);
+    printf("L:\t%02X\n", cpu.regL);
+
+    printf("I:\t%02X\n", cpu.reg_I);
+    printf("R:\t%02X\n", cpu.reg_R);
+
+    printf("A':\t%02X\n", cpu.reg_A);
+    printf("F':\t%02X\n", cpu.reg_F);
+    printf("B':\t%02X\n", cpu.reg_B);
+    printf("C':\t%02X\n", cpu.reg_C);
+    printf("D':\t%02X\n", cpu.reg_D);
+    printf("E':\t%02X\n", cpu.reg_E);
 
 
+    printf("IFF1:\t%01X\n", cpu.regIFF1);
+    printf("IFF2:\t%01X\n", cpu.regIFF2);
+    printf("IM:\t%01X\n", cpu.regINIR);
+
+    printf("Hidden 16-bit math register:\tNOT IMPLEMENTED\n");
+
+    printf("IX:\t%04X\n", cpu.reg_IX);
+    printf("IY:\t%04X\n", cpu.reg_IY);
+    printf("PC:\t%04X\n", cpu.reg_PC);
+    printf("SP:\t%04X\n", cpu.reg_SP);
+    
+
+    printf("Ran %d cycles\n", cpu.cycleCnt);
+    cout << "*============================================*\n" << endl;
+}
 
 
 
@@ -1067,26 +1011,21 @@ uint8_t incFlags(uint8_t reg1)
 }
 
 
-
-
-
-
-
 uint8_t twosComp(uint8_t reg)
     {return (~reg) + 1;}
 
 //MAIN==============================================================================================================================
 int main(){
-    cout << "Max Castle is feeling splendid" << endl; //File running check
+    cout << "Max Castle is feeling thankful" << endl; //File running check
 
-    //z80_mem_load(fileRun.c_str()); //Load into memory
-    z80_mem_write(0x00, 0x06);//load B
-    z80_mem_write(0x01, 0x7F);//goes into b 
-    z80_mem_write(0x02, 0x3e);//load a
-    z80_mem_write(0x03, 0x64);//goes into b 
-    //z80_mem_write(0x04, 0x80); //a= a+b
-    z80_mem_write(0x04, 0x47);
-    z80_mem_write(0x05, 0x76);//halt
+    z80_mem_load(fileRun.c_str()); //Load into memory
+    // z80_mem_write(0x00, 0x06);//load B
+    // z80_mem_write(0x01, 0x7F);//goes into b 
+    // z80_mem_write(0x02, 0x3e);//load a
+    // z80_mem_write(0x03, 0x64);//goes into b 
+    // //z80_mem_write(0x04, 0x80); //a= a+b
+    // z80_mem_write(0x04, 0x47);
+    // z80_mem_write(0x05, 0x76);//halt
     
     for (int i =0; i < MEMSIZE; i++)
     {
