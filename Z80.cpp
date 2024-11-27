@@ -16,7 +16,7 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\simple-sub.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\multiply-4.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameEMMA;
 
@@ -793,50 +793,46 @@ int decode()
 
 
 
-        // SUBTRACT WITH THE FLAGS CHANGE =========================================================
+        // SUBTRACT FLAGS CHANGE, RESGISTERS DONT =========================================================
         case 0xb8: //cp B from A
-            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_B);
+            subFlags(cpu.reg_A, cpu.reg_B);
             cpu.cycleCnt+=4;
             break;
 
         case 0xb9: //cp C from A
-            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_C);
+            subFlags(cpu.reg_A, cpu.reg_C);
             cpu.cycleCnt+=4;
             break;
 
         case 0xba: //cp D from A
-            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_D);
+            subFlags(cpu.reg_A, cpu.reg_D);
             cpu.cycleCnt+=4;
             break;
 
         case 0xbb: //cp E from A
-            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_E);
+            subFlags(cpu.reg_A, cpu.reg_E);
             cpu.cycleCnt+=4;
             break; 
 
         case 0xbc: //cp H from A
-            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_H);
+            subFlags(cpu.reg_A, cpu.reg_H);
             cpu.cycleCnt+=4;
             break;
 
         case 0xbd: //cp L from A
-            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_L);
+            subFlags(cpu.reg_A, cpu.reg_L);
             cpu.cycleCnt+=4;
             break;
 
         case 0xbe: //cp HL from A
-            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_HL[0]);
+            subFlags(cpu.reg_A, cpu.reg_HL[0]);
             cpu.cycleCnt+=4;
             break;
 
         case 0xbf: //cp A from A
-            cpu.reg_A = subFlags(cpu.reg_A, cpu.reg_A);
+            subFlags(cpu.reg_A, cpu.reg_A);
             cpu.cycleCnt+=4;
             break;
-
-
-
-
 
 
 
@@ -1001,7 +997,7 @@ uint8_t incFlags(uint8_t reg1)
     int32_t sum = reg1 + uint8_t(1);
     bool halfCarry = (sum ^ reg1 ^ uint8_t(1)) & 0x10; //Demonstrated in class
     bool overflow = (reg1 == 0x7F); //Overflows at 0x80
-    bool carry = cpu.Flags & 1; //CARRY IS UNAFFECTED
+    bool carry = cpu.Flags & 0x01; //CARRY IS UNAFFECTED
     setflags(sum, (sum < 0), halfCarry, overflow, false, carry);
     return sum;
 }
