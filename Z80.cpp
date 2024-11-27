@@ -987,15 +987,11 @@ uint8_t addFlags(uint8_t reg1, uint8_t reg2)
 //Does the logic for subtracting a register to another, returns their differents and sets their flags. ***NOT FULLY WORKING***
 uint8_t subFlags(uint8_t reg1, uint8_t reg2)
 {
-    uint8_t negativeReg2 = twosComp(reg2);
-    uint8_t diff = reg1 + negativeReg2;
-
-    cout << bitset<8>(reg1) << "-" << bitset<8>(reg2) << "=" << bitset<8>(diff)  << "=" << int(diff) << endl;
-
-    bool halfCarry = ((reg1 & 0x0f) < (reg2 & 0x0f)); 
-    bool overflow = ((reg1 ^ diff) & (negativeReg2 ^ diff) & 0x80) != 0; //If the carries between bits dont result to 0, there was overflow
+    uint16_t diff = reg1 - reg2;
+    bool halfCarry = ((reg1 & 0x0f) < (reg2 & 0x0f)); //The thing being subtracted from wasnt big enough: had to borrow
+    bool overflow = (((reg1 ^ reg2) & 0x80) && ((reg1 ^ diff) & 0x80)); //If the registers have different signs and the result also has a different sign
     bool carry = reg2 > reg1; //If reg 2 is bigger, then there was a carry
-    setflags(int(diff),(reg2 > reg1), halfCarry, overflow, true, carry);
+    setflags(diff,(reg2 > reg1), halfCarry, overflow, true, carry);
     return diff;
 }
 
