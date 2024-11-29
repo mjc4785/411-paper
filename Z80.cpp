@@ -627,8 +627,8 @@ int decode()
         case 0x09://PAIRED ADD INTRUCTION - Reg hl += bc
         {
             uint16_t paired = add16Flags(cpu.regH, cpu.regL, ((cpu.regB << 8)|cpu.regC));
-            cpu.regH = (paired << 8) & 0xFF;// Upper 8
-            cpu.regL = (paired) & 0xFF;// Lower 8
+            cpu.regH = (paired >> 8);   // Upper 8
+            cpu.regL = (paired) & 0xFF; // Lower 8
             cpu.cycleCnt += 11;
             break;
         }    
@@ -636,8 +636,8 @@ int decode()
         case 0x19: //PAIRED ADD INTRUCTION - Reg hl += de
         {
             uint16_t paired = add16Flags(cpu.regH, cpu.regL, ((cpu.regD << 8)|cpu.regE));
-            cpu.regH = (paired << 8) & 0xFF;// Upper 8
-            cpu.regL = (paired) & 0xFF;// Lower 8
+            cpu.regH = (paired >> 8);   // Upper 8
+            cpu.regL = (paired) & 0xFF; // Lower 8
             cpu.cycleCnt += 11;
             break;
         } 
@@ -645,16 +645,20 @@ int decode()
         case 0x29: //PAIRED ADD INTRUCTION - Reg hl += hl
         {
             uint16_t paired = add16Flags(cpu.regH, cpu.regL, ((cpu.regH << 8)|cpu.regL));
-            cpu.regH = (paired << 8) & 0xFF;// Upper 8
-            cpu.regL = (paired) & 0xFF;// Lower 8
+            cpu.regH = (paired >> 8);   // Upper 8
+            cpu.regL = (paired) & 0xFF; // Lower 8
             cpu.cycleCnt += 11;
             break;
         } 
         
         case 0x39: //PAIRED ADD INTRUCTION - Reg hl += sp
+        {
+            uint16_t paired = add16Flags(cpu.regH, cpu.regL, cpu.reg_SP);
+            cpu.regH = (paired >> 8);   // Upper 8
+            cpu.regL = (paired) & 0xFF; // Lower 8
             cpu.cycleCnt += 11;
             break;
-            
+        }
 
 
 
@@ -1393,14 +1397,11 @@ uint16_t add16Flags(uint8_t regH, uint8_t regL, uint16_t other)
     //Sign doesnt change
     //Z doesnt change
     cpu.Flags |= ((sum >> 5) & 1) << 5; //5th bit of result
-    ((cpu.regL) + (other & 0x0FFF) > 0x0FFF) ? (cpu.Flags |=  0x08) : (cpu.Flags &=  ~0x08);//H: Set if carry out of bit 11, reset otherwise
+    (((paired & 0x0FFF) + (other & 0x0FFF)) > 0x0FFF) ? (cpu.Flags |=  0x08) : (cpu.Flags &=  ~0x08);//H: Set if carry out of bit 11, reset otherwise
     cpu.Flags |= ((sum >> 3) & 1) << 3; //3rd bit of result
     //P/V doesnt change
     cpu.Flags &= ~0x02; //N reset
     (sum & 0x10000) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01); //C: set of carry from bit 15, reset otherwise
-
-    
-    printf("x%04x + x%04x = x%04x\n", paired, other, sum);
 
     return sum & 0xffff;
 }
