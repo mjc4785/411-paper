@@ -20,7 +20,7 @@ struct Z80{
         flag                        ->   S  |Z  |x  |H  |y  |P/V|N  |C
 
         C == carry flag -> 0x00 - 0x01
-        N == add/subtract -> 0x02
+        N == add/subtract (1) -> 0x02
         P/V == parity/overflow flag -> 0x04
         y == undoccumented bit - 3rd bit of the result
         H == half carry flag -> 0x08
