@@ -39,6 +39,8 @@ uint8_t incFlags(uint8_t);
 uint8_t twosComp(uint8_t);
 void andFlags(uint8_t);
 void xorFlags(uint8_t);
+uint16_t incPaired(uint8_t, uint8_t);
+uint16_t add16Flags(uint8_t, uint8_t, uint16_t);
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -439,7 +441,7 @@ int decode()
             cpu.cycleCnt += 4;
             break;
 
-        case 0xfa: //LOAD INSTRUCTION - Load 16 bit Register SP with Paired Register HL
+        case 0xf9: //LOAD INSTRUCTION - Load 16 bit Register SP with Paired Register HL
             cpu.reg_SP = ((cpu.regH << 8) | cpu.regL);
             cpu.cycleCnt += 6;
             break;
@@ -616,8 +618,43 @@ int decode()
             cpu.cycleCnt += 7;
             break;
         
+        case 0x86: //ADD INSTRUCTION - RegA += memory[regHL]
+            cpu.regA = addFlags(cpu.regA,z80_mem_read((((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 7;
+            break;
 
 
+        case 0x09://PAIRED ADD INTRUCTION - Reg hl += bc
+        {
+            uint16_t paired = add16Flags(cpu.regH, cpu.regL, ((cpu.regB << 8)|cpu.regC));
+            cpu.regH = (paired << 8) & 0xFF;// Upper 8
+            cpu.regL = (paired) & 0xFF;// Lower 8
+            cpu.cycleCnt += 11;
+            break;
+        }    
+    
+        case 0x19: //PAIRED ADD INTRUCTION - Reg hl += de
+        {
+            uint16_t paired = add16Flags(cpu.regH, cpu.regL, ((cpu.regD << 8)|cpu.regE));
+            cpu.regH = (paired << 8) & 0xFF;// Upper 8
+            cpu.regL = (paired) & 0xFF;// Lower 8
+            cpu.cycleCnt += 11;
+            break;
+        } 
+
+        case 0x29: //PAIRED ADD INTRUCTION - Reg hl += hl
+        {
+            uint16_t paired = add16Flags(cpu.regH, cpu.regL, ((cpu.regH << 8)|cpu.regL));
+            cpu.regH = (paired << 8) & 0xFF;// Upper 8
+            cpu.regL = (paired) & 0xFF;// Lower 8
+            cpu.cycleCnt += 11;
+            break;
+        } 
+        
+        case 0x39: //PAIRED ADD INTRUCTION - Reg hl += sp
+            cpu.cycleCnt += 11;
+            break;
+            
 
 
 
@@ -657,11 +694,15 @@ int decode()
             cpu.cycleCnt += 4;
             break;
         
-        case 0xd6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
+        case 0xd6: //SUBTRACT IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
             cpu.regA = subFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
             cpu.cycleCnt += 7;
             break;
-
+        
+        case 0x96: //SUBTRACTION INSTRUCTION - RegA -= memory[regHL]
+            cpu.regA = subFlags(cpu.regA,z80_mem_read((((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 7;
+            break;
 
 
 
@@ -723,8 +764,44 @@ int decode()
             cpu.cycleCnt += 4;
             break;
         
-
-
+        case 0x03: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register BC
+        {
+            uint16_t paired = (incPaired(cpu.regB, cpu.regC));
+            cpu.regB = (paired >> 8) & 0xFF;  // High byte
+            cpu.regC = paired & 0xFF;       // Low byte
+            cpu.cycleCnt += 6;
+            break;
+        }
+            
+        
+        case 0x13: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register DE
+        {
+            uint16_t paired = (incPaired(cpu.regD, cpu.regE));
+            cpu.regD = (paired >> 8) & 0xFF;  // High byte
+            cpu.regE = paired & 0xFF;       // Low byte
+            cpu.cycleCnt += 6;
+            break;
+        }
+        
+        case 0x23: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register HL
+        {
+            uint16_t paired = (incPaired(cpu.regH, cpu.regL));
+            cpu.regH = (paired >> 8) & 0xFF;  // High byte
+            cpu.regL = paired & 0xFF;       // Low byte
+            cpu.cycleCnt += 6;
+            break;
+        }
+        
+        case 0x33: //INCRAMENT 16bit REGISTER INSTRUCTION - Adds 1 to Paired Register SP
+            cpu.reg_SP++; //Incrament by 1, do not set flags
+            cpu.cycleCnt += 6;
+            break;
+        
+        case 0x34: //INCRAMENT DATA AT MEMORY LOCATION INSTUCTION - Adds 1 to data at memory location (HL)
+            z80_mem_write(((cpu.regH << 8) | cpu.regL), incFlags(z80_mem_read(((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 11;
+            break;
+        
 
 
 
@@ -999,23 +1076,61 @@ int decode()
 
 
         
-        // PUSH FUNCS ----------------------------------------------------
-        /*SP is decremented and A is stored into the memory location pointed to by SP.
-         SP is decremented again and F is stored into the memory location pointed to by SP.*/
+        // PUSH FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        /*SP is decremented and B is stored into the memory location pointed to by SP.
+         SP is decremented again and C is stored into the memory location pointed to by SP*/
         case 0xc5:
-            cpu.reg_SP;
+            cpu.reg_SP--;
+            memory[cpu.reg_SP] = cpu.reg_B;
+
+            cpu.reg_SP--;
+            memory[cpu.reg_SP] = cpu.reg_C;
+
+            cpu.cycleCnt += 11;
+            
             break;
 
-        case 0xd5:
+        /*SP is decremented and D is stored into the memory location pointed to by SP. 
+        SP is decremented again and E is stored into the memory location pointed to by SP.*/
+        case 0xd5: 
+            cpu.reg_SP--;
+            memory[cpu.reg_SP] = cpu.reg_D;
+
+            cpu.reg_SP--;
+            memory[cpu.reg_SP] = cpu.reg_E;
+
+            cpu.cycleCnt += 11;
+            
             break;
 
+        /*SP is decremented and H is stored into the memory location pointed to by SP. 
+        SP is decremented again and L is stored into the memory location pointed to by SP.*/
         case 0xe5:
+            cpu.reg_SP--;
+            memory[cpu.reg_SP] = cpu.reg_H;
+
+            cpu.reg_SP--;
+            memory[cpu.reg_SP] = cpu.reg_L;
+
+            cpu.cycleCnt += 11;
+            
             break;
 
+        /*SP is decremented and A is stored into the memory location pointed to by SP. 
+        SP is decremented again and F is stored into the memory location pointed to by SP.*/
         case 0xf5:
+            cpu.reg_SP--;
+            memory[cpu.reg_SP] = cpu.reg_A;
+
+            cpu.reg_SP--;
+            memory[cpu.reg_SP] = cpu.reg_F;
+
+            cpu.cycleCnt += 11;
+            
             break;
         
-        // CALL FUNCS ----------------------------------------------------
+        // CALL FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
         case 0xc4:
             break;
 
@@ -1027,22 +1142,61 @@ int decode()
 
         case 0xf4:
             break;
+
+
         
         
-        // POP FUNCS ----------------------------------------------------
+        // POP FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
+        /*The memory location pointed to by SP is stored into C and SP is incremented.
+         The memory location pointed to by SP is stored into B and SP is incremented again.*/
         case 0xc1:
+            cpu.reg_C = cpu.reg_SP;
+            cpu.reg_SP++;
+
+            cpu.reg_B = cpu.reg_SP;
+            cpu.reg_SP++;
+
+            cpu.cycleCnt += 10;
             break;
 
+        /*The memory location pointed to by SP is stored into E and SP is incremented. 
+        The memory location pointed to by SP is stored into D and SP is incremented again.*/
         case 0xd1:
+            cpu.reg_C = cpu.reg_SP;
+            cpu.reg_SP++;
+
+            cpu.reg_B = cpu.reg_SP;
+            cpu.reg_SP++;
+
+            cpu.cycleCnt += 10;
             break;
 
+        /*The memory location pointed to by SP is stored into L and SP is incremented. 
+        The memory location pointed to by SP is stored into H and SP is incremented again.*/
         case 0xe1:
+            cpu.reg_C = cpu.reg_SP;
+            cpu.reg_SP++;
+
+            cpu.reg_B = cpu.reg_SP;
+            cpu.reg_SP++;
+
+            cpu.cycleCnt += 10;
             break;
 
+        /*The memory location pointed to by SP is stored into F and SP is incremented. 
+        The memory location pointed to by SP is stored into A and SP is incremented again.*/
         case 0xf1:
+            cpu.reg_C = cpu.reg_SP;
+            cpu.reg_SP++;
+
+            cpu.reg_B = cpu.reg_SP;
+            cpu.reg_SP++;
+
+            cpu.cycleCnt += 10;
             break;
 
-        // RETURN FUNCS ----------------------------------------------------
+        // RETURN FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
+        /*If the zero flag is unset, the top stack entry is popped into PC.*/
         case 0xc0:
             break;
 
@@ -1056,7 +1210,7 @@ int decode()
             break;
 
 
-        //UNIDENTIFIED INSTRUCTION--------------------------------------------------
+        //UNIDENTIFIED INSTRUCTION----------------------------------------------------------------------------------------------------------------------------------------------------------
         default:
             cout << "Unknown Instruction " << hex << int(inst) << endl;
             printReg(cpu);
@@ -1193,7 +1347,6 @@ uint8_t addFlags(uint8_t reg1, uint8_t reg2)
     int32_t sum = reg1 + reg2;
     //bool halfCarry = (((reg1 & 0xf) + (reg2 & 0xf)) & 0x10) == 0x10; //FROM ROBM.DEV
     bool halfCarry = (sum ^ reg1 ^ reg2) & 0x10; //Demonstrated in class
-    
     bool overflow = (reg1 >> 7 == reg2 >> 7) && (sum >> 7 != reg1 >> 7); //If operants have same sign, but sum sign changes
     bool carry = sum > 0xFF; //If sum is more than 8 bits can hold, there was a carry
     setflags(sum, (sum < 0), halfCarry, overflow, false, carry);
@@ -1222,6 +1375,35 @@ uint8_t incFlags(uint8_t reg1)
     return sum;
 }
 
+//incrememnts the paired register values - does not impact flags.
+uint16_t incPaired(uint8_t regH, uint8_t regL)
+{
+    uint16_t pairedReg = (regH << 8) | regL; //Combine into paired register
+    pairedReg++; //Add one for incrament
+    return pairedReg; 
+}
+
+//IDoes the logic for adding two 16 bit registers. 
+uint16_t add16Flags(uint8_t regH, uint8_t regL, uint16_t other)
+{
+
+    uint16_t paired = (regH << 8)| regL; //Make paired 16 bits
+    uint32_t sum = paired + other; //Caclilate Sum
+    
+    //Sign doesnt change
+    //Z doesnt change
+    cpu.Flags |= ((sum >> 5) & 1) << 5; //5th bit of result
+    ((cpu.regL) + (other & 0x0FFF) > 0x0FFF) ? (cpu.Flags |=  0x08) : (cpu.Flags &=  ~0x08);//H: Set if carry out of bit 11, reset otherwise
+    cpu.Flags |= ((sum >> 3) & 1) << 3; //3rd bit of result
+    //P/V doesnt change
+    cpu.Flags &= ~0x02; //N reset
+    (sum & 0x10000) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01); //C: set of carry from bit 15, reset otherwise
+
+    
+    printf("x%04x + x%04x = x%04x\n", paired, other, sum);
+
+    return sum & 0xffff;
+}
 
 uint8_t twosComp(uint8_t reg)
     {return (~reg) + 1;}
@@ -1231,25 +1413,34 @@ int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
 
     //z80_mem_load(fileRun.c_str()); //Load into memory
-    z80_mem_write(0x00, 0x01);//load BC
-    z80_mem_write(0x01, 0x55);//goes into B 
-    z80_mem_write(0x02, 0x44);//goes into C
-    z80_mem_write(0x03, 0x3e);//load A
-    z80_mem_write(0x04, 0x47);// goes into A
-    z80_mem_write(0x05, 0x02);//load a into mem location (BC)
+    z80_mem_write(0x00, 0x26);//load H with n
+    z80_mem_write(0x01, 0x12);//H
+    z80_mem_write(0x02, 0x2e);//load L with n
+    z80_mem_write(0x03, 0x34);//L
+    
 
-    z80_mem_write(0x06, 0x3e);//load A
-    z80_mem_write(0x07, 0x20);// goes into A
+    z80_mem_write(0x04, 0x3e);//load A
+    z80_mem_write(0x05, 0x2e);// goes into A
 
-    z80_mem_write(0x08, 0x3a);//load A from nn
-    z80_mem_write(0x09, 0x55);// n
-    z80_mem_write(0x0a, 0x44);// n 
+    z80_mem_write(0x06, 0x06);//load B with n
+    z80_mem_write(0x07, 0x0F);//B
 
-    z80_mem_write(0x0b, 0x32);//load A from nn
-    z80_mem_write(0x0c, 0x55);// n
-    z80_mem_write(0x0d, 0x40);// n 
+    z80_mem_write(0x08, 0x0e);//load C with n
+    z80_mem_write(0x09, 0x0F);//C
 
-    z80_mem_write(0x0e, 0x76);//halt
+    /*z80_mem_write(0x0b, 0x70);//load (HL) with B
+
+    z80_mem_write(0x0c, 0x23);//Incrament HL
+
+    z80_mem_write(0x0d, 0x34);//Incrament (HL)
+
+    z80_mem_write(0x0e, 0x96);//add to A from (HL)
+
+    z80_mem_write(0x0f, 0xf9);//load sp with HL*/
+
+    z80_mem_write(0x0a, 0x09);//hl += bc
+
+    z80_mem_write(0x0b, 0x76);//halt
 
      
     
@@ -1266,7 +1457,7 @@ int main(){
     {
         {printf("ram[%04x] = %02x\n", i, memory[i]);}
     }
-    printf("num: %02x", z80_mem_read((cpu.regB << 8)|cpu.regC));
+    printf("num: %02x", z80_mem_read((cpu.regH << 8)|cpu.regL));
 
     return 0;
 }
