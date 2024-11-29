@@ -523,7 +523,7 @@ int decode()
         // JUMP INST ---------------------------------------------------------
         case 0xc3: //set pc to next value
             {
-                //takes pc
+
                 cpu.reg_PC = memory[int(cpu.reg_PC++)];
                 // takes new ram address needed
                 //increments it to that
@@ -928,6 +928,24 @@ int decode()
             break;
 
 
+
+
+
+        //RETURN CONDITION =====================================================================================================================
+        case 0xc0: // return if the zero flag is unset
+        // if zero flag unset 
+        
+            // poptop stack entry into PC
+            break; 
+
+        case 0xd0: // return if the carry flag is unset
+            break;
+
+        case 0xe0: // return if the parity/overflow flag is unset 
+            break;
+
+        case 0xf0: // return if the sign flag is unset
+            break;
 
 
 
