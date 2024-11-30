@@ -712,23 +712,174 @@ int decode()
 
 
 
-        // JUMP INST ---------------------------------------------------------
-        case 0xc3: //set pc to next value
+
+
+
+
+        // JUMP INST -
+        //----------------------------------------------------------------------------------------------------------------
+
+        case 0x10: // jump if zero is not set after decrementing b reg 
+            cpu.reg_B--;
+            if(cpu.reg_B > 0)
             {
-
-                cpu.reg_PC = memory[int(cpu.reg_PC++)];
-                // takes new ram address needed
-                //increments it to that
-
-                cpu.cycleCnt += 10; //cycle count for JP
-                
+                cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt+=13;
                 break;
             }
+            cpu.cycleCnt+=8;
+            break;
 
-        case 0x18:
-            cpu.reg_PC += memory[int(cpu.reg_PC++)];
+
+
+        case 0x20: // jump if zero is unset 
+            if ((cpu.Flags & 0b010000000) == 0)
+            {
+                cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 12; 
+                break;
+            }
+            cpu.cycleCnt+=7;
+            break;
+
+
+            
+        case 0x30: // jump if carry is unset
+        if ((cpu.Flags & 0b000000001) == 0)
+            {
+                cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 12; 
+                break;
+            }
+            cpu.cycleCnt+=7; 
+            break;
+
+
+
+        case 0x18: // jump from inst opcode to d 
+            cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 12; 
             break;
+
+
+
+        case 0x28: // jump if zero flag is set from opcode to d 
+            if ((cpu.Flags & 0b010000000) > 0)
+            {
+                cpu.reg_PC += memory[int(cpu.reg_PC++)];
+                cpu.cycleCnt += 12; 
+                break;
+            }
+            cpu.cycleCnt+=7;
+            break;
+
+
+
+        case 0x38: // jump is carry flag is set from opcode to d 
+            if ((cpu.Flags & 0b000000001) > 0)
+            {
+                cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 12; 
+                break;
+            }
+            cpu.cycleCnt+=7;
+            break;
+
+
+        case 0xc2: //zero flag unset, jump to nn
+        if ((cpu.Flags & 0b010000000) == 0)
+            {
+                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 10; 
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+        case 0xd2:
+        if ((cpu.Flags & 0b000000001) == 0)
+            {
+                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 10; 
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+        case 0xe2:
+        if ((cpu.Flags & 0b000000100) == 0)
+            {
+                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 10; 
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+        case 0xf2:
+        if ((cpu.Flags & 0b100000000) == 0)
+            {
+                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 10; 
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+
+        case 0xca: //zero flag set, jump to nn
+        if ((cpu.Flags & 0b010000000) > 0)
+            {
+                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 10; 
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+        case 0xda: // if carry flag set jump to nn 
+        if ((cpu.Flags & 0b000000001) > 0)
+            {
+                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 10; 
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+        case 0xea: // uf the P/V flag is unset, jump to nn
+        if ((cpu.Flags & 0b000000100) > 0)
+            {
+                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 10; 
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+        case 0xfa: // if the sign flag us set, jump to nn
+        if ((cpu.Flags & 0b100000000) > 0)
+            {
+                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 10; 
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+
+        case 0xc3: //jumps to nn if zero flag isnt set
+            if ((cpu.Flags & 0b010000000) == 0)
+            {
+                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
+                cpu.cycleCnt += 10; //cycle count for Jp   
+                break;
+            }
+            break;
+
+
+
+
 
 
 
@@ -965,6 +1116,12 @@ int decode()
             cpu.cycleCnt += 4;
             break;
 
+        case 0xee:
+            cpu.reg_A = cpu.reg_A ^ z80_mem_read(int(cpu.reg_PC++));
+            xorFlags(cpu.reg_A);
+            cpu.cycleCnt += 7;
+            break;
+
             //im sorry, i swear this didn't take me long 
 
                           //////      ////////
@@ -1136,17 +1293,108 @@ int decode()
         
         // CALL FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
         case 0xc4:
+        //If the zero flag is unset
+            if ( (cpu.Flags & 0b010000000) == 0)
+            {
+                cpu.reg_SP = cpu.reg_PC + 3;
+                cpu.reg_PC = memory[cpu.reg_PC++];
+                cpu.cycleCnt+=17;
+                break;
+            }
+            cpu.cycleCnt+=10;
             break;
 
         case 0xd4:
+        //If the carry flag is unset
+            if ( (cpu.Flags & 0b00000001) == 0)
+            {
+                cpu.reg_SP = cpu.reg_PC + 3;
+                cpu.reg_PC = memory[cpu.reg_PC++];
+                cpu.cycleCnt+=17;
+                break;
+            }
+            cpu.cycleCnt+=10;
             break;
 
         case 0xe4:
+        //If the P/V flag is unset
+            if ( (cpu.Flags & 0b00000100) == 0)
+            {
+                cpu.reg_SP = cpu.reg_PC + 3;
+                cpu.reg_PC = memory[cpu.reg_PC++];
+                cpu.cycleCnt+=17;
+                break;
+            }
+            cpu.cycleCnt+=10;
             break;
 
         case 0xf4:
+        //If the sign flag is unset
+            if ( (cpu.Flags & 0b10000000) == 0)
+            {
+                cpu.reg_SP = cpu.reg_PC + 3;
+                cpu.reg_PC = memory[cpu.reg_PC++];
+                cpu.cycleCnt+=17;
+                break;
+            }
+            cpu.cycleCnt+=10;
             break;
 
+        case 0xcc:
+        //If the zero flag is set
+            if ( (cpu.Flags & 0b010000000) > 0)
+            {
+                cpu.reg_SP = cpu.reg_PC + 3;
+                cpu.reg_PC = memory[cpu.reg_PC++];
+                cpu.cycleCnt+=17;
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+        case 0xdc:
+        //If the carry flag is set
+            if ( (cpu.Flags & 0b00000001) > 0)
+            {
+                cpu.reg_SP = cpu.reg_PC + 3;
+                cpu.reg_PC = memory[cpu.reg_PC++];
+                cpu.cycleCnt+=17;
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+        case 0xec:
+        //If the P/V flag is set
+            if ( (cpu.Flags & 0b00000100) > 0)
+            {
+                cpu.reg_SP = cpu.reg_PC + 3;
+                cpu.reg_PC = memory[cpu.reg_PC++];
+                cpu.cycleCnt+=17;
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+        case 0xfc:
+        //If the sign flag is set
+            if ( (cpu.Flags & 0b10000000) > 0)
+            {
+                cpu.reg_SP = cpu.reg_PC + 3;
+                cpu.reg_PC = memory[cpu.reg_PC++];
+                cpu.cycleCnt+=17;
+                break;
+            }
+            cpu.cycleCnt+=10;
+            break;
+
+
+        case 0xcd:
+        //unconditional jump call
+            cpu.reg_SP = cpu.reg_PC + 3;
+            cpu.reg_PC = memory[cpu.reg_PC++];
+            cpu.cycleCnt+=17;
+            break;
 
         
         
@@ -1199,19 +1447,146 @@ int decode()
             cpu.cycleCnt += 10;
             break;
 
+
+
+
+
+
+
         // RETURN FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
         /*If the zero flag is unset, the top stack entry is popped into PC.*/
         case 0xc0:
+            if ( (cpu.Flags & 0b010000000) == 0)
+            {
+                cpu.reg_PC = cpu.reg_SP;
+                cpu.cycleCnt+=10;
+                break;
+            }
+            cpu.cycleCnt+=5;
             break;
 
-        case 0xd0:
+        case 0xd0: // carry flag
+            if ( (cpu.Flags & 0b000000001) == 0)
+            {
+                cpu.reg_PC = cpu.reg_SP;
+                cpu.cycleCnt+=10;
+                break;
+            }
+            cpu.cycleCnt+=5;
             break;
 
-        case 0xe0:
+        case 0xe0: // P/V flag
+            if ( (cpu.Flags & 0b000000100) == 0)
+            {
+                cpu.reg_PC = cpu.reg_SP;
+                cpu.cycleCnt+=10;
+                break;
+            }
+            cpu.cycleCnt+=5;
             break;
 
-        case 0xf0:
+        case 0xf0: // sign flag
+            if ( (cpu.Flags & 0b100000000) == 0)
+            {
+                cpu.reg_PC = cpu.reg_SP;
+                cpu.cycleCnt+=10;
+                break;
+            }
+            cpu.cycleCnt+=5;
             break;
+
+        case 0xc8: // zero flag SET 
+            if ( (cpu.Flags & 0b010000000) > 0)
+            {
+                cpu.reg_PC = cpu.reg_SP;
+                cpu.cycleCnt+=10;
+                break;
+            }
+            cpu.cycleCnt+=5;
+            break;
+
+        case 0xd8: // carry flag SET
+            if ( (cpu.Flags & 0b000000001) > 0)
+            {
+                cpu.reg_PC = cpu.reg_SP;
+                cpu.cycleCnt+=10;
+                break;
+            }
+            cpu.cycleCnt+=5;
+            break;
+
+        case 0xe8: // p/v flag SET
+            if ( (cpu.Flags & 0b000000100) > 0)
+            {
+                cpu.reg_PC = cpu.reg_SP;
+                cpu.cycleCnt+=10;
+                break;
+            }
+            cpu.cycleCnt+=5;
+            break;
+
+        case 0xf8: // sign flag SET
+            if ( (cpu.Flags & 0b100000000) > 0)
+            {
+                cpu.reg_PC = cpu.reg_SP;
+                cpu.cycleCnt+=10;
+                break;
+            }
+            cpu.cycleCnt+=5;
+            break;
+
+        case 0xc9: // return
+            cpu.reg_PC = cpu.reg_SP;
+            cpu.cycleCnt+=10;
+            break; 
+
+
+
+
+        // reset commands
+        case 0xc7: // reset the pc counter but save the last pc count plus one to sp.
+            cpu.reg_SP = cpu.reg_PC + 1;
+            cpu.reg_PC = 0;
+            break;
+
+        case 0xe7: // reset the pc counter + 16 but save the last pc count plus one to sp.
+            cpu.reg_SP = cpu.reg_PC + 1;
+            cpu.reg_PC = 16;
+            break;
+
+        case 0xd7: // reset the pc counter + 32 but save the last pc count plus one to sp.
+            cpu.reg_SP = cpu.reg_PC + 1;
+            cpu.reg_PC = 32;
+            break;
+
+        case 0xf7: // reset the pc counter + 48 but save the last pc count plus one to sp.
+            cpu.reg_SP = cpu.reg_PC + 1;
+            cpu.reg_PC = 48;
+            break;
+
+        case 0xcf: // reset the pc counter + 8 but save the last pc count plus one to sp.
+            cpu.reg_SP = cpu.reg_PC + 1;
+            cpu.reg_PC = 8;
+            break;
+
+        case 0xef: // reset the pc counter + 24 but save the last pc count plus one to sp.
+            cpu.reg_SP = cpu.reg_PC + 1;
+            cpu.reg_PC = 24;
+            break;
+
+        case 0xdf: // reset the pc counter + 40 but save the last pc count plus one to sp.
+            cpu.reg_SP = cpu.reg_PC + 1;
+            cpu.reg_PC = 40;
+            break;
+
+        case 0xff: // reset the pc counter + 56 but save the last pc count plus one to sp.
+            cpu.reg_SP = cpu.reg_PC + 1;
+            cpu.reg_PC = 56;
+            break;
+
+        
+
+
 
 
         //UNIDENTIFIED INSTRUCTION----------------------------------------------------------------------------------------------------------------------------------------------------------
