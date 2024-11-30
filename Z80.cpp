@@ -122,7 +122,7 @@ int decode()
     switch(inst)
     {
 
-        //HALT------------------------------------------------------------------------
+        //HALT INSTRUCTION==========================================================================================
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
             cpu.cycleCnt += 4; // 4 Cycles for halt
             //printReg(cpu); //OUR VERSION OF PRINT
@@ -131,11 +131,13 @@ int decode()
             return 1;
             break;
 
-        //NOP INSTUCTION---------------------------------------------------------------
+        //NOP INSTUCTION===========================================================================================
         case 0x00: //NOP INSTRUCTION
             cpu.cycleCnt += 4;
             break;
         
+        //LOAD INSTRUCTIONS=======================================================================================
+    {
         //LOAD REGISTER FROM IMMEDIATE------------------------------------------------
         case 0x3e: //LOAD INSTRUCTION - Load value at n into register A
             //cpu.regA = memory[int(cpu.reg_PC++)]; //OLD WAY - WORKS BUT REPLACED WITH FUNCTION JUST INCASE
@@ -575,11 +577,13 @@ int decode()
             break;
         
 
+    }
 
 
 
-
-        //8-BIT ADDITION ARITHMETIC-------------------------------------------------
+        //ARITHMETIC INSTRUCTIONS==================================================================================
+    {    
+        //ADDITION INSTRUCTIONS---------------------------------------------------------------
         case 0x80: //ADD INSTRUCTION - RegA += RegB
             cpu.regA = addFlags(cpu.regA, cpu.regB);
             cpu.cycleCnt += 4;
@@ -662,9 +666,86 @@ int decode()
             break;
         }
 
+        // INCREMENT INST -------------------------------------------------
+        case 0x04: //INCRAMENT INSTRUCTION - Adds 1 to Register B
+            cpu.regB = incFlags(cpu.regB);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x14: //INCRAMENT INSTRUCTION - Adds 1 to Register D
+            cpu.regD = incFlags(cpu.regD);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x24: //INCRAMENT INSTRUCTION - Adds 1 to Register H
+            cpu.regH = incFlags(cpu.regH);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x0c: //INCRAMENT INSTRUCTION - Adds 1 to Register C
+            cpu.regC = incFlags(cpu.regC);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x1c: //INCRAMENT INSTRUCTION - Adds 1 to Register E
+            cpu.regE = incFlags(cpu.regE);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x2c: //INCRAMENT INSTRUCTION - Adds 1 to Register L
+            cpu.regL = incFlags(cpu.regL);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x3c: //INCRAMENT INSTRUCTION - Adds 1 to Register A
+            cpu.regA = incFlags(cpu.regA);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x03: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register BC
+        {
+            uint16_t paired = (incPaired(cpu.regB, cpu.regC));
+            cpu.regB = (paired >> 8) & 0xff;  // High byte
+            cpu.regC = paired & 0xff;       // Low byte
+            cpu.cycleCnt += 6;
+            break;
+        }
+            
+        
+        case 0x13: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register DE
+        {
+            uint16_t paired = (incPaired(cpu.regD, cpu.regE));
+            cpu.regD = (paired >> 8) & 0xff;  // High byte
+            cpu.regE = paired & 0xff;       // Low byte
+            cpu.cycleCnt += 6;
+            break;
+        }
+        
+        case 0x23: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register HL
+        {
+            uint16_t paired = (incPaired(cpu.regH, cpu.regL));
+            cpu.regH = (paired >> 8) & 0xff;  // High byte
+            cpu.regL = paired & 0xff;       // Low byte
+            cpu.cycleCnt += 6;
+            break;
+        }
+        
+        case 0x33: //INCRAMENT 16bit REGISTER INSTRUCTION - Adds 1 to Paired Register SP
+            cpu.reg_SP++; //Incrament by 1, do not set flags
+            cpu.cycleCnt += 6;
+            break;
+        
+        case 0x34: //INCRAMENT DATA AT MEMORY LOCATION INSTUCTION - Adds 1 to data at memory location (HL)
+            z80_mem_write(((cpu.regH << 8) | cpu.regL), incFlags(z80_mem_read(((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 11;
+            break;
+        
+
+        //ADD WITH CARRY INSTRUCTIONS---------------------------------------------------------------
+        
 
 
-        //8-BIT SUBTRACTION ARITHMETIC-------------------------------------------------
+        //SUBTRACTION ARITHMETIC-------------------------------------------------
         case 0x90: //SUBTRACTION INSTRUCTiON - RegA -= RegB
             cpu.regA = subFlags(cpu.regA, cpu.regB);
             cpu.cycleCnt += 4;
@@ -783,6 +864,53 @@ int decode()
             cpu.cycleCnt += 6;
             break;
 
+
+        // SUBTRACT FLAGS CHANGE, RESGISTERS DONT-----------------------------------------------------
+        case 0xb8: //cp B from A
+            subFlags(cpu.reg_A, cpu.reg_B);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xb9: //cp C from A
+            subFlags(cpu.reg_A, cpu.reg_C);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xba: //cp D from A
+            subFlags(cpu.reg_A, cpu.reg_D);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbb: //cp E from A
+            subFlags(cpu.reg_A, cpu.reg_E);
+            cpu.cycleCnt+=4;
+            break; 
+
+        case 0xbc: //cp H from A
+            subFlags(cpu.reg_A, cpu.reg_H);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbd: //cp L from A
+            subFlags(cpu.reg_A, cpu.reg_L);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbe: //cp HL from A
+            subFlags(cpu.reg_A, cpu.reg_HL[0]);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbf: //cp A from A
+            subFlags(cpu.reg_A, cpu.reg_A);
+            cpu.cycleCnt+=4;
+            break;
+
+
+    }
+
+        //LOGICAL INSTRUCTIONS=====================================================================================
+    { 
         // JUMP INST ---------------------------------------------------------
         case 0xc3: //set pc to next value
             {
@@ -803,86 +931,12 @@ int decode()
 
 
 
-        // INCREMENT INST ===================================================================================
-        case 0x04: //INCRAMENT INSTRUCTION - Adds 1 to Register B
-            cpu.regB = incFlags(cpu.regB);
-            cpu.cycleCnt += 4;
-            break;
-        
-        case 0x14: //INCRAMENT INSTRUCTION - Adds 1 to Register D
-            cpu.regD = incFlags(cpu.regD);
-            cpu.cycleCnt += 4;
-            break;
-        
-        case 0x24: //INCRAMENT INSTRUCTION - Adds 1 to Register H
-            cpu.regH = incFlags(cpu.regH);
-            cpu.cycleCnt += 4;
-            break;
-        
-        case 0x0c: //INCRAMENT INSTRUCTION - Adds 1 to Register C
-            cpu.regC = incFlags(cpu.regC);
-            cpu.cycleCnt += 4;
-            break;
-        
-        case 0x1c: //INCRAMENT INSTRUCTION - Adds 1 to Register E
-            cpu.regE = incFlags(cpu.regE);
-            cpu.cycleCnt += 4;
-            break;
-        
-        case 0x2c: //INCRAMENT INSTRUCTION - Adds 1 to Register L
-            cpu.regL = incFlags(cpu.regL);
-            cpu.cycleCnt += 4;
-            break;
-        
-        case 0x3c: //INCRAMENT INSTRUCTION - Adds 1 to Register A
-            cpu.regA = incFlags(cpu.regA);
-            cpu.cycleCnt += 4;
-            break;
-        
-        case 0x03: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register BC
-        {
-            uint16_t paired = (incPaired(cpu.regB, cpu.regC));
-            cpu.regB = (paired >> 8) & 0xff;  // High byte
-            cpu.regC = paired & 0xff;       // Low byte
-            cpu.cycleCnt += 6;
-            break;
-        }
-            
-        
-        case 0x13: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register DE
-        {
-            uint16_t paired = (incPaired(cpu.regD, cpu.regE));
-            cpu.regD = (paired >> 8) & 0xff;  // High byte
-            cpu.regE = paired & 0xff;       // Low byte
-            cpu.cycleCnt += 6;
-            break;
-        }
-        
-        case 0x23: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register HL
-        {
-            uint16_t paired = (incPaired(cpu.regH, cpu.regL));
-            cpu.regH = (paired >> 8) & 0xff;  // High byte
-            cpu.regL = paired & 0xff;       // Low byte
-            cpu.cycleCnt += 6;
-            break;
-        }
-        
-        case 0x33: //INCRAMENT 16bit REGISTER INSTRUCTION - Adds 1 to Paired Register SP
-            cpu.reg_SP++; //Incrament by 1, do not set flags
-            cpu.cycleCnt += 6;
-            break;
-        
-        case 0x34: //INCRAMENT DATA AT MEMORY LOCATION INSTUCTION - Adds 1 to data at memory location (HL)
-            z80_mem_write(((cpu.regH << 8) | cpu.regL), incFlags(z80_mem_read(((cpu.regH << 8) | cpu.regL))));
-            cpu.cycleCnt += 11;
-            break;
-        
 
 
 
 
 
-//SHIFT IN STRUCNT ION S
+        //SHIFT INSTRUCNTIONS--------------------------------------------------------------------------
         case 0x27: //shift left one byte A
         {
             bool msb = (cpu.regA & 0x80) != 0;
@@ -1106,46 +1160,7 @@ int decode()
 
 
 
-        // SUBTRACT FLAGS CHANGE, RESGISTERS DONT =========================================================
-        case 0xb8: //cp B from A
-            subFlags(cpu.reg_A, cpu.reg_B);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xb9: //cp C from A
-            subFlags(cpu.reg_A, cpu.reg_C);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xba: //cp D from A
-            subFlags(cpu.reg_A, cpu.reg_D);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xbb: //cp E from A
-            subFlags(cpu.reg_A, cpu.reg_E);
-            cpu.cycleCnt+=4;
-            break; 
-
-        case 0xbc: //cp H from A
-            subFlags(cpu.reg_A, cpu.reg_H);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xbd: //cp L from A
-            subFlags(cpu.reg_A, cpu.reg_L);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xbe: //cp HL from A
-            subFlags(cpu.reg_A, cpu.reg_HL[0]);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xbf: //cp A from A
-            subFlags(cpu.reg_A, cpu.reg_A);
-            cpu.cycleCnt+=4;
-            break;
+        
 
 
 
@@ -1284,7 +1299,7 @@ int decode()
         case 0xf0:
             break;
 
-
+    }
         //UNIDENTIFIED INSTRUCTION----------------------------------------------------------------------------------------------------------------------------------------------------------
         default:
             cout << "Unknown Instruction " << hex << int(inst) << endl;
