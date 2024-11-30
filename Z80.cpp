@@ -942,13 +942,18 @@ int decode()
             break;
 
         case 0xbe: //cp HL from A
-            subFlags(cpu.reg_A, cpu.reg_HL[0]);
-            cpu.cycleCnt+=4;
+            subFlags(cpu.reg_A, z80_mem_read(((cpu.regH << 8) | cpu.regL)));
+            cpu.cycleCnt+=7;
             break;
 
         case 0xbf: //cp A from A
             subFlags(cpu.reg_A, cpu.reg_A);
             cpu.cycleCnt+=4;
+            break;
+        
+        case 0xfe: //cp n from A
+            subFlags(cpu.reg_A, z80_mem_read(cpu.reg_PC++));
+            cpu.cycleCnt+=7;
             break;
 
 
@@ -1251,9 +1256,9 @@ int decode()
             break;
 
         case 0xa6: //bitwise and register A with HL
-            cpu.reg_A = cpu.reg_A & cpu.reg_HL[0]; //bitwise AND for reg a with HL 
+            cpu.reg_A = cpu.reg_A & z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise AND for reg a with HL 
             andFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
         case 0xa7: //bitwise and register A with A
@@ -1265,7 +1270,7 @@ int decode()
         case 0xe6:
             cpu.reg_A = cpu.reg_A & memory[int(cpu.reg_PC++)]; //bitwise AND for reg a with n 
             andFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
 
@@ -1310,9 +1315,9 @@ int decode()
             break;
 
         case 0xae: // XOR A with HL 
-            cpu.reg_A = cpu.reg_A ^ cpu.reg_HL[0]; //bitwise XOR for reg a with hl 
+            cpu.reg_A = cpu.reg_A ^ z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise XOR for reg a with hl 
             xorFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
         case 0xaf: // XOR A with A 
@@ -1375,9 +1380,9 @@ int decode()
             break;
 
         case 0xb6: // OR A with HL 
-            cpu.reg_A = cpu.reg_A | cpu.reg_HL[0]; //bitwise OR for reg a with hl 
+            cpu.reg_A = cpu.reg_A | z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise OR for reg a with hl 
             xorFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
         case 0xb7: // OR A with A 
@@ -1389,7 +1394,7 @@ int decode()
         case 0xf6:// OR A with n memory[int(cpu.reg_PC++)];
             cpu.reg_A = cpu.reg_A | memory[int(cpu.reg_PC++)]; //bitwise OR for reg a with a             
             xorFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
 
