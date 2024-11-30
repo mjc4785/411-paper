@@ -44,6 +44,7 @@ uint16_t add16Flags(uint8_t, uint8_t, uint16_t);
 uint8_t decFlags(uint8_t);
 uint16_t decPaired(uint8_t, uint8_t);
 uint8_t adcFlags(uint8_t, uint8_t);
+uint8_t sbcFlags(uint8_t, uint8_t);
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -621,7 +622,7 @@ int decode()
             break;
         
         case 0xc6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
-            cpu.regA = addFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
+            cpu.regA = addFlags(cpu.regA,z80_mem_read(int(cpu.reg_PC++)));
             cpu.cycleCnt += 7;
             break;
         
@@ -780,7 +781,12 @@ int decode()
         
         case 0x8e: //ADD W CARRY INSTRUCTION - RegA += (HL) + Carry
             cpu.regA = adcFlags(cpu.regA, z80_mem_read(((cpu.regH << 8) | cpu.regL)));
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0xce: //ADD W CARRY INSTRUCTION - RegA += n + Carry
+            cpu.regA = adcFlags(cpu.regA, z80_mem_read(cpu.reg_PC++));
+            cpu.cycleCnt += 7;
             break;
 
 
@@ -821,7 +827,7 @@ int decode()
             break;
         
         case 0xd6: //SUBTRACT IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
-            cpu.regA = subFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
+            cpu.regA = subFlags(cpu.regA,z80_mem_read(int(cpu.reg_PC++)));
             cpu.cycleCnt += 7;
             break;
         
@@ -945,6 +951,52 @@ int decode()
             cpu.cycleCnt+=4;
             break;
 
+
+        //SUBTRACT WITH CARRY INSTRUCTIONS-------------------------------------------------------
+        case 0x98:  //SUB W CARRY INSTRUCTION - RegA -= RegB - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regB);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x99:  //SUB W CARRY INSTRUCTION - RegA -= RegC - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regC);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9a:  //SUB W CARRY INSTRUCTION - RegA -= RegD - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regD);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9b:  //SUB W CARRY INSTRUCTION - RegA -= RegE - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regE);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9c:  //SUB W CARRY INSTRUCTION - RegA -= RegH - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regH);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9d:  //SUB W CARRY INSTRUCTION - RegA -= RegL - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regL);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9f:  //SUB W CARRY INSTRUCTION - RegA -= RegA - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regA);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9e:  //SUB W CARRY INSTRUCTION - RegA -= (hl) - Carry
+            cpu.regA = sbcFlags(cpu.regA, z80_mem_read(((cpu.regH << 8) | cpu.regL)));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0xde:  //SUB W CARRY INSTRUCTION - RegA -= n - Carry
+            cpu.regA = sbcFlags(cpu.regA, z80_mem_read(cpu.reg_PC++));
+            cpu.cycleCnt += 7;
+            break;
 
     }
 
@@ -1577,6 +1629,24 @@ uint8_t adcFlags(uint8_t reg1, uint8_t reg2)
     return sum & 0xff;
 }
 
+//subtracts registers and the carry bit if set
+uint8_t sbcFlags(uint8_t reg1, uint8_t reg2)
+{
+    uint16_t diff = reg1 - reg2 - (cpu.Flags & 0x01);
+    printf("x%02x - x%02x - x%01x = x%02x", reg1, reg2, (cpu.Flags & 0x01), diff);
+
+    (diff & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80); //Sign
+    (diff == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40); //Z set if result is 0
+    cpu.Flags |= ((diff >> 5) & 1) << 5; //5th bit of result
+    ((reg1 & 0xf) < ((reg2 & 0xf) + (cpu.Flags & 0x01))) ? (cpu.Flags |=  0x08) : (cpu.Flags &=  ~0x08); //FROM ROBM.DEV
+    cpu.Flags |= ((diff >> 3) & 1) << 3; //3rd bit of result
+    ((reg1 ^ reg2) & (diff ^ reg1) & 0x80) ? (cpu.Flags |= 0x04) : (cpu.Flags &= ~0x04);; //If operants have same sign, but sub sign changes - overflow
+    cpu.Flags |= 0x02; //N set
+    ((reg2 + (cpu.Flags & 0x01))  > reg1) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01); //Carry if result is greater than 8 bits can hold
+    
+    return diff & 0xff;
+}
+
 //MAIN==============================================================================================================================
 int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
@@ -1587,10 +1657,11 @@ int main(){
     z80_mem_write(0x02, 0x2e);//load L with n
     z80_mem_write(0x03, 0x44);//L
     
+    //cpu.Flags |= 0x01; ///set carry
     z80_mem_write(0x04, 0x3e);//load A
-    z80_mem_write(0x05, 0x01);// goes into A
+    z80_mem_write(0x05, 0x10);// goes into A
 
-    z80_mem_write(0x06, 0x06);//load B with n
+    /*z80_mem_write(0x06, 0x06);//load B with n
     z80_mem_write(0x07, 0x04);//B
 
     z80_mem_write(0x08, 0x36);//load (HL) with n
@@ -1598,9 +1669,12 @@ int main(){
 
     z80_mem_write(0x0a, 0x86);//a += (HL)
 
-    z80_mem_write(0x0b, 0x88);//regA += b + carry
+    z80_mem_write(0x0b, 0x88);//regA += b + carry*/
 
-    z80_mem_write(0x0c, 0x76);//halt
+    z80_mem_write(0x06, 0xde); //regA -= n + carry
+    z80_mem_write(0x07, 0x20); // n
+
+    z80_mem_write(0x08, 0x76);//halt
 
      
     
