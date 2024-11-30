@@ -41,6 +41,8 @@ void andFlags(uint8_t);
 void xorFlags(uint8_t);
 uint16_t incPaired(uint8_t, uint8_t);
 uint16_t add16Flags(uint8_t, uint8_t, uint16_t);
+uint8_t decFlags(uint8_t);
+uint16_t decPaired(uint8_t, uint8_t);
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -708,9 +710,78 @@ int decode()
             cpu.cycleCnt += 7;
             break;
 
+        //DEC INSTRUCTION---------------------------------------------------------------
+        case 0x05: //DECREMENT INSTRUCTION - RegB -= 1, carry flag unaffected
+            cpu.regB = decFlags(cpu.regB);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x15: //DECREMENT INSTRUCTION - RegD -= 1, carry flag unaffected
+            cpu.regD = decFlags(cpu.regD);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x25: //DECREMENT INSTRUCTION - RegH -= 1, carry flag unaffected
+            cpu.regH = decFlags(cpu.regH);
+            cpu.cycleCnt += 4;
+            break;
 
+        case 0x0d: //DECREMENT INSTRUCTION - RegC -= 1, carry flag unaffected
+            cpu.regC = decFlags(cpu.regC);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x1d: //DECREMENT INSTRUCTION - RegE -= 1, carry flag unaffected
+            cpu.regE = decFlags(cpu.regE);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x2d: //DECREMENT INSTRUCTION - RegL -= 1, carry flag unaffected
+            cpu.regL = decFlags(cpu.regL);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x3d: //DECREMENT INSTRUCTION - RegA -= 1, carry flag unaffected
+            cpu.regA = decFlags(cpu.regA);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x35:
+            z80_mem_write(((cpu.regH << 8) | cpu.regL), decFlags(z80_mem_read(((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 11;
+            break;
+        
+        case 0x0b: //PAIRED DECREMENT INSTRuCTION - Paired Reg BC - 1, no flags affected
+        {
+            uint16_t paired = decPaired(cpu.regB, cpu.regC);
+            cpu.regB = (paired >> 8) & 0xff; //High
+            cpu.regC = paired & 0xff; //Low
+            cpu.cycleCnt += 6;
+            break;
+        }
 
+        case 0x1b: //PAIRED DECREMENT INSTRuCTION - Paired Reg DE - 1, no flags affected
+        {
+            uint16_t paired = decPaired(cpu.regD, cpu.regE);
+            cpu.regD = (paired >> 8) & 0xff; //High
+            cpu.regE = paired & 0xff; //Low
+            cpu.cycleCnt += 6;
+            break;
+        }
 
+        case 0x2b: //PAIRED DECREMENT INSTRuCTION - Paired Reg HL - 1, no flags affected
+        {
+            uint16_t paired = decPaired(cpu.regH, cpu.regL);
+            cpu.regH = (paired >> 8) & 0xff; //High
+            cpu.regL = paired & 0xff; //Low
+            cpu.cycleCnt += 6;
+            break;
+        }
+
+        case 0x3b: //16 bit DECREMENT INSTRUCTION - RegSP--, no flags change
+            cpu.reg_SP--;
+            cpu.cycleCnt += 6;
+            break;
 
         // JUMP INST ---------------------------------------------------------
         case 0xc3: //set pc to next value
@@ -771,8 +842,8 @@ int decode()
         case 0x03: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register BC
         {
             uint16_t paired = (incPaired(cpu.regB, cpu.regC));
-            cpu.regB = (paired >> 8) & 0xFF;  // High byte
-            cpu.regC = paired & 0xFF;       // Low byte
+            cpu.regB = (paired >> 8) & 0xff;  // High byte
+            cpu.regC = paired & 0xff;       // Low byte
             cpu.cycleCnt += 6;
             break;
         }
@@ -781,8 +852,8 @@ int decode()
         case 0x13: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register DE
         {
             uint16_t paired = (incPaired(cpu.regD, cpu.regE));
-            cpu.regD = (paired >> 8) & 0xFF;  // High byte
-            cpu.regE = paired & 0xFF;       // Low byte
+            cpu.regD = (paired >> 8) & 0xff;  // High byte
+            cpu.regE = paired & 0xff;       // Low byte
             cpu.cycleCnt += 6;
             break;
         }
@@ -790,8 +861,8 @@ int decode()
         case 0x23: //INCRAMENT PAIRED REGISTER INSTRUCTION - Adds 1 to Paired Register HL
         {
             uint16_t paired = (incPaired(cpu.regH, cpu.regL));
-            cpu.regH = (paired >> 8) & 0xFF;  // High byte
-            cpu.regL = paired & 0xFF;       // Low byte
+            cpu.regH = (paired >> 8) & 0xff;  // High byte
+            cpu.regL = paired & 0xff;       // Low byte
             cpu.cycleCnt += 6;
             break;
         }
@@ -1409,29 +1480,53 @@ uint16_t add16Flags(uint8_t regH, uint8_t regL, uint16_t other)
 uint8_t twosComp(uint8_t reg)
     {return (~reg) + 1;}
 
+uint8_t decFlags(uint8_t reg)
+{
+    uint8_t diff = reg - uint8_t(1);
+
+    (diff & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80); //Sign - set bit if diff has sign bit set
+    (diff == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40); //Z set if result is 0
+    cpu.Flags |= ((diff >> 5) & 1) << 5; //5th bit of result
+    ((diff & 0x0f) == 0x0f) ? (cpu.Flags |= 0x08) : (cpu.Flags &= ~0x08); //Half carry if difference has ...1111
+    cpu.Flags |= ((diff >> 3) & 1) << 3; //3rd bit of result
+    (reg == 0x80) ? (cpu.Flags |= 0x04) : (cpu.Flags &= ~0x04); //Overflow if register was already 0
+    cpu.Flags |= 0x02; //N set
+    //Carry is unaffected
+
+    return diff;
+}
+
+uint16_t decPaired(uint8_t regH, uint8_t regL)
+{
+    uint16_t pairedReg = (regH << 8) | regL; //Combine into paired register
+    pairedReg--; //Subtract 1 for decrament
+    return pairedReg; 
+}
+
 //MAIN==============================================================================================================================
 int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
 
     //z80_mem_load(fileRun.c_str()); //Load into memory
     z80_mem_write(0x00, 0x26);//load H with n
-    z80_mem_write(0x01, 0x12);//H
+    z80_mem_write(0x01, 0x55);//H
     z80_mem_write(0x02, 0x2e);//load L with n
-    z80_mem_write(0x03, 0x34);//L
+    z80_mem_write(0x03, 0x44);//L
     
 
     z80_mem_write(0x04, 0x3e);//load A
     z80_mem_write(0x05, 0x2e);// goes into A
 
     z80_mem_write(0x06, 0x06);//load B with n
-    z80_mem_write(0x07, 0x0F);//B
+    z80_mem_write(0x07, 0x80);//B
 
-    z80_mem_write(0x08, 0x0e);//load C with n
-    z80_mem_write(0x09, 0x0F);//C
+    
 
-    /*z80_mem_write(0x0b, 0x70);//load (HL) with B
+    z80_mem_write(0x08, 0x70);//load (HL) with B
+    
+    z80_mem_write(0x09, 0x2b);//dec HL
 
-    z80_mem_write(0x0c, 0x23);//Incrament HL
+    /*z80_mem_write(0x0c, 0x23);//Incrament HL
 
     z80_mem_write(0x0d, 0x34);//Incrament (HL)
 
@@ -1439,9 +1534,9 @@ int main(){
 
     z80_mem_write(0x0f, 0xf9);//load sp with HL*/
 
-    z80_mem_write(0x0a, 0x09);//hl += bc
+    //z80_mem_write(0x0a, 0x09);//hl += bc
 
-    z80_mem_write(0x0b, 0x76);//halt
+    z80_mem_write(0x0a, 0x76);//halt
 
      
     
