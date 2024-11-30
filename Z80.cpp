@@ -43,6 +43,7 @@ uint16_t incPaired(uint8_t, uint8_t);
 uint16_t add16Flags(uint8_t, uint8_t, uint16_t);
 uint8_t decFlags(uint8_t);
 uint16_t decPaired(uint8_t, uint8_t);
+uint8_t adcFlags(uint8_t, uint8_t);
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -742,7 +743,45 @@ int decode()
         
 
         //ADD WITH CARRY INSTRUCTIONS---------------------------------------------------------------
+        case 0x88: //ADD W CARRY INSTRUCTION - RegA += RegB + Carry
+            cpu.regA = adcFlags(cpu.regA, cpu.regB);
+            cpu.cycleCnt += 4;
+            break;
         
+        case 0x89: //ADD W CARRY INSTRUCTION - RegA += RegC + Carry
+            cpu.regA = adcFlags(cpu.regA, cpu.regC);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x8a: //ADD W CARRY INSTRUCTION - RegA += RegD + Carry
+            cpu.regA = adcFlags(cpu.regA, cpu.regD);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x8b: //ADD W CARRY INSTRUCTION - RegA += RegE + Carry
+            cpu.regA = adcFlags(cpu.regA, cpu.regE);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x8c: //ADD W CARRY INSTRUCTION - RegA += RegH + Carry
+            cpu.regA = adcFlags(cpu.regA, cpu.regH);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x8d: //ADD W CARRY INSTRUCTION - RegA += RegL + Carry
+            cpu.regA = adcFlags(cpu.regA, cpu.regL);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x8f: //ADD W CARRY INSTRUCTION - RegA += RegA + Carry
+            cpu.regA = adcFlags(cpu.regA, cpu.regA);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x8e: //ADD W CARRY INSTRUCTION - RegA += (HL) + Carry
+            cpu.regA = adcFlags(cpu.regA, z80_mem_read(((cpu.regH << 8) | cpu.regL)));
+            cpu.cycleCnt += 4;
+            break;
 
 
         //SUBTRACTION ARITHMETIC-------------------------------------------------
@@ -1495,6 +1534,7 @@ uint16_t add16Flags(uint8_t regH, uint8_t regL, uint16_t other)
 uint8_t twosComp(uint8_t reg)
     {return (~reg) + 1;}
 
+//Decrements registers
 uint8_t decFlags(uint8_t reg)
 {
     uint8_t diff = reg - uint8_t(1);
@@ -1511,11 +1551,30 @@ uint8_t decFlags(uint8_t reg)
     return diff;
 }
 
+//Decrements paired registers - no flags impacted
 uint16_t decPaired(uint8_t regH, uint8_t regL)
 {
     uint16_t pairedReg = (regH << 8) | regL; //Combine into paired register
     pairedReg--; //Subtract 1 for decrament
     return pairedReg; 
+}
+
+//Adds registers, and the carry bit if set
+uint8_t adcFlags(uint8_t reg1, uint8_t reg2)
+{
+
+    uint16_t sum = reg1 + reg2 + (cpu.Flags & 0x01);
+
+    (sum & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80); //Sign
+    (sum == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40); //Z set if result is 0
+    cpu.Flags |= ((sum >> 5) & 1) << 5; //5th bit of result
+    ((((reg1 & 0xf) + (reg2 & 0xf) + (cpu.Flags & 0x01)) & 0x10) == 0x10) ? (cpu.Flags |=  0x08) : (cpu.Flags &=  ~0x08); //FROM ROBM.DEV
+    cpu.Flags |= ((sum >> 3) & 1) << 3; //3rd bit of result
+    ((reg1 >> 7 == reg2 >> 7) && (sum >> 7 != reg1 >> 7)) ? (cpu.Flags |= 0x04) : (cpu.Flags &= ~0x04);; //If operants have same sign, but sum sign changes - overflow
+    cpu.Flags &= ~0x02; //N reset
+    (sum > 0xFF) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01); //Carry if result is greater than 8 bits can hold
+    
+    return sum & 0xff;
 }
 
 //MAIN==============================================================================================================================
@@ -1528,30 +1587,20 @@ int main(){
     z80_mem_write(0x02, 0x2e);//load L with n
     z80_mem_write(0x03, 0x44);//L
     
-
     z80_mem_write(0x04, 0x3e);//load A
-    z80_mem_write(0x05, 0x2e);// goes into A
+    z80_mem_write(0x05, 0x01);// goes into A
 
     z80_mem_write(0x06, 0x06);//load B with n
-    z80_mem_write(0x07, 0x80);//B
+    z80_mem_write(0x07, 0x04);//B
 
-    
+    z80_mem_write(0x08, 0x36);//load (HL) with n
+    z80_mem_write(0x09, 0xff);//n
 
-    z80_mem_write(0x08, 0x70);//load (HL) with B
-    
-    z80_mem_write(0x09, 0x2b);//dec HL
+    z80_mem_write(0x0a, 0x86);//a += (HL)
 
-    /*z80_mem_write(0x0c, 0x23);//Incrament HL
+    z80_mem_write(0x0b, 0x88);//regA += b + carry
 
-    z80_mem_write(0x0d, 0x34);//Incrament (HL)
-
-    z80_mem_write(0x0e, 0x96);//add to A from (HL)
-
-    z80_mem_write(0x0f, 0xf9);//load sp with HL*/
-
-    //z80_mem_write(0x0a, 0x09);//hl += bc
-
-    z80_mem_write(0x0a, 0x76);//halt
+    z80_mem_write(0x0c, 0x76);//halt
 
      
     
