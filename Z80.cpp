@@ -1002,13 +1002,6 @@ int decode()
 
 
 
-
-
-
-        // INCREMENT INST ===================================================================================
-        case 0x04: //INCRAMENT INSTRUCTION - Adds 1 to Register B
-            cpu.regB = incFlags(cpu.regB);
-            
         //DEC INSTRUCTION---------------------------------------------------------------
         case 0x05: //DECREMENT INSTRUCTION - RegB -= 1, carry flag unaffected
             cpu.regB = decFlags(cpu.regB);
@@ -1123,34 +1116,6 @@ int decode()
             subFlags(cpu.reg_A, cpu.reg_A);
             cpu.cycleCnt+=4;
             break;
-
-
-    }
-
-        //LOGICAL INSTRUCTIONS=====================================================================================
-    { 
-        // JUMP INST ---------------------------------------------------------
-        case 0xc3: //set pc to next value
-            {
-
-                cpu.reg_PC = memory[int(cpu.reg_PC++)];
-                // takes new ram address needed
-                //increments it to that
-
-                cpu.cycleCnt += 10; //cycle count for JP
-                
-                break;
-            }
-
-        case 0x18:
-            cpu.reg_PC += memory[int(cpu.reg_PC++)];
-            cpu.cycleCnt += 12; 
-            break;
-
-
-
-
-
 
 
 
@@ -1658,6 +1623,7 @@ int decode()
     }
 
     return 0;
+};
 }
 
 
