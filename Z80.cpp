@@ -669,6 +669,29 @@ int decode()
 
         //ARITHMETIC INSTRUCTIONS==================================================================================
     {    
+        //CARRY SET INSTRUCTIONS-------------------------------------------------------------
+        case 0x37: //SET CARRY INSTRUCTION scf
+            cpu.Flags |= 0x01; //Set the carry flag
+            cpu.Flags &= ~0x02;//reset N
+            cpu.Flags &= ~0x08;//reset H
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x3F: //INVERT CARRY INSTRUCTION ccf - invert carry and half carry, reset N
+            (cpu.Flags & 0x01) ? (cpu.Flags &= ~0x01) : (cpu.Flags |= 0x01); //invert carry
+            cpu.Flags &= ~0x02;//reset N
+            (cpu.Flags & 0x08) ? (cpu.Flags &= ~0x08) : (cpu.Flags |= 0x08); //invery half carry
+            cpu.cycleCnt += 4;
+            break;
+
+        //ONES COMPLEMENT INSTRUCTION--------------------------------
+        case 0x2F: //INVERSION OF A INSTRUCTION cpl - invert all bits in regA, sets H and N
+            cpu.regA = ~cpu.regA; //invert bits
+            cpu.Flags |= 0x02;//set N
+            cpu.Flags |= 0x08;//set H
+            cpu.cycleCnt += 4;
+            break;
+
         //ADDITION INSTRUCTIONS---------------------------------------------------------------
         case 0x80: //ADD INSTRUCTION - RegA += RegB
             cpu.regA = addFlags(cpu.regA, cpu.regB);
@@ -2095,7 +2118,7 @@ int main(){
     z80_mem_write(0x0c, 0x55);//n
     z80_mem_write(0x0d, 0x44);//n
 
-    z80_mem_write(0x0e, 0xe3); //reg hl swap (sp)
+    z80_mem_write(0x0e, 0x2F); //reg hl swap (sp)
 
     z80_mem_write(0x0f, 0x76);//halt
 
