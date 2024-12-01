@@ -22,7 +22,8 @@ const string fileRun = filenameMAX;
 
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
-int const CYCLES = 1024;
+//int const CYCLES = 1024; //UNCOMMENT THIS WHEN TURNING IN ***
+int const CYCLES = 10000000;
 int const MEMSIZE = 65536;
 bool INTERUPT_MODE1 = true;
 bool INTERUPT_MODE2 = true;
@@ -115,6 +116,7 @@ int z80_execute(){
         if(decode()) {break;} // if decode returns 1 (either halt or unknown inst), break
                               // otherwise, keep looping. 
     }
+    cout << "ran out of cycles :( [" << cpu.cycleCnt << "]\n" << endl;
     
     return cpu.cycleCnt; // return CompletedCylces;
 }
@@ -146,6 +148,79 @@ int decode()
         case 0x00: //NOP INSTRUCTION
             cpu.cycleCnt += 4;
             break;
+        
+        //MODE CHANGE INSTRUCTIONS================================================================================
+    {
+        //EXCHANGE INSTUCTIONS-----------------------------------
+        case 0x08: //EXCHANGE INSTRUCTION - swap af with af'
+        {
+            int8_t temp = cpu.regA;
+            int8_t temp2 = cpu.Flags;
+            cpu.regA = cpu.reg_A;
+            cpu.Flags = cpu.reg_F;
+            cpu.reg_A = temp;
+            cpu.reg_F = temp2;
+
+            cpu.cycleCnt += 4;
+            break;
+        }    
+
+        case 0xeb: //EXCHANGE INSTRUCTION - swap de with hl
+        {
+            int8_t temp = cpu.regD;
+            int8_t temp2 = cpu.regE;
+            cpu.regD = cpu.regH;
+            cpu.regE = cpu.regL;
+            cpu.regH = temp;
+            cpu.regL = temp2;
+
+            cpu.cycleCnt += 4;
+            break;
+        }
+
+        case 0xd9: //EXCHANGE INSTRUCTION - swap bc, de,hl with b'c' d'e' h'l'
+        {
+            int8_t temp = cpu.regB;
+            int8_t temp2 = cpu.regC;
+            cpu.regB = cpu.reg_B;
+            cpu.regC = cpu.reg_C;
+            cpu.reg_B = temp;
+            cpu.reg_C = temp2;
+
+            temp = cpu.regD;
+            temp2 = cpu.regE;
+            cpu.regD = cpu.reg_D;
+            cpu.regE = cpu.reg_E;
+            cpu.reg_D = temp;
+            cpu.reg_E = temp2;
+        
+            temp = cpu.regH;
+            temp2 = cpu.regL;
+            cpu.regH = cpu.reg_H;
+            cpu.regL = cpu.reg_L;
+            cpu.reg_H = temp;
+            cpu.reg_L = temp2;
+
+            cpu.cycleCnt += 4;
+            break;
+        }
+
+        case  0xe3: //EXCHANGE INSTRUCTION - swap (sp) with L and (sp+1) with H
+        {
+            uint8_t temp = cpu.regH;
+            uint8_t temp2 = cpu.regL;
+            cpu.regL = z80_mem_read(cpu.reg_SP);
+            cpu.regH = z80_mem_read(cpu.reg_SP+1);            
+            z80_mem_write16(cpu.reg_SP, (temp << 8)|temp2);
+
+            cpu.cycleCnt += 19;
+            break;
+        }
+
+
+            
+
+    }
         
         //LOAD INSTRUCTIONS=======================================================================================
     {
@@ -1735,7 +1810,7 @@ int decode()
 
         //UNIDENTIFIED INSTRUCTION----------------------------------------------------------------------------------------------------------------------------------------------------------
         default:
-            cout << "Unknown Instruction " << hex << int(inst) << endl;
+            cout << "Unknown Instruction: " << hex << int(inst) << endl;
             printReg(cpu);
             return 1;
             break;
@@ -1806,6 +1881,8 @@ void printRegTest(Z80 cpu)
     printf("C':\t%02X\n", cpu.reg_C);
     printf("D':\t%02X\n", cpu.reg_D);
     printf("E':\t%02X\n", cpu.reg_E);
+    printf("H':\t%02X\n", cpu.reg_H);
+    printf("L':\t%02X\n", cpu.reg_L);
 
 
     printf("IFF1:\t%01X\n", cpu.regIFF1);
@@ -1995,33 +2072,34 @@ int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
 
 
-    z80_mem_load(fileRun.c_str()); //Load into memory
+//    z80_mem_load(fileRun.c_str()); //Load into memory
 
-/*    z80_mem_write(0x00, 0x26);//load H with n
-    z80_mem_write(0x01, 0x55);//H
-    z80_mem_write(0x02, 0x2e);//load L with n
-    z80_mem_write(0x03, 0x44);//L
+    z80_mem_write(0x00, 0x21);//load HL with n n
+    z80_mem_write(0x01, 0x06);//L
+    z80_mem_write(0x02, 0x09);//H
     
-    //cpu.Flags |= 0x01; ///set carry
-    z80_mem_write(0x04, 0x3e);//load A
-    z80_mem_write(0x05, 0x10);// goes into A
 
-    /*z80_mem_write(0x06, 0x06);//load B with n
-    z80_mem_write(0x07, 0x04);//B
+    z80_mem_write(0x03, 0x3e);//load A
+    z80_mem_write(0x04, 0x10);// goes into A
 
-    z80_mem_write(0x08, 0x36);//load (HL) with n
-    z80_mem_write(0x09, 0xff);//n
+    z80_mem_write(0x05, 0x22);//load (nn) with HL
+    z80_mem_write(0x06, 0x55);
+    z80_mem_write(0x07, 0x44);
 
-    z80_mem_write(0x0a, 0x86);//a += (HL)
+    z80_mem_write(0x08, 0x21);//load HL with nn
+    z80_mem_write(0x09, 0x04);//L
+    z80_mem_write(0x0a, 0x20);//H
 
-    z80_mem_write(0x0b, 0x88);//regA += b + carry /
 
-    z80_mem_write(0x06, 0xde); //regA -= n + carry
-    z80_mem_write(0x07, 0x20); // n
+    z80_mem_write(0x0b, 0x31);//load sp with nn
+    z80_mem_write(0x0c, 0x55);//n
+    z80_mem_write(0x0d, 0x44);//n
 
-    z80_mem_write(0x08, 0x76);//halt
+    z80_mem_write(0x0e, 0xe3); //reg hl swap (sp)
 
-*/
+    z80_mem_write(0x0f, 0x76);//halt
+
+
     
     for (int i =0; i < MEMSIZE; i++)
     {
