@@ -44,6 +44,7 @@ uint16_t add16Flags(uint8_t, uint8_t, uint16_t);
 uint8_t decFlags(uint8_t);
 uint16_t decPaired(uint8_t, uint8_t);
 uint8_t adcFlags(uint8_t, uint8_t);
+uint8_t sbcFlags(uint8_t, uint8_t);
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -621,7 +622,7 @@ int decode()
             break;
         
         case 0xc6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
-            cpu.regA = addFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
+            cpu.regA = addFlags(cpu.regA,z80_mem_read(int(cpu.reg_PC++)));
             cpu.cycleCnt += 7;
             break;
         
@@ -780,7 +781,12 @@ int decode()
         
         case 0x8e: //ADD W CARRY INSTRUCTION - RegA += (HL) + Carry
             cpu.regA = adcFlags(cpu.regA, z80_mem_read(((cpu.regH << 8) | cpu.regL)));
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0xce: //ADD W CARRY INSTRUCTION - RegA += n + Carry
+            cpu.regA = adcFlags(cpu.regA, z80_mem_read(cpu.reg_PC++));
+            cpu.cycleCnt += 7;
             break;
 
 
@@ -821,7 +827,7 @@ int decode()
             break;
         
         case 0xd6: //SUBTRACT IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
-            cpu.regA = subFlags(cpu.regA,memory[int(++cpu.reg_PC)]);
+            cpu.regA = subFlags(cpu.regA,z80_mem_read(int(cpu.reg_PC++)));
             cpu.cycleCnt += 7;
             break;
         
@@ -830,16 +836,179 @@ int decode()
             cpu.cycleCnt += 7;
             break;
 
+        //DEC INSTRUCTION---------------------------------------------------------------
+        case 0x05: //DECREMENT INSTRUCTION - RegB -= 1, carry flag unaffected
+            cpu.regB = decFlags(cpu.regB);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x15: //DECREMENT INSTRUCTION - RegD -= 1, carry flag unaffected
+            cpu.regD = decFlags(cpu.regD);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x25: //DECREMENT INSTRUCTION - RegH -= 1, carry flag unaffected
+            cpu.regH = decFlags(cpu.regH);
+            cpu.cycleCnt += 4;
+            break;
+
+        case 0x0d: //DECREMENT INSTRUCTION - RegC -= 1, carry flag unaffected
+            cpu.regC = decFlags(cpu.regC);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x1d: //DECREMENT INSTRUCTION - RegE -= 1, carry flag unaffected
+            cpu.regE = decFlags(cpu.regE);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x2d: //DECREMENT INSTRUCTION - RegL -= 1, carry flag unaffected
+            cpu.regL = decFlags(cpu.regL);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x3d: //DECREMENT INSTRUCTION - RegA -= 1, carry flag unaffected
+            cpu.regA = decFlags(cpu.regA);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x35:
+            z80_mem_write(((cpu.regH << 8) | cpu.regL), decFlags(z80_mem_read(((cpu.regH << 8) | cpu.regL))));
+            cpu.cycleCnt += 11;
+            break;
+        
+        case 0x0b: //PAIRED DECREMENT INSTRuCTION - Paired Reg BC - 1, no flags affected
+        {
+            uint16_t paired = decPaired(cpu.regB, cpu.regC);
+            cpu.regB = (paired >> 8) & 0xff; //High
+            cpu.regC = paired & 0xff; //Low
+            cpu.cycleCnt += 6;
+            break;
+        }
+
+        case 0x1b: //PAIRED DECREMENT INSTRuCTION - Paired Reg DE - 1, no flags affected
+        {
+            uint16_t paired = decPaired(cpu.regD, cpu.regE);
+            cpu.regD = (paired >> 8) & 0xff; //High
+            cpu.regE = paired & 0xff; //Low
+            cpu.cycleCnt += 6;
+            break;
+        }
+
+        case 0x2b: //PAIRED DECREMENT INSTRuCTION - Paired Reg HL - 1, no flags affected
+        {
+            uint16_t paired = decPaired(cpu.regH, cpu.regL);
+            cpu.regH = (paired >> 8) & 0xff; //High
+            cpu.regL = paired & 0xff; //Low
+            cpu.cycleCnt += 6;
+            break;
+        }
+
+        case 0x3b: //16 bit DECREMENT INSTRUCTION - RegSP--, no flags change
+            cpu.reg_SP--;
+            cpu.cycleCnt += 6;
+            break;
 
 
+        // SUBTRACT FLAGS CHANGE, RESGISTERS DONT-----------------------------------------------------
+        case 0xb8: //cp B from A
+            subFlags(cpu.reg_A, cpu.reg_B);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xb9: //cp C from A
+            subFlags(cpu.reg_A, cpu.reg_C);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xba: //cp D from A
+            subFlags(cpu.reg_A, cpu.reg_D);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbb: //cp E from A
+            subFlags(cpu.reg_A, cpu.reg_E);
+            cpu.cycleCnt+=4;
+            break; 
+
+        case 0xbc: //cp H from A
+            subFlags(cpu.reg_A, cpu.reg_H);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbd: //cp L from A
+            subFlags(cpu.reg_A, cpu.reg_L);
+            cpu.cycleCnt+=4;
+            break;
+
+        case 0xbe: //cp HL from A
+            subFlags(cpu.reg_A, z80_mem_read(((cpu.regH << 8) | cpu.regL)));
+            cpu.cycleCnt+=7;
+            break;
+
+        case 0xbf: //cp A from A
+            subFlags(cpu.reg_A, cpu.reg_A);
+            cpu.cycleCnt+=4;
+            break;
+        
+        case 0xfe: //cp n from A
+            subFlags(cpu.reg_A, z80_mem_read(cpu.reg_PC++));
+            cpu.cycleCnt+=7;
+            break;
 
 
+        //SUBTRACT WITH CARRY INSTRUCTIONS-------------------------------------------------------
+        case 0x98:  //SUB W CARRY INSTRUCTION - RegA -= RegB - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regB);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x99:  //SUB W CARRY INSTRUCTION - RegA -= RegC - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regC);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9a:  //SUB W CARRY INSTRUCTION - RegA -= RegD - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regD);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9b:  //SUB W CARRY INSTRUCTION - RegA -= RegE - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regE);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9c:  //SUB W CARRY INSTRUCTION - RegA -= RegH - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regH);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9d:  //SUB W CARRY INSTRUCTION - RegA -= RegL - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regL);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9f:  //SUB W CARRY INSTRUCTION - RegA -= RegA - Carry
+            cpu.regA = sbcFlags(cpu.regA, cpu.regA);
+            cpu.cycleCnt += 4;
+            break;
+        
+        case 0x9e:  //SUB W CARRY INSTRUCTION - RegA -= (hl) - Carry
+            cpu.regA = sbcFlags(cpu.regA, z80_mem_read(((cpu.regH << 8) | cpu.regL)));
+            cpu.cycleCnt += 7;
+            break;
+        
+        case 0xde:  //SUB W CARRY INSTRUCTION - RegA -= n - Carry
+            cpu.regA = sbcFlags(cpu.regA, z80_mem_read(cpu.reg_PC++));
+            cpu.cycleCnt += 7;
+            break;
+   
+    }
 
+        //LOGICAL INSTRUCTIONS=====================================================================================
+    { 
 
-
-
-        // JUMP INST -
-        //----------------------------------------------------------------------------------------------------------------
+        // JUMP INST -----------------------------------------------------------------------------------------------------------------
 
         case 0x10: // jump if zero is not set after decrementing b reg 
             cpu.reg_B--;
@@ -1003,123 +1172,123 @@ int decode()
 
 
         //DEC INSTRUCTION---------------------------------------------------------------
-        case 0x05: //DECREMENT INSTRUCTION - RegB -= 1, carry flag unaffected
-            cpu.regB = decFlags(cpu.regB);
-            cpu.cycleCnt += 4;
-            break;
+        // case 0x05: //DECREMENT INSTRUCTION - RegB -= 1, carry flag unaffected
+        //     cpu.regB = decFlags(cpu.regB);
+        //     cpu.cycleCnt += 4;
+        //     break;
         
-        case 0x15: //DECREMENT INSTRUCTION - RegD -= 1, carry flag unaffected
-            cpu.regD = decFlags(cpu.regD);
-            cpu.cycleCnt += 4;
-            break;
+        // case 0x15: //DECREMENT INSTRUCTION - RegD -= 1, carry flag unaffected
+        //     cpu.regD = decFlags(cpu.regD);
+        //     cpu.cycleCnt += 4;
+        //     break;
         
-        case 0x25: //DECREMENT INSTRUCTION - RegH -= 1, carry flag unaffected
-            cpu.regH = decFlags(cpu.regH);
-            cpu.cycleCnt += 4;
-            break;
+        // case 0x25: //DECREMENT INSTRUCTION - RegH -= 1, carry flag unaffected
+        //     cpu.regH = decFlags(cpu.regH);
+        //     cpu.cycleCnt += 4;
+        //     break;
 
-        case 0x0d: //DECREMENT INSTRUCTION - RegC -= 1, carry flag unaffected
-            cpu.regC = decFlags(cpu.regC);
-            cpu.cycleCnt += 4;
-            break;
+        // case 0x0d: //DECREMENT INSTRUCTION - RegC -= 1, carry flag unaffected
+        //     cpu.regC = decFlags(cpu.regC);
+        //     cpu.cycleCnt += 4;
+        //     break;
         
-        case 0x1d: //DECREMENT INSTRUCTION - RegE -= 1, carry flag unaffected
-            cpu.regE = decFlags(cpu.regE);
-            cpu.cycleCnt += 4;
-            break;
+        // case 0x1d: //DECREMENT INSTRUCTION - RegE -= 1, carry flag unaffected
+        //     cpu.regE = decFlags(cpu.regE);
+        //     cpu.cycleCnt += 4;
+        //     break;
         
-        case 0x2d: //DECREMENT INSTRUCTION - RegL -= 1, carry flag unaffected
-            cpu.regL = decFlags(cpu.regL);
-            cpu.cycleCnt += 4;
-            break;
+        // case 0x2d: //DECREMENT INSTRUCTION - RegL -= 1, carry flag unaffected
+        //     cpu.regL = decFlags(cpu.regL);
+        //     cpu.cycleCnt += 4;
+        //     break;
         
-        case 0x3d: //DECREMENT INSTRUCTION - RegA -= 1, carry flag unaffected
-            cpu.regA = decFlags(cpu.regA);
-            cpu.cycleCnt += 4;
-            break;
+        // case 0x3d: //DECREMENT INSTRUCTION - RegA -= 1, carry flag unaffected
+        //     cpu.regA = decFlags(cpu.regA);
+        //     cpu.cycleCnt += 4;
+        //     break;
         
-        case 0x35:
-            z80_mem_write(((cpu.regH << 8) | cpu.regL), decFlags(z80_mem_read(((cpu.regH << 8) | cpu.regL))));
-            cpu.cycleCnt += 11;
-            break;
+        // case 0x35:
+        //     z80_mem_write(((cpu.regH << 8) | cpu.regL), decFlags(z80_mem_read(((cpu.regH << 8) | cpu.regL))));
+        //     cpu.cycleCnt += 11;
+        //     break;
         
-        case 0x0b: //PAIRED DECREMENT INSTRuCTION - Paired Reg BC - 1, no flags affected
-        {
-            uint16_t paired = decPaired(cpu.regB, cpu.regC);
-            cpu.regB = (paired >> 8) & 0xff; //High
-            cpu.regC = paired & 0xff; //Low
-            cpu.cycleCnt += 6;
-            break;
-        }
+        // case 0x0b: //PAIRED DECREMENT INSTRuCTION - Paired Reg BC - 1, no flags affected
+        // {
+        //     uint16_t paired = decPaired(cpu.regB, cpu.regC);
+        //     cpu.regB = (paired >> 8) & 0xff; //High
+        //     cpu.regC = paired & 0xff; //Low
+        //     cpu.cycleCnt += 6;
+        //     break;
+        // }
 
-        case 0x1b: //PAIRED DECREMENT INSTRuCTION - Paired Reg DE - 1, no flags affected
-        {
-            uint16_t paired = decPaired(cpu.regD, cpu.regE);
-            cpu.regD = (paired >> 8) & 0xff; //High
-            cpu.regE = paired & 0xff; //Low
-            cpu.cycleCnt += 6;
-            break;
-        }
+        // case 0x1b: //PAIRED DECREMENT INSTRuCTION - Paired Reg DE - 1, no flags affected
+        // {
+        //     uint16_t paired = decPaired(cpu.regD, cpu.regE);
+        //     cpu.regD = (paired >> 8) & 0xff; //High
+        //     cpu.regE = paired & 0xff; //Low
+        //     cpu.cycleCnt += 6;
+        //     break;
+        // }
 
-        case 0x2b: //PAIRED DECREMENT INSTRuCTION - Paired Reg HL - 1, no flags affected
-        {
-            uint16_t paired = decPaired(cpu.regH, cpu.regL);
-            cpu.regH = (paired >> 8) & 0xff; //High
-            cpu.regL = paired & 0xff; //Low
-            cpu.cycleCnt += 6;
-            break;
-        }
+        // case 0x2b: //PAIRED DECREMENT INSTRuCTION - Paired Reg HL - 1, no flags affected
+        // {
+        //     uint16_t paired = decPaired(cpu.regH, cpu.regL);
+        //     cpu.regH = (paired >> 8) & 0xff; //High
+        //     cpu.regL = paired & 0xff; //Low
+        //     cpu.cycleCnt += 6;
+        //     break;
+        // }
 
-        case 0x3b: //16 bit DECREMENT INSTRUCTION - RegSP--, no flags change
-            cpu.reg_SP--;
-            cpu.cycleCnt += 6;
-            break;
-
-
-        // SUBTRACT FLAGS CHANGE, RESGISTERS DONT-----------------------------------------------------
-        case 0xb8: //cp B from A
-            subFlags(cpu.reg_A, cpu.reg_B);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xb9: //cp C from A
-            subFlags(cpu.reg_A, cpu.reg_C);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xba: //cp D from A
-            subFlags(cpu.reg_A, cpu.reg_D);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xbb: //cp E from A
-            subFlags(cpu.reg_A, cpu.reg_E);
-            cpu.cycleCnt+=4;
-            break; 
-
-        case 0xbc: //cp H from A
-            subFlags(cpu.reg_A, cpu.reg_H);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xbd: //cp L from A
-            subFlags(cpu.reg_A, cpu.reg_L);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xbe: //cp HL from A
-            subFlags(cpu.reg_A, cpu.reg_HL[0]);
-            cpu.cycleCnt+=4;
-            break;
-
-        case 0xbf: //cp A from A
-            subFlags(cpu.reg_A, cpu.reg_A);
-            cpu.cycleCnt+=4;
-            break;
+        // case 0x3b: //16 bit DECREMENT INSTRUCTION - RegSP--, no flags change
+        //     cpu.reg_SP--;
+        //     cpu.cycleCnt += 6;
+        //     break;
 
 
+        // // SUBTRACT FLAGS CHANGE, RESGISTERS DONT-----------------------------------------------------
+        // case 0xb8: //cp B from A
+        //     subFlags(cpu.reg_A, cpu.reg_B);
+        //     cpu.cycleCnt+=4;
+        //     break;
 
-        //SHIFT INSTRUCNTIONS--------------------------------------------------------------------------
+        // case 0xb9: //cp C from A
+        //     subFlags(cpu.reg_A, cpu.reg_C);
+        //     cpu.cycleCnt+=4;
+        //     break;
+
+        // case 0xba: //cp D from A
+        //     subFlags(cpu.reg_A, cpu.reg_D);
+        //     cpu.cycleCnt+=4;
+        //     break;
+
+        // case 0xbb: //cp E from A
+        //     subFlags(cpu.reg_A, cpu.reg_E);
+        //     cpu.cycleCnt+=4;
+        //     break; 
+
+        // case 0xbc: //cp H from A
+        //     subFlags(cpu.reg_A, cpu.reg_H);
+        //     cpu.cycleCnt+=4;
+        //     break;
+
+        // case 0xbd: //cp L from A
+        //     subFlags(cpu.reg_A, cpu.reg_L);
+        //     cpu.cycleCnt+=4;
+        //     break;
+
+        // case 0xbe: //cp HL from A
+        //     subFlags(cpu.reg_A, cpu.reg_HL[0]);
+        //     cpu.cycleCnt+=4;
+        //     break;
+
+        // case 0xbf: //cp A from A
+        //     subFlags(cpu.reg_A, cpu.reg_A);
+        //     cpu.cycleCnt+=4;
+        //     break;
+
+
+
+    //SHIFT INSTRUCNTIONS--------------------------------------------------------------------------
         case 0x27: //shift left one byte A
         {
             bool msb = (cpu.regA & 0x80) != 0;
@@ -1203,9 +1372,9 @@ int decode()
             break;
 
         case 0xa6: //bitwise and register A with HL
-            cpu.reg_A = cpu.reg_A & cpu.reg_HL[0]; //bitwise AND for reg a with HL 
+            cpu.reg_A = cpu.reg_A & z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise AND for reg a with HL 
             andFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
         case 0xa7: //bitwise and register A with A
@@ -1217,7 +1386,7 @@ int decode()
         case 0xe6:
             cpu.reg_A = cpu.reg_A & memory[int(cpu.reg_PC++)]; //bitwise AND for reg a with n 
             andFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
 
@@ -1262,9 +1431,9 @@ int decode()
             break;
 
         case 0xae: // XOR A with HL 
-            cpu.reg_A = cpu.reg_A ^ cpu.reg_HL[0]; //bitwise XOR for reg a with hl 
+            cpu.reg_A = cpu.reg_A ^ z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise XOR for reg a with hl 
             xorFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
         case 0xaf: // XOR A with A 
@@ -1327,9 +1496,9 @@ int decode()
             break;
 
         case 0xb6: // OR A with HL 
-            cpu.reg_A = cpu.reg_A | cpu.reg_HL[0]; //bitwise OR for reg a with hl 
+            cpu.reg_A = cpu.reg_A | z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise OR for reg a with hl 
             xorFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
         case 0xb7: // OR A with A 
@@ -1341,7 +1510,7 @@ int decode()
         case 0xf6:// OR A with n memory[int(cpu.reg_PC++)];
             cpu.reg_A = cpu.reg_A | memory[int(cpu.reg_PC++)]; //bitwise OR for reg a with a             
             xorFlags(cpu.reg_A);
-            cpu.cycleCnt += 4;
+            cpu.cycleCnt += 7;
             break;
 
 
@@ -1506,6 +1675,11 @@ int decode()
             cpu.cycleCnt+=10;
             break;
 
+        case 0xe9: // jp (hl): adds contence of HL into PC
+            cpu.reg_PC = z80_mem_read(((cpu.regH << 8) | cpu.regL));
+            cpu.cycleCnt+=4;
+            break;
+
 
         case 0xcd:
         //unconditional jump call
@@ -1614,6 +1788,8 @@ int decode()
             break;
 
 
+
+
         //UNIDENTIFIED INSTRUCTION----------------------------------------------------------------------------------------------------------------------------------------------------------
         default:
             cout << "Unknown Instruction " << hex << int(inst) << endl;
@@ -1621,10 +1797,10 @@ int decode()
             return 1;
             break;
     }
+    }
 
     return 0;
 };
-}
 
 
 
@@ -1853,6 +2029,24 @@ uint8_t adcFlags(uint8_t reg1, uint8_t reg2)
     return sum & 0xff;
 }
 
+//subtracts registers and the carry bit if set
+uint8_t sbcFlags(uint8_t reg1, uint8_t reg2)
+{
+    uint16_t diff = reg1 - reg2 - (cpu.Flags & 0x01);
+    printf("x%02x - x%02x - x%01x = x%02x", reg1, reg2, (cpu.Flags & 0x01), diff);
+
+    (diff & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80); //Sign
+    (diff == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40); //Z set if result is 0
+    cpu.Flags |= ((diff >> 5) & 1) << 5; //5th bit of result
+    ((reg1 & 0xf) < ((reg2 & 0xf) + (cpu.Flags & 0x01))) ? (cpu.Flags |=  0x08) : (cpu.Flags &=  ~0x08); //FROM ROBM.DEV
+    cpu.Flags |= ((diff >> 3) & 1) << 3; //3rd bit of result
+    ((reg1 ^ reg2) & (diff ^ reg1) & 0x80) ? (cpu.Flags |= 0x04) : (cpu.Flags &= ~0x04);; //If operants have same sign, but sub sign changes - overflow
+    cpu.Flags |= 0x02; //N set
+    ((reg2 + (cpu.Flags & 0x01))  > reg1) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01); //Carry if result is greater than 8 bits can hold
+    
+    return diff & 0xff;
+}
+
 //MAIN==============================================================================================================================
 int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
@@ -1863,10 +2057,11 @@ int main(){
     z80_mem_write(0x02, 0x2e);//load L with n
     z80_mem_write(0x03, 0x44);//L
     
+    //cpu.Flags |= 0x01; ///set carry
     z80_mem_write(0x04, 0x3e);//load A
-    z80_mem_write(0x05, 0x01);// goes into A
+    z80_mem_write(0x05, 0x10);// goes into A
 
-    z80_mem_write(0x06, 0x06);//load B with n
+    /*z80_mem_write(0x06, 0x06);//load B with n
     z80_mem_write(0x07, 0x04);//B
 
     z80_mem_write(0x08, 0x36);//load (HL) with n
@@ -1874,9 +2069,12 @@ int main(){
 
     z80_mem_write(0x0a, 0x86);//a += (HL)
 
-    z80_mem_write(0x0b, 0x88);//regA += b + carry
+    z80_mem_write(0x0b, 0x88);//regA += b + carry*/
 
-    z80_mem_write(0x0c, 0x76);//halt
+    z80_mem_write(0x06, 0xde); //regA -= n + carry
+    z80_mem_write(0x07, 0x20); // n
+
+    z80_mem_write(0x08, 0x76);//halt
 
      
     
