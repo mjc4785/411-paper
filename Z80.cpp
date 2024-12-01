@@ -18,12 +18,14 @@ using namespace std;
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\load-regs.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
-const string fileRun = filenameEMMA;
+const string fileRun = filenameMAX;
 
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
 int const CYCLES = 1024;
 int const MEMSIZE = 65536;
+bool INTERUPT_MODE1 = true;
+bool INTERUPT_MODE2 = true;
 static uint8_t memory[MEMSIZE];
 Z80 cpu;
 
@@ -126,11 +128,18 @@ int decode()
 
         //HALT INSTRUCTION==========================================================================================
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
-            cpu.cycleCnt += 4; // 4 Cycles for halt
-            //printReg(cpu); //OUR VERSION OF PRINT
-            printRegTest(cpu); //SEBALD VERSION OF PRINT
-            z80_mem_dump("memory.bin");
-            return 1;
+            
+            if(INTERUPT_MODE1 && INTERUPT_MODE2)
+            {
+                cpu.cycleCnt += 4; // 4 Cycles for halt
+                //printReg(cpu); //OUR VERSION OF PRINT
+                printRegTest(cpu); //SEBALD VERSION OF PRINT
+                z80_mem_dump("memory.bin");
+                return 1;
+            }
+
+            return 0;
+            
             break;
 
         //NOP INSTUCTION===========================================================================================
@@ -1171,164 +1180,73 @@ int decode()
 
 
 
-        //DEC INSTRUCTION---------------------------------------------------------------
-        // case 0x05: //DECREMENT INSTRUCTION - RegB -= 1, carry flag unaffected
-        //     cpu.regB = decFlags(cpu.regB);
-        //     cpu.cycleCnt += 4;
-        //     break;
-        
-        // case 0x15: //DECREMENT INSTRUCTION - RegD -= 1, carry flag unaffected
-        //     cpu.regD = decFlags(cpu.regD);
-        //     cpu.cycleCnt += 4;
-        //     break;
-        
-        // case 0x25: //DECREMENT INSTRUCTION - RegH -= 1, carry flag unaffected
-        //     cpu.regH = decFlags(cpu.regH);
-        //     cpu.cycleCnt += 4;
-        //     break;
-
-        // case 0x0d: //DECREMENT INSTRUCTION - RegC -= 1, carry flag unaffected
-        //     cpu.regC = decFlags(cpu.regC);
-        //     cpu.cycleCnt += 4;
-        //     break;
-        
-        // case 0x1d: //DECREMENT INSTRUCTION - RegE -= 1, carry flag unaffected
-        //     cpu.regE = decFlags(cpu.regE);
-        //     cpu.cycleCnt += 4;
-        //     break;
-        
-        // case 0x2d: //DECREMENT INSTRUCTION - RegL -= 1, carry flag unaffected
-        //     cpu.regL = decFlags(cpu.regL);
-        //     cpu.cycleCnt += 4;
-        //     break;
-        
-        // case 0x3d: //DECREMENT INSTRUCTION - RegA -= 1, carry flag unaffected
-        //     cpu.regA = decFlags(cpu.regA);
-        //     cpu.cycleCnt += 4;
-        //     break;
-        
-        // case 0x35:
-        //     z80_mem_write(((cpu.regH << 8) | cpu.regL), decFlags(z80_mem_read(((cpu.regH << 8) | cpu.regL))));
-        //     cpu.cycleCnt += 11;
-        //     break;
-        
-        // case 0x0b: //PAIRED DECREMENT INSTRuCTION - Paired Reg BC - 1, no flags affected
-        // {
-        //     uint16_t paired = decPaired(cpu.regB, cpu.regC);
-        //     cpu.regB = (paired >> 8) & 0xff; //High
-        //     cpu.regC = paired & 0xff; //Low
-        //     cpu.cycleCnt += 6;
-        //     break;
-        // }
-
-        // case 0x1b: //PAIRED DECREMENT INSTRuCTION - Paired Reg DE - 1, no flags affected
-        // {
-        //     uint16_t paired = decPaired(cpu.regD, cpu.regE);
-        //     cpu.regD = (paired >> 8) & 0xff; //High
-        //     cpu.regE = paired & 0xff; //Low
-        //     cpu.cycleCnt += 6;
-        //     break;
-        // }
-
-        // case 0x2b: //PAIRED DECREMENT INSTRuCTION - Paired Reg HL - 1, no flags affected
-        // {
-        //     uint16_t paired = decPaired(cpu.regH, cpu.regL);
-        //     cpu.regH = (paired >> 8) & 0xff; //High
-        //     cpu.regL = paired & 0xff; //Low
-        //     cpu.cycleCnt += 6;
-        //     break;
-        // }
-
-        // case 0x3b: //16 bit DECREMENT INSTRUCTION - RegSP--, no flags change
-        //     cpu.reg_SP--;
-        //     cpu.cycleCnt += 6;
-        //     break;
-
-
-        // // SUBTRACT FLAGS CHANGE, RESGISTERS DONT-----------------------------------------------------
-        // case 0xb8: //cp B from A
-        //     subFlags(cpu.reg_A, cpu.reg_B);
-        //     cpu.cycleCnt+=4;
-        //     break;
-
-        // case 0xb9: //cp C from A
-        //     subFlags(cpu.reg_A, cpu.reg_C);
-        //     cpu.cycleCnt+=4;
-        //     break;
-
-        // case 0xba: //cp D from A
-        //     subFlags(cpu.reg_A, cpu.reg_D);
-        //     cpu.cycleCnt+=4;
-        //     break;
-
-        // case 0xbb: //cp E from A
-        //     subFlags(cpu.reg_A, cpu.reg_E);
-        //     cpu.cycleCnt+=4;
-        //     break; 
-
-        // case 0xbc: //cp H from A
-        //     subFlags(cpu.reg_A, cpu.reg_H);
-        //     cpu.cycleCnt+=4;
-        //     break;
-
-        // case 0xbd: //cp L from A
-        //     subFlags(cpu.reg_A, cpu.reg_L);
-        //     cpu.cycleCnt+=4;
-        //     break;
-
-        // case 0xbe: //cp HL from A
-        //     subFlags(cpu.reg_A, cpu.reg_HL[0]);
-        //     cpu.cycleCnt+=4;
-        //     break;
-
-        // case 0xbf: //cp A from A
-        //     subFlags(cpu.reg_A, cpu.reg_A);
-        //     cpu.cycleCnt+=4;
-        //     break;
+       
 
 
 
-    //SHIFT INSTRUCNTIONS--------------------------------------------------------------------------
-        case 0x27: //shift left one byte A
+
+
+
+
+
+
+
+
+
+
+        case 0xcb: // if called, bit instructions 
         {
-            bool msb = (cpu.regA & 0x80) != 0;
-            cpu.reg_A <<= 1;
-            (msb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-            (cpu.regA == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);  // zero flag
-            (cpu.regA & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80);  // sign flag
 
-            cpu.cycleCnt+=8;
+            cpu.reg_R++; //whatever is in paper - 1 (cause one already added prior)
 
-            break;
-        }
+            uint8_t inst2 = z80_mem_read(cpu.reg_PC++); //Reads the next instuction and incraments program counter
 
-        case 0x2f: //shift right one byte
-         {
-            bool lsb = (cpu.regA & 0x01) != 0; // since we shift in this direction it is necessary to 
-            //make sure that when shifting, we dont lose any data.
-            //lsb flag lets us know if there is a value in the least bit of the word
-            
-            cpu.regA >>= 1; //actual right shift
-
-            (lsb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);  // carry flag
-            //if the flag is there, set it. otherwise, set the flag to false
-
-            (cpu.regA == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);  // zero flag
-            // the zero flag is the 6th bit is either 1 or 0
-
-            (cpu.regA & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80);  // sign flag
-            //sets the sign flag to 1 or 0 depending on if the sign bit is 1 or 0 
-
-            cpu.cycleCnt += 8;
-
-            break;
-         }
-
-         case 0xcb:
+            switch(inst2)
             {
-                // this just means that we need to prepare to use bit instructions. 
+
+        //SHIFT INSTRUCNTIONS--------------------------------------------------------------------------
+
+                    case 0x27: //shift left one byte A
+                    {
+                        bool msb = (cpu.regA & 0x80) != 0;
+                        cpu.reg_A <<= 1;
+                        (msb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        (cpu.regA == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);  // zero flag
+                        (cpu.regA & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80);  // sign flag
+                        cpu.cycleCnt+=8;
+                        break;
+                    }
+
+                    case 0x2f: //shift right one byte
+                    {
+                        bool lsb = (cpu.regA & 0x01) != 0; 
+                        // since we shift in this direction it is necessary to 
+                        //make sure that when shifting, we dont lose any data.
+                        //lsb flag lets us know if there is a value in the least bit of the word
+                        cpu.regA >>= 1; 
+                        //actual right shift
+                        (lsb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);  
+                        // carry flag
+                        //if the flag is there, set it. otherwise, set the flag to false
+                        (cpu.regA == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);  
+                        // zero flag
+                        // the zero flag is the 6th bit is either 1 or 0
+                        (cpu.regA & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80);  
+                        // sign flag
+                        //sets the sign flag to 1 or 0 depending on if the sign bit is 1 or 0 
+                        cpu.cycleCnt += 8;
+                        break;
+                    }
+                }
                 break;
             }
+
+
+
+
+
+
+
 
         
 
@@ -1787,6 +1705,31 @@ int decode()
             cpu.cycleCnt+=5;
             break;
 
+        
+
+
+
+
+
+        // INTERUPT HANDILING -------------------------------------------------------------------------------------------------------------------------------------------------------------
+        case 0xf3:
+            
+            INTERUPT_MODE1 = false;
+            INTERUPT_MODE2 = false;
+            
+            cpu.cycleCnt+=4;
+
+            break;
+
+        case 0xfb:
+            
+            INTERUPT_MODE1 = true;
+            INTERUPT_MODE2 = true;
+            
+            cpu.cycleCnt+=4;
+
+            break;
+
 
 
 
@@ -2051,8 +1994,10 @@ uint8_t sbcFlags(uint8_t reg1, uint8_t reg2)
 int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
 
-    //z80_mem_load(fileRun.c_str()); //Load into memory
-    z80_mem_write(0x00, 0x26);//load H with n
+
+    z80_mem_load(fileRun.c_str()); //Load into memory
+
+/*    z80_mem_write(0x00, 0x26);//load H with n
     z80_mem_write(0x01, 0x55);//H
     z80_mem_write(0x02, 0x2e);//load L with n
     z80_mem_write(0x03, 0x44);//L
@@ -2069,14 +2014,14 @@ int main(){
 
     z80_mem_write(0x0a, 0x86);//a += (HL)
 
-    z80_mem_write(0x0b, 0x88);//regA += b + carry*/
+    z80_mem_write(0x0b, 0x88);//regA += b + carry /
 
     z80_mem_write(0x06, 0xde); //regA -= n + carry
     z80_mem_write(0x07, 0x20); // n
 
     z80_mem_write(0x08, 0x76);//halt
 
-     
+*/
     
     for (int i =0; i < MEMSIZE; i++)
     {
