@@ -16,7 +16,7 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\simple-add.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\simple-sub.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameEMMA;
 
@@ -34,7 +34,6 @@ Z80 cpu;
 int decode();
 void printReg(Z80);
 void printRegTest(Z80);
-void setflags(uint8_t, bool, bool, bool, bool, bool);
 uint8_t addFlags(uint8_t, uint8_t);
 uint8_t subFlags(uint8_t, uint8_t);
 uint8_t incFlags(uint8_t);
@@ -1919,6 +1918,132 @@ int decode()
             cpu.cycleCnt+=4;
 
             break;
+        
+        //================================================================================================================================
+        //ED INSTRUCTIONS=================================================================================================================
+        //================================================================================================================================
+    {
+        case 0xed:
+            cpu.reg_R += 1; //ED increases R by 2, one is already done by while loop
+            uint8_t inst2 = z80_mem_read(cpu.reg_PC++); //Reads the next instuction and incraments program counter
+            switch(inst2)
+            {
+
+                //LOAD INSTRUCTIONS------------------------------------------------------------------------
+                case 0x43://LOAD INSTRUCTION - load memory address (nn) with C and (nn+1) with B 
+                {    
+                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    z80_mem_write(addr, cpu.regC); //C goes into (nn)
+                    z80_mem_write(addr+1, cpu.regB); //B goes into (nn+1)
+                    cpu.cycleCnt += 20;
+                    break;
+                }
+
+                case 0x53://LOAD INSTRUCTION - load memory address (nn) with E and (nn+1) with D 
+                {    
+                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    z80_mem_write(addr, cpu.regE); //E goes into (nn)
+                    z80_mem_write(addr+1, cpu.regD); //D goes into (nn+1)
+                    cpu.cycleCnt += 20;
+                    break;
+                }
+
+                case 0x63://LOAD INSTRUCTION - load memory address (nn) with L and (nn+1) with H 
+                {    
+                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    z80_mem_write(addr, cpu.regL); //L goes into (nn)
+                    z80_mem_write(addr+1, cpu.regH); //H goes into (nn+1)
+                    cpu.cycleCnt += 20;
+                    break;
+                }
+
+                case 0x73://LOAD INSTRUCTION - load memory address (nn) with sp LOWER8 and (nn+1) with sp HIGHER8
+                {    
+                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    z80_mem_write(addr, cpu.reg_SP & 0xff ); //Lower8 goes into (nn)
+                    z80_mem_write(addr+1, cpu.reg_SP >> 8 ); //higher 8 goes into (nn+1)
+                    cpu.cycleCnt += 20;
+                    break;
+                }
+
+                case 0x4b://LOAD INSTRUCTION - load value at (nn) into C and (nn+1) into B
+                {
+                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    cpu.regC = z80_mem_read(addr); //NOTE THE NN GOES INTO C
+                    cpu.regB = z80_mem_read(addr + 1); //NOTE THE NN+1 GOES INTO B
+                    cpu.cycleCnt += 20;
+                    break;
+                }
+
+                case 0x5b://LOAD INSTRUCTION - load value at (nn) into E and (nn+1) into D
+                {
+                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    cpu.regE = z80_mem_read(addr); //NOTE THE NN GOES INTO E
+                    cpu.regD = z80_mem_read(addr + 1); //NOTE THE NN+1 GOES INTO D
+                    cpu.cycleCnt += 20;
+                    break;
+                }
+
+                case 0x6b://LOAD INSTRUCTION - load value at (nn) into L and (nn+1) into H
+                {
+                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    cpu.regL = z80_mem_read(addr); //NOTE THE NN GOES INTO L
+                    cpu.regH = z80_mem_read(addr + 1); //NOTE THE NN+1 GOES INTO H
+                    cpu.cycleCnt += 20;
+                    break;
+                }
+
+                case 0x7b://LOAD INSTRUCTION - load value at (nn) into spLOWER8 and (nn+1) into spUPPER8
+                {
+                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    cpu.reg_SP = (z80_mem_read(addr +1) << 8) | z80_mem_read(addr);
+                    cpu.cycleCnt += 20;
+                    break;
+                }
+
+                case 0x47://LOAD INSTRUCTION - load value of a into i
+                    cpu.reg_I = cpu.regA;
+                    cpu.cycleCnt += 9;
+                    break;
+                
+                case 0x57://LOAD INSTRUCTION - load value of i into a, CHANGE FLAGS
+                    cpu.regA = cpu.reg_I;
+
+                    cpu.Flags = ZSXYtable[cpu.reg_I]|(cpu.Flags & 0x01);//S Z X Y, based on i, C unaffected
+                    //H is reset.
+                    cpu.Flags |= cpu.regIFF2 << 2;//P/V contains contents of IFF2, if interrupt durring instruction: reset
+                    //N is reset.
+
+                    cpu.cycleCnt += 9;
+                    break;
+                
+                case 0x4f://LOAD INSTRUCTION - load value of a into r
+                    cpu.reg_R = cpu.regA;
+                    cpu.cycleCnt += 9;
+                    break;
+                
+                case 0x5f://LOAD INSTRUCTION - load value of r into a, CHANGE FLAGS
+                    cpu.regA = cpu.reg_R;
+
+                    cpu.Flags = ZSXYtable[cpu.reg_R]|(cpu.Flags & 0x01);//S Z X Y, based on i, C unaffected
+                    //H is reset.
+                    cpu.Flags |= cpu.regIFF2 << 2;//P/V contains contents of IFF2, if interrupt durring instruction: reset
+                    //N is reset.
+
+                    cpu.cycleCnt += 9;
+                    break;
+                
+
+                //UNIDENTIFIED INSTRUCTION=================================================================
+                default:
+                    cout << "Unknown ED Instruction: " << hex << int(inst2) << endl;
+                    printReg(cpu);
+                    return 1;
+                    break;
+            }
+
+            break; //Break for end of ED instructions in big alpha switch statement
+    }
 
 
 
@@ -1980,6 +2105,15 @@ void printRegTest(Z80 cpu)
     cout << "\n*=================Z80========================*" << endl;
     printf("A:\t%02X\n", cpu.regA);
     printf("F:\t%02X\n", cpu.Flags);
+
+    printf("\tS=%01x  Z=%01x  H=%01x  P/V=%01x  N=%01x  C=%01x\n", 
+       (cpu.Flags & 0x80) >> 7,  // Sign flag (bit 7)
+       (cpu.Flags & 0x40) >> 6,  // Zero flag (bit 6)
+       (cpu.Flags & 0x10) >> 4,  // Half-carry flag (bit 4)
+       (cpu.Flags & 0x04) >> 2,  // Overflow flag (bit 2)
+       (cpu.Flags & 0x02) >> 1,  // Subtract flag (bit 1)
+       (cpu.Flags & 0x01));      // Carry flag (bit 0)
+
     printf("B:\t%02X\n", cpu.regB);
     printf("C:\t%02X\n", cpu.regC);
     printf("D:\t%02X\n", cpu.regD);
@@ -2017,23 +2151,6 @@ void printRegTest(Z80 cpu)
 }
 
 
-
-//Edits the flag register according to the arithmetic opperation results
-void setflags(uint8_t result, bool negative, bool halfCarry, bool overflow, bool subtraction, bool carry)
-{
-    //FLAGS: Sign | Zero | UNDOC:Copy of bit 5 of reesult| Half carry | UNDOC:Copy of bit 3 of reesult | Parity/oVerflow | add/subtract N | Carry
-    cpu.Flags = 0; //Reset the flags for each result
-
-    if (negative)     {cpu.Flags |= 0b10000000;}  //(bit 7) S-Flag  [0:(+/0)result | 1:(-)result]
-    if (result == 0)    {cpu.Flags |= 0b01000000;}  //(bit 6) Z-flag  [0: result!=0 | 1: result==0]
-    cpu.Flags |= ((result >> 5) & 1) << 5; //(bit 5) Undoccumented - 5th bit of the result
-    if (halfCarry)      {cpu.Flags |= 0b00010000;}  //(bit 4) H-Flag [0:carry absent | 1: carry present]
-    cpu.Flags |= ((result >> 3) & 1) << 3; //(bit 3) Undoccumented - 3rd bit of the result
-    if(overflow)        {cpu.Flags |= 0b00000100;}  //(bit 2) P/V-Flag [0: no overflow or odd number of 1 bits]
-    if(subtraction)     {cpu.Flags |= 0b00000010;}  //(bit 1) N-Flag [0:Addition | 1: Subtraction]
-    if(carry)           {cpu.Flags |= 0b00000001;}  //(bit 0) C-Flag [0: no carry/borrow | 1: carry/borrow]
-}
-
 void andFlags(uint8_t reg){
 
             //flags (move this into a func that gets passed reg a) 
@@ -2061,12 +2178,14 @@ void xorFlags(uint8_t reg){
 uint8_t addFlags(uint8_t reg1, uint8_t reg2)
 {
     int16_t sum = reg1 + reg2;
-    //C, N=0, V, H, Z, S
+
+    //cout << bitset<8>(reg1) << " +\n" << bitset<8>(reg2) << " =\n" << bitset<8>(sum) << endl;
+
     cpu.Flags = ZSXYtable[sum & 0xff]; //Set Z, S, X, Y 
-    cpu.Flags |= ((sum ^ reg1 ^ reg2) & 0x10); //Half carry: if the sum of the bottom 0xf is greater than 0xf (Demonstrated in class)
-    cpu.Flags |= (!((reg1 ^ reg2) & 0x80) && (reg1 ^ sum) & 0x80); //Overflow: if operants have same sign but sum sign changes 
+    cpu.Flags |= (sum ^ reg1 ^ reg2) & 0x10; //Half carry: if the sum of the bottom 0xf is greater than 0xf (Demonstrated in class)
+    cpu.Flags |= (((~(reg1 ^ reg2) & 0x80) && ((reg1 ^ sum) & 0x80)) << 2); //Overflow: if operants have same sign but sum sign changes (explained by sebald))
     cpu.Flags &= ~ 0x02; //Subtraction: False 
-    cpu.Flags |= (sum > 0xff) & 0x01; //Carry: if sum is more than 8 bits can hold
+    cpu.Flags |= (sum > 0xff); //Carry: if sum is more than 8 bits can hold then there was a carry
 
     return sum;
 }
@@ -2075,10 +2194,15 @@ uint8_t addFlags(uint8_t reg1, uint8_t reg2)
 uint8_t subFlags(uint8_t reg1, uint8_t reg2)
 {
     uint16_t diff = reg1 - reg2;
-    bool halfCarry = ((reg1 & 0x0f) < (reg2 & 0x0f)); //The thing being subtracted from wasnt big enough: had to borrow
-    bool overflow = (((reg1 ^ reg2) & 0x80) && ((reg1 ^ diff) & 0x80)); //If the registers have different signs and the result also has a different sign
-    bool carry = reg2 > reg1; //If reg 2 is bigger, then there was a carry
-    setflags(diff,(reg2 > reg1), halfCarry, overflow, true, carry);
+
+    //cout << bitset<8>(reg1) << " -\n" << bitset<8>(reg2) << " =\n" << bitset<8>(diff) << endl;
+
+    cpu.Flags = ZSXYtable[diff & 0xff]; //Set Z, S, X, Y
+    cpu.Flags |= (((reg1 & 0x0f) < (reg2 & 0x0f))) << 4; //Half carry: if there was borrow bc thing being subtracted is bigger in lower 4 bits
+    cpu.Flags |= (((reg1 ^ reg2) & 0x80) && ((reg1 ^ diff) & 0x80)) << 2; //Overflow: if operants have different sign but diff sign is same as second (explained by sebald)
+    cpu.Flags |= 0x02; //Subtraction : True
+    cpu.Flags |= (reg2 > reg1) & 0x01; //Carry: If reg 2 is bigger, then there was a borrow
+
     return diff;
 }
 
@@ -2086,10 +2210,15 @@ uint8_t subFlags(uint8_t reg1, uint8_t reg2)
 uint8_t incFlags(uint8_t reg1)
 {
     int32_t sum = reg1 + uint8_t(1);
-    bool halfCarry = (sum ^ reg1 ^ uint8_t(1)) & 0x10; //Demonstrated in class
-    bool overflow = (reg1 == 0x7F); //Overflows at 0x80
-    bool carry = cpu.Flags & 0x01; //CARRY IS UNAFFECTED
-    setflags(sum, (sum < 0), halfCarry, overflow, false, carry);
+
+    //cout << bitset<8>(reg1) << " +\n" << bitset<8>(1) << " =\n" << bitset<8>(sum) << endl;
+
+    cpu.Flags = ZSXYtable[sum & 0xff] | //Set Z, S, X, Y 
+    ((reg1 ^ 0x01 ^ sum) & 0x10)| // Half Carry: Demonstrated in class
+    ((reg1 == 0x7F)) << 2 | //Overflow: at 0x80
+    //N is reset
+    cpu.Flags & 0x01; //CARRY IS UNAFFECTED
+    
     return sum;
 }
 
@@ -2189,40 +2318,47 @@ int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
 
 
-    z80_mem_load(fileRun.c_str()); //Load into memory
+   //z80_mem_load(fileRun.c_str()); //Load into memory
 
+   
+    /*z80_mem_write(0x00, 0x3e);//load A
+    z80_mem_write(0x01, 0x0f);// goes into A*/
+
+    
     /*z80_mem_write(0x00, 0x21);//load HL with n n
-    z80_mem_write(0x01, 0x06);//L
-    z80_mem_write(0x02, 0x09);//H
+    z80_mem_write(0x01, 0xDA);//H
+    z80_mem_write(0x02, 0x92);//L*/
+
+    /*z80_mem_write(0x00, 0x31);//load sp with n n
+    z80_mem_write(0x01, 0x02);//sp
+    z80_mem_write(0x02, 0x01);//sp*/
+
+    /*z80_mem_write(0x00, 0x01);//load BC with n n
+    z80_mem_write(0x01, 0x33);//B
+    z80_mem_write(0x02, 0x22);//C*/
+
+    /*z80_mem_write(0x03, 0x22);//load nn with HL
+    z80_mem_write(0x04, 0x55);//n
+    z80_mem_write(0x05, 0x44);//n */
+
+    z80_mem_write(0x00, 0xed);//ed instruction
+    z80_mem_write(0x01, 0x5f);//load a with i
     
 
-    z80_mem_write(0x03, 0x3e);//load A
-    z80_mem_write(0x04, 0x10);// goes into A
-
-    z80_mem_write(0x05, 0x22);//load (nn) with HL
-    z80_mem_write(0x06, 0x55);
-    z80_mem_write(0x07, 0x44);
-
-    z80_mem_write(0x08, 0x21);//load HL with nn
-    z80_mem_write(0x09, 0x04);//L
-    z80_mem_write(0x0a, 0x20);//H
+    //z80_mem_write(0x05, 0x84); //a+=h
+    //z80_mem_write(0x05, 0x94); //a-=h
+    //z80_mem_write(0x05, 0x3c); // a++
 
 
-    z80_mem_write(0x0b, 0x31);//load sp with nn
-    z80_mem_write(0x0c, 0x55);//n
-    z80_mem_write(0x0d, 0x44);//n
-
-    z80_mem_write(0x0e, 0x2F); //reg hl swap (sp)
-
-    z80_mem_write(0x0f, 0x76);//halt*/
+    z80_mem_write(0x02, 0x76);//halt
 
 
     
-    for (int i =0; i < MEMSIZE; i++)
+    /*for (int i =0; i < MEMSIZE; i++)
     {
         if(memory[i] != 0)
             {printf("ram[%04x] = %02x\n", i, memory[i]);}
-    }
+    }*/
 
     z80_execute();
 
