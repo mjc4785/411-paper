@@ -50,6 +50,7 @@ void retS();
 uint16_t popS();
 uint16_t sbc16Flags(uint16_t, uint16_t);
 uint16_t adc16Flags(uint16_t, uint16_t);
+void incR();
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -207,7 +208,7 @@ int z80_execute(){
 
     while(cpu.cycleCnt < CYCLES)
     {
-        cpu.reg_R++; //INCRAMENT THE R RESGISTER ON ALL PREFIXES EXCEPT IY CB IX CB
+        incR(); //INCRAMENT THE R RESGISTER ON ALL PREFIXES EXCEPT IY CB IX CB, 7th bit doesnt change
         if(decode()) {break;} // if decode returns 1 (either halt or unknown inst), break
                               // otherwise, keep looping. 
     }
@@ -1390,7 +1391,7 @@ int decode()
         case 0xcb: // if called, bit instructions 
         {
 
-            cpu.reg_R++; //whatever is in paper - 1 (cause one already added prior)
+            incR(); //whatever is in paper - 1 (cause one already added prior)
 
             uint8_t inst2 = z80_mem_read(cpu.reg_PC++); //Reads the next instuction and incraments program counter
 
@@ -3536,7 +3537,7 @@ int decode()
         //================================================================================================================================
     {
         case 0xed:
-            cpu.reg_R += 1; //ED increases R by 2, one is already done by while loop
+            incR(); //ED increases R by 2, one is already done by while loop
             uint8_t inst2 = z80_mem_read(cpu.reg_PC++); //Reads the next instuction and incraments program counter
             switch(inst2)
             {
@@ -4050,7 +4051,18 @@ int decode()
             break; //Break for end of ED instructions in big alpha switch statement
     }
 
+        //================================================================================================================================
+        //DD INSTRUCTIONS=================================================================================================================
+        //================================================================================================================================
+    {
+         case 0xdd:
+            incR();//DD increases R by 2, one is already done by while loop
+            uint8_t inst2 = z80_mem_read(cpu.reg_PC++); //Reads the next instuction and incraments program counter
+            switch(inst2)
+            {
 
+            }//End DD switch
+    }
 
 
         //UNIDENTIFIED INSTRUCTION----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -4373,6 +4385,13 @@ uint16_t adc16Flags(uint16_t reg1, uint16_t reg2)
     return sum & 0xffff;
 }
 
+void incR() //INCREASING R DOES NOT CHANGE THE 8th BIT
+{
+    uint8_t bit7 = cpu.reg_R & 0x80; //7th bit is stored
+    cpu.reg_R++;
+    (bit7)? (cpu.reg_R |= 0x80):(cpu.reg_R &= ~0x80);//8th bit restored
+}
+
 //MAIN==============================================================================================================================
 int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
@@ -4414,7 +4433,6 @@ int main(){
    memory[0x2224] = 0x59;
    memory[0x2223] = 0x66;
    //cpu.Flags |= 0x01;
-
 
     //cpu.Flags |= 0x01;
     z80_mem_write(0x00, 0xed);//ed instruction
