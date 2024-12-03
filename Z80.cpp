@@ -222,7 +222,7 @@ int decode()
         //HALT INSTRUCTION==========================================================================================
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
             
-            if(INTERUPT_MODE1 && INTERUPT_MODE2)
+            if(cpu.regIFF1 && cpu.regIFF2)
             {
                 cpu.cycleCnt += 4; // 4 Cycles for halt
                 //printReg(cpu); //OUR VERSION OF PRINT

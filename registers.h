@@ -62,8 +62,8 @@ struct Z80{
         uint16_t reg_PC = 0;//Program Counter
 
         //UNDOCCUMENTED REGISTERS
-        bool regIFF1 = 0; //Interrupt Flip Flop 1
-        bool regIFF2 = 0; //Interrupt Flip Flop 2
+        bool regIFF1 = true; //Interrupt Flip Flop 1
+        bool regIFF2 = true; //Interrupt Flip Flop 2
         uint8_t regINIR = 0; //Internal 
 
         //Paired Registers
