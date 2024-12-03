@@ -3165,6 +3165,112 @@ int decode()
                     break;
                 }
             }
+                //CARRY IS PRESERVED INSTRUCTIONS-----------------------------------------------------------
+            {
+                case 0xa1: //CPI - A - (HL), HL ← HL +1, BC ← BC – 1
+                {  
+                    uint8_t diff = cpu.regA - z80_mem_read((cpu.regH << 8) | cpu.regL);
+                    uint8_t n = diff - ((cpu.Flags &0x10)>>4); // n = A-(HL)-HF
+                    //cout << bitset<8>(cpu.regA) << " -\n" << bitset<8>( z80_mem_read((cpu.regH << 8) | cpu.regL)) << " -\n" <<bitset<8>((cpu.Flags &0x10)>>4) << " =\n" << bitset<8>(n) << endl;
+
+                    cpu.regH = (((cpu.regH<<8)|cpu.regL) + 1) >> 8;//Hl++
+                    cpu.regL = (((cpu.regH<<8)|cpu.regL) + 1) & 0xff;//hL++
+                    cpu.regB = (((cpu.regB<<8)|cpu.regC) - 1) >> 8;//Bc--
+                    cpu.regC = (((cpu.regB<<8)|cpu.regC) - 1) & 0xff;//bC--  
+
+                    cpu.Flags = ZStable[diff] | (cpu.Flags & 0x01); // Z,S set; Carry unaffected
+                    (n & 0x01)? (cpu.Flags |= 0x20):(cpu.Flags &= ~0x20);//YF based on a-(hl old) bit 1
+                    ((cpu.regA & 0x0f) < ((diff & 0x0f) + ((cpu.Flags &0x10)>>4)))? (cpu.Flags |= 0x10):(cpu.Flags &= ~0x10); //Half Carry
+                    (n & 0x08)? (cpu.Flags |= 0x08):(cpu.Flags &= ~0x08);//XF based on a-(hl old) bit 3
+                    (bool(cpu.regB | cpu.regC)) ? (cpu.Flags |= 0x04):(cpu.Flags &= ~0x04);//P/V is reset if BC == 0, set otherwise 
+                    cpu.Flags |= 0x02; //N Set
+
+                    cpu.cycleCnt += 16;
+                    break;
+                }
+            
+                case 0xb1: //CPIR - A - (HL), HL ← HL +1, BC ← BC – 1
+                {  
+                    cout <<"RENTERING" << endl;
+                    uint8_t diff = cpu.regA - z80_mem_read((cpu.regH << 8) | cpu.regL); //A - (HL)
+                    uint8_t n = diff - ((cpu.Flags &0x10)>>4); // n = A-(HL)-HF
+
+                    cpu.regH = (((cpu.regH<<8)|cpu.regL) + 1) >> 8;//Hl++
+                    cpu.regL = (((cpu.regH<<8)|cpu.regL) + 1) & 0xff;//hL++
+                    cpu.regB = (((cpu.regB<<8)|cpu.regC) - 1) >> 8;//Bc--
+                    cpu.regC = (((cpu.regB<<8)|cpu.regC) - 1) & 0xff;//bC--  
+                    cpu.Flags = ZStable[diff] | (cpu.Flags & 0x01); // Z,S set; Carry unaffected
+                    (n & 0x01)? (cpu.Flags |= 0x20):(cpu.Flags &= ~0x20);//YF based on a-(hl old) bit 1
+                    ((cpu.regA & 0x0f) < ((z80_mem_read((cpu.regH << 8) | cpu.regL) & 0x0f)))? (cpu.Flags |= 0x10):(cpu.Flags &= ~0x10); //Half Carry
+                    (n & 0x08)? (cpu.Flags |= 0x08):(cpu.Flags &= ~0x08);//XF based on a-(hl old) bit 3
+                    (bool(cpu.regB | cpu.regC)) ? (cpu.Flags |= 0x04):(cpu.Flags &= ~0x04);//P/V is reset if BC == 0, set otherwise 
+                    cpu.Flags |= 0x02; //N Set
+
+                    //If BC is not 0 and A ≠ (HL), the program counter is decremented by two and the instruction is repeated
+                    if((bool(cpu.regB|cpu.regC) && (diff != 0))) //While BC != 0 AND A != (HL))
+                    {   
+                        cpu.reg_PC -= 2;
+                        cpu.cycleCnt += 21;
+                        break;
+                    }
+
+                    cpu.cycleCnt += 16;
+                    break;
+                }
+
+                case 0xa9: //CPD - A – (HL), HL ← HL – 1, BC ← BC – 1
+                {
+                    uint8_t diff = cpu.regA - z80_mem_read((cpu.regH << 8) | cpu.regL);
+                    uint8_t n = diff - ((cpu.Flags &0x10)>>4); // n = A-(HL)-HF
+                    //cout << bitset<8>(cpu.regA) << " -\n" << bitset<8>( z80_mem_read((cpu.regH << 8) | cpu.regL)) << " -\n" <<bitset<8>((cpu.Flags &0x10)>>4) << " =\n" << bitset<8>(n) << endl;
+
+                    cpu.regH = (((cpu.regH<<8)|cpu.regL) - 1) >> 8;//Hl--
+                    cpu.regL = (((cpu.regH<<8)|cpu.regL) - 1) & 0xff;//hL--
+                    cpu.regB = (((cpu.regB<<8)|cpu.regC) - 1) >> 8;//Bc--
+                    cpu.regC = (((cpu.regB<<8)|cpu.regC) - 1) & 0xff;//bC--  
+
+                    cpu.Flags = ZStable[diff] | (cpu.Flags & 0x01); // Z,S set; Carry unaffected
+                    (n & 0x01)? (cpu.Flags |= 0x20):(cpu.Flags &= ~0x20);//YF based on a-(hl old) bit 1
+                    ((cpu.regA & 0x0f) < ((diff & 0x0f) + ((cpu.Flags &0x10)>>4)))? (cpu.Flags |= 0x10):(cpu.Flags &= ~0x10); //Half Carry
+                    (n & 0x08)? (cpu.Flags |= 0x08):(cpu.Flags &= ~0x08);//XF based on a-(hl old) bit 3
+                    (bool(cpu.regB | cpu.regC)) ? (cpu.Flags |= 0x04):(cpu.Flags &= ~0x04);//P/V is reset if BC == 0, set otherwise 
+                    cpu.Flags |= 0x02; //N Set
+
+                    cpu.cycleCnt += 16;
+                    break;
+                }
+            
+                case 0xb9: //CPDR - A – (HL), HL ← HL – 1, BC ← BC – 1
+                {
+                    uint8_t diff = cpu.regA - z80_mem_read((cpu.regH << 8) | cpu.regL);
+                    uint8_t n = diff - ((cpu.Flags &0x10)>>4); // n = A-(HL)-HF
+                    //cout << bitset<8>(cpu.regA) << " -\n" << bitset<8>( z80_mem_read((cpu.regH << 8) | cpu.regL)) << " -\n" <<bitset<8>((cpu.Flags &0x10)>>4) << " =\n" << bitset<8>(n) << endl;
+
+                    cpu.regH = (((cpu.regH<<8)|cpu.regL) - 1) >> 8;//Hl--
+                    cpu.regL = (((cpu.regH<<8)|cpu.regL) - 1) & 0xff;//hL--
+                    cpu.regB = (((cpu.regB<<8)|cpu.regC) - 1) >> 8;//Bc--
+                    cpu.regC = (((cpu.regB<<8)|cpu.regC) - 1) & 0xff;//bC--  
+
+                    cpu.Flags = ZStable[diff] | (cpu.Flags & 0x01); // Z,S set; Carry unaffected
+                    (n & 0x01)? (cpu.Flags |= 0x20):(cpu.Flags &= ~0x20);//YF based on a-(hl old) bit 1
+                    ((cpu.regA & 0x0f) < ((diff & 0x0f) + ((cpu.Flags &0x10)>>4)))? (cpu.Flags |= 0x10):(cpu.Flags &= ~0x10); //Half Carry
+                    (n & 0x08)? (cpu.Flags |= 0x08):(cpu.Flags &= ~0x08);//XF based on a-(hl old) bit 3
+                    (bool(cpu.regB | cpu.regC)) ? (cpu.Flags |= 0x04):(cpu.Flags &= ~0x04);//P/V is reset if BC == 0, set otherwise 
+                    cpu.Flags |= 0x02; //N Set
+
+                    //If BC is not 0 and A ≠ (HL), the program counter is decremented by two and the instruction is repeated
+                    if((bool(cpu.regB|cpu.regC) && (diff != 0))) //While BC != 0 AND A != (HL))
+                    {   
+                        cpu.reg_PC -= 2;
+                        cpu.cycleCnt += 21;
+                        break;
+                    }
+
+                    cpu.cycleCnt += 16;
+                    break;
+                }
+
+            }
 
                 //SUBTRACTION W CARRY INSTRUCTIONS---------------------------------------------------------
             {
@@ -3556,30 +3662,24 @@ int main(){
     z80_mem_write(0x04, 0x55);//n
     z80_mem_write(0x05, 0x44);//n */
 
-/*
+
    cpu.regH = 0x11;
-   cpu.regL = 0x14;
-   cpu.regD = 0x22;
-   cpu.regE = 0x25;
+   cpu.regL = 0x18;
+   cpu.regA = 0xf3;
    cpu.regB = 0x00;
-   cpu.regC = 0x03;
-   memory[0x1114] = 0xa5;
-   memory[0x1113] = 0x36;
-   memory[0x1112] = 0x88;
+   cpu.regC = 0x07;
+   memory[0x1118] = 0x52;
+   memory[0x1117] = 0x00;
+   memory[0x1116] = 0xF3;
    memory[0x2225] = 0xc5;
    memory[0x2224] = 0x59;
    memory[0x2223] = 0x66;
-   cpu.Flags = 0x00;
-*/
+   //cpu.Flags |= 0x01;
 
-    cpu.regH = 0x50;
-    cpu.regL = 0x00;
-    cpu.regA = 0b01111010;
-    memory[0x5000] = 0b00110001;
 
     //cpu.Flags |= 0x01;
     z80_mem_write(0x00, 0xed);//ed instruction
-    z80_mem_write(0x01, 0x6f);//rrd
+    z80_mem_write(0x01, 0xb9);//cpir
     
 
     //z80_mem_write(0x05, 0x84); //a+=h
@@ -3604,7 +3704,7 @@ int main(){
     
     for (int i =0; i < 3; i++)
     {
-        printf("\tram[%04x] = %02x\t ", 0x1114-i, memory[0x1114-i]);
+        printf("\tram[%04x] = %02x\t ", 0x1118-i, memory[0x1118-i]);
         printf("ram[%04x] = %02x\n ", 0x2225-i, memory[0x2225-i]);
     }
 
