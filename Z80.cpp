@@ -17,8 +17,8 @@ using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\simple-add.bin";
-const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
-const string fileRun = filenameEMMA;
+const string filenameMAX = "C:\\411\\rotate.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
+const string fileRun = filenameMAX;
 
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
@@ -1400,43 +1400,59 @@ int decode()
 
 
                     case 0x00: // RLC b 
-                        ((cpu.reg_B & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_B = (cpu.reg_B << 1) | (cpu.Flags & 0x01);
+                        ((cpu.regB & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regB = (cpu.regB << 1) | (cpu.Flags & 0x01);
+                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x01: // RLC c
-                        ((cpu.reg_C & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_C = (cpu.reg_C << 1) | (cpu.Flags & 0x01);
+                        ((cpu.regC & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regC = (cpu.regC << 1) | (cpu.Flags & 0x01);
+                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x02: // RLC d
-                        ((cpu.reg_D & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_D = (cpu.reg_D << 1) | (cpu.Flags & 0x01);
+                        ((cpu.regD & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regD = (cpu.regD << 1) | (cpu.Flags & 0x01);
+                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x03: // RLC e
-                        ((cpu.reg_E & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_E = (cpu.reg_E << 1) | (cpu.Flags & 0x01);
+                        ((cpu.regE & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regE = (cpu.regE << 1) | (cpu.Flags & 0x01);
+                        cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x04: // RLC h
-                        ((cpu.reg_H & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_H = (cpu.reg_H << 1) | (cpu.Flags & 0x01);
+                        ((cpu.regH & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regH = (cpu.regH << 1) | (cpu.Flags & 0x01);
+                        cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x05: // RLC l
-                        ((cpu.reg_L & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_L = (cpu.reg_L << 1) | (cpu.Flags & 0x01);
+                        ((cpu.regL & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regL = (cpu.regL << 1) | (cpu.Flags & 0x01);
+                        cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x06: // RLC (hl)
                         ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
                         z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), (z80_mem_read(((cpu.regH << 8) | cpu.regL)) << 1) | (cpu.Flags & 0x01));
+                        cpu.Flags = ZSPXYtable[int(z80_mem_read(((cpu.regH << 8) | cpu.regL)))]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=15;
                         break;
 
                     case 0x07: // RLC a
-                        ((cpu.reg_A & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_A = (cpu.reg_A << 1) | (cpu.Flags & 0x01);
+                        ((cpu.regA & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regA = (cpu.regA << 1) | (cpu.Flags & 0x01);
+                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=8;
                         break;
 
 
@@ -1446,43 +1462,59 @@ int decode()
 
 
                     case 0x08: //RRC b
-                        ((cpu.reg_B & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_B = (cpu.reg_B >> 1) | (cpu.Flags & 0x80);
+                        ((cpu.regB & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regB = (cpu.regB >> 1) | (cpu.Flags & 0x80);
+                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x09: //RRC c
-                        ((cpu.reg_C & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_C = (cpu.reg_C >> 1) | (cpu.Flags & 0x80);
+                        ((cpu.regC & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regC = (cpu.regC >> 1) | (cpu.Flags & 0x80);
+                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x0A: //RRC d
-                        ((cpu.reg_D & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_D = (cpu.reg_D >> 1) | (cpu.Flags & 0x80);
+                        ((cpu.regD & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regD = (cpu.regD >> 1) | (cpu.Flags & 0x80);
+                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x0B: //RRC e
-                        ((cpu.reg_E & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_E = (cpu.reg_E >> 1) | (cpu.Flags & 0x80);
+                        ((cpu.regE & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regE = (cpu.regE >> 1) | (cpu.Flags & 0x80);
+                        cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x0C: //RRC h
-                        ((cpu.reg_H & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_H = (cpu.reg_H >> 1) | (cpu.Flags & 0x80);
+                        ((cpu.regH & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regH = (cpu.regH >> 1) | (cpu.Flags & 0x80);
+                        cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x0D: //RRC l
-                        ((cpu.reg_L & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_L = (cpu.reg_L >> 1) | (cpu.Flags & 0x80);
+                        ((cpu.regL & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regL = (cpu.regL >> 1) | (cpu.Flags & 0x80);
+                        cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
                     case 0x0E: //RRC (hl)
                         ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
                         z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 1) | (cpu.Flags & 0x01)));
+                        cpu.Flags = ZSPXYtable[int(z80_mem_read(((cpu.regH << 8) | cpu.regL)))]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=15;
                         break;
 
                     case 0x0F: //RRC a
-                        ((cpu.reg_A & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_A = (cpu.reg_A >> 1) | (cpu.Flags & 0x80);
+                        ((cpu.regA & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regA = (cpu.regA >> 1) | (cpu.Flags & 0x80);
+                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
 
@@ -1494,8 +1526,10 @@ int decode()
 
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_B & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_B = (cpu.reg_B << 1) | preFlagC;
+                        ((cpu.regB & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regB = (cpu.regB << 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
@@ -1504,8 +1538,10 @@ int decode()
 
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_C & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_C = (cpu.reg_C << 1) | preFlagC;
+                        ((cpu.regC & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regC = (cpu.regC << 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
@@ -1514,8 +1550,10 @@ int decode()
                     
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_D & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_D = (cpu.reg_D << 1) | preFlagC;
+                        ((cpu.regD & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regD = (cpu.regD << 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
@@ -1524,8 +1562,10 @@ int decode()
                                         
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_E & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_E = (cpu.reg_E << 1) | preFlagC;
+                        ((cpu.regE & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regE = (cpu.regE << 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
                         
                         break; 
@@ -1534,8 +1574,10 @@ int decode()
                                         
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_H & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_H = (cpu.reg_H << 1) | preFlagC;
+                        ((cpu.regH & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regH = (cpu.regH << 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
                         
                         break;
@@ -1544,8 +1586,10 @@ int decode()
                                         
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_L & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_L = (cpu.reg_L << 1) | preFlagC;
+                        ((cpu.regL & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regL = (cpu.regL << 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
                         
                         break;
@@ -1556,6 +1600,8 @@ int decode()
                         uint8_t preFlagC = cpu.Flags & 0x01;
                         ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
                         z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ( (z80_mem_read(((cpu.regH << 8) | cpu.regL)))| preFlagC));
+                        cpu.Flags = ZSPXYtable[int(z80_mem_read(((cpu.regH << 8) | cpu.regL)))]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=15;
                         }
                         
                         break;
@@ -1564,8 +1610,10 @@ int decode()
                                         
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_A & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_A = (cpu.reg_A << 1) | preFlagC;
+                        ((cpu.regA & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regA = (cpu.regA << 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
                         
                         break;
@@ -1582,8 +1630,10 @@ int decode()
 
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_B & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_B = (cpu.reg_B >> 1) | preFlagC;
+                        ((cpu.regB & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regB = (cpu.regB >> 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
@@ -1592,8 +1642,10 @@ int decode()
                     
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_C & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_C = (cpu.reg_C >> 1) | preFlagC;
+                        ((cpu.regC & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regC = (cpu.regC >> 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
@@ -1602,8 +1654,10 @@ int decode()
                                         
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_D & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_D = (cpu.reg_D >> 1) | preFlagC;
+                        ((cpu.regD & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regD = (cpu.regD >> 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
@@ -1612,8 +1666,10 @@ int decode()
                                         
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_E & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_E = (cpu.reg_E >> 1) | preFlagC;
+                        ((cpu.regE & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regE = (cpu.regE >> 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
@@ -1622,8 +1678,10 @@ int decode()
                                         
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_H & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_H = (cpu.reg_H >> 1) | preFlagC;
+                        ((cpu.regH & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regH = (cpu.regH >> 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
@@ -1632,8 +1690,10 @@ int decode()
                                         
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_L & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_L = (cpu.reg_L >> 1) | preFlagC;
+                        ((cpu.regL & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regL = (cpu.regL >> 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
@@ -1643,7 +1703,9 @@ int decode()
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
                         ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ( (z80_mem_read(((cpu.regH << 8) | cpu.regL)))| preFlagC));
+                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 1)| preFlagC));
+                        cpu.Flags = ZSPXYtable[int(z80_mem_read(((cpu.regH << 8) | cpu.regL)))]; //Set Z, S, X, Y 
+                        cpu.cycleCnt+=15;
                         }
                         
                         break;
@@ -1652,118 +1714,276 @@ int decode()
                                         
                         {
                         uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_A & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_A = (cpu.reg_A >> 1) | preFlagC;
+                        ((cpu.regA & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regA = (cpu.regA >> 1) | preFlagC;
+                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         }
 
                         break;
 
-                    case 0x20:
-                        break;
 
-                    case 0x21:
-                        break;
 
-                    case 0x22:
-                        break;
 
-                    case 0x23:
-                        break;
 
-                    case 0x24:
-                        break;
 
-                    case 0x25:
-                        break;
 
-                    case 0x26:
-                        break;
-
-                    case 0x27:
-                        {
-                        bool msb = (cpu.regA & 0x80) != 0;
-                        cpu.reg_A <<= 1;
-                        (msb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        (cpu.regA == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);  // zero flag
-                        (cpu.regA & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80);  // sign flag
+                    case 0x20: //sla b
+                        ((cpu.regB & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regB <<= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
                         cpu.cycleCnt+=8;
                         break;
-                    }
 
-                    case 0x28:
-                        break;
-
-                    case 0x29:
-                        break;
-
-                    case 0x2A:
+                    case 0x21: //sla c
+                        ((cpu.regC & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regC <<= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
-                    case 0x2B:
+                    case 0x22: //sla d
+                        ((cpu.regD & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regD <<= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
-                    case 0x2C:
+                    case 0x23: //sla e
+                        ((cpu.regE & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regE <<= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
-                    case 0x2D:
+                    case 0x24: //sla h
+                        ((cpu.regH & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regH <<= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
-                    case 0x2E:
+                    case 0x25: //sla l
+                        ((cpu.regL & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regL <<= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
 
-                    case 0x2F:
-                        {
-                        bool lsb = (cpu.regA & 0x01) != 0; 
-                        // since we shift in this direction it is necessary to 
-                        //make sure that when shifting, we dont lose any data.
-                        //lsb flag lets us know if there is a value in the least bit of the word
-                        cpu.regA >>= 1; 
-                        //actual right shift
-                        (lsb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);  
-                        // carry flag
-                        //if the flag is there, set it. otherwise, set the flag to false
-                        (cpu.regA == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);  
-                        // zero flag
-                        // the zero flag is the 6th bit is either 1 or 0
-                        (cpu.regA & 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80);  
-                        // sign flag
-                        //sets the sign flag to 1 or 0 depending on if the sign bit is 1 or 0 
-                        cpu.cycleCnt += 8;
-                        break;
-                        }
+                    case 0x26: //sla (hl)
+                       (((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01));
+                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) << 1)));
+                        cpu.Flags = ZSPXYtable[int((z80_mem_read(((cpu.regH << 8) | cpu.regL))))]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=15;
+                        break; 
 
-                    case 0x30:
+                    case 0x27: //sla a
+                    cout << int(cpu.regA) << ":" << int(cpu.regA << 1) << endl;
+                        ((cpu.regA & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regA = (cpu.regA << 1);
+                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x31:
+
+
+
+
+
+
+                    case 0x28: // sra b
+                        ((cpu.regB & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regB >>= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x32:
+
+                    case 0x29: // sra c
+                        ((cpu.regC & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regC >>= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x33:
+
+                    case 0x2A: // sra d
+                        ((cpu.regD & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regD >>= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x34:
+
+                    case 0x2B: // sra e
+                        ((cpu.regE & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regE >>= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x35:
+
+                    case 0x2C: // sra h
+                        ((cpu.regH & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regH >>= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x36:
+
+                    case 0x2D: // sra l
+                        ((cpu.regL & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regL >>= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x37:
+
+                    case 0x2E: // sra (hl)
+                        (((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01));
+                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 1)));
+                        cpu.Flags = ZSPXYtable[int((z80_mem_read(((cpu.regH << 8) | cpu.regL))))]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=15;
                         break;
-                    case 0x38:
+ 
+                    case 0x2F: // sra a
+                        ((cpu.regA & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regA >>= 1;
+                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x39:
+
+
+
+
+
+
+
+                    case 0x30: // sll b 
+                        ((cpu.regB & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regB <<= 1;
+                        cpu.regB |= 0x01;
+                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x3A:
+                        
+                    case 0x31: // sll c
+                        ((cpu.regC & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regC <<= 1;
+                        cpu.regC |= 0x01;
+                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x3B:
+                        
+                    case 0x32: // sll d 
+                        ((cpu.regD & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regD <<= 1;
+                        cpu.regD |= 0x01;
+                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x3C:
+                        
+                    case 0x33: // sll e 
+                        ((cpu.regE & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regE <<= 1;
+                        cpu.regE |= 0x01;
+                        cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x3D:
+                        
+                    case 0x34: // sll h 
+                        ((cpu.regH & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regH <<= 1;
+                        cpu.regH |= 0x01;
+                        cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x3E:
+                        
+                    case 0x35: // sll l 
+                        ((cpu.regL & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regL <<= 1;
+                        cpu.regL |= 0x01;
+                        cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
                         break;
-                    case 0x3F:
+                         
+                    case 0x36: // sll (hl) 
+                       (((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01));
+                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) << 1) | 0x01));
+                        cpu.Flags = ZSPXYtable[int((z80_mem_read(((cpu.regH << 8) | cpu.regL))))]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=15;
                         break;
+                        
+                    case 0x37: // sll a
+                        ((cpu.regA & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regA <<= 1;
+                        cpu.regB |= 0x01;
+                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
+                        break;
+
+
+
+                        
+                    case 0x38: // srl b
+                        ((cpu.regB & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regB >>= 1;
+                        cpu.regB |= 0x80;
+                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
+                        break;
+                        
+                    case 0x39: // srl c
+                        ((cpu.regC & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regC >>= 1;
+                        cpu.regC |= 0x80;
+                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
+                        break;
+                        
+                    case 0x3A: // srl d
+                        ((cpu.regD & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regD >>= 1;
+                        cpu.regD |= 0x80;
+                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
+                        break;
+                        
+                    case 0x3B: // srl e
+                        ((cpu.regE & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regE >>= 1;
+                        cpu.regE |= 0x80;
+                        cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
+                        break;
+                        
+                    case 0x3C: // srl h
+                        ((cpu.regH & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regH >>= 1;
+                        cpu.regH |= 0x80;
+                        cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
+                        break;
+                        
+                    case 0x3D: // srl l
+                        ((cpu.regL & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regL >>= 1;
+                        cpu.regL |= 0x80;
+                        cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
+                        break;
+                        
+                    case 0x3E: // srl (hl)
+                        (((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01));
+                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 1) | 0x80));
+                        cpu.Flags = ZSPXYtable[int((z80_mem_read(((cpu.regH << 8) | cpu.regL))))]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=15;
+                        break;
+                        
+                    case 0x3F: // srl a
+                        ((cpu.regA & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                        cpu.regA >>= 1;
+                        cpu.regA |= 0x80;
+                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                        cpu.cycleCnt+=8;
+                        break;
+                        
+
+
+
                     case 0x40:
                         break;
                     case 0x41:
