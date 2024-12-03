@@ -17,15 +17,15 @@ struct Z80{
         how the flags work for max's reference 
         
         bit position(in binary)     ->   7  |6  |5  |4  |3  |2  |1  |0
-        flag                        ->   S  |Z  |x  |H  |y  |P/V|N  |C
+        flag                        ->   S  |Z  |y  |H  |x  |P/V|N  |C
         address                     ->  x80 |x40|x20|x10|x08|x04|x02|x01
 
         C == carry flag -> 0x00 - 0x01
         N == add/subtract (1) -> 0x02
         P/V == parity/overflow flag -> 0x04
-        y == undoccumented bit - 3rd bit of the result
+        x == undoccumented bit - 3rd bit of the result
         H == half carry flag -> 0x10
-        x == undoccumented bit - 5th bit of the result
+        y == undoccumented bit - 5th bit of the result
         Z == zero flag -> 0x40
         S == sign flag  -> 0x80
 

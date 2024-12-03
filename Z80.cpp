@@ -1393,293 +1393,10 @@ int decode()
             switch(inst2)
             {
 
-        //SHIFT INSTRUCNTIONS-------------------------------------------------------------------------
+        //SHIFT INSTRUCNTIONS--------------------------------------------------------------------------
 
-        //memwrite(emma code for z80 read, bit to manipulate)
-
-
-                    case 0x00: // RLC b 
-                        ((cpu.reg_B & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_B = (cpu.reg_B << 1) | (cpu.Flags & 0x01);
-                        break;
-
-                    case 0x01: // RLC c
-                        ((cpu.reg_C & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_C = (cpu.reg_C << 1) | (cpu.Flags & 0x01);
-                        break;
-
-                    case 0x02: // RLC d
-                        ((cpu.reg_D & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_D = (cpu.reg_D << 1) | (cpu.Flags & 0x01);
-                        break;
-
-                    case 0x03: // RLC e
-                        ((cpu.reg_E & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_E = (cpu.reg_E << 1) | (cpu.Flags & 0x01);
-                        break;
-
-                    case 0x04: // RLC h
-                        ((cpu.reg_H & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_H = (cpu.reg_H << 1) | (cpu.Flags & 0x01);
-                        break;
-
-                    case 0x05: // RLC l
-                        ((cpu.reg_L & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_L = (cpu.reg_L << 1) | (cpu.Flags & 0x01);
-                        break;
-
-                    case 0x06: // RLC (hl)
-                        ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), (z80_mem_read(((cpu.regH << 8) | cpu.regL)) << 1) | (cpu.Flags & 0x01));
-                        break;
-
-                    case 0x07: // RLC a
-                        ((cpu.reg_A & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_A = (cpu.reg_A << 1) | (cpu.Flags & 0x01);
-                        break;
-
-
-
-
-
-
-
-                    case 0x08: //RRC b
-                        ((cpu.reg_B & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_B = (cpu.reg_B >> 1) | (cpu.Flags & 0x80);
-                        break;
-
-                    case 0x09: //RRC c
-                        ((cpu.reg_C & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_C = (cpu.reg_C >> 1) | (cpu.Flags & 0x80);
-                        break;
-
-                    case 0x0A: //RRC d
-                        ((cpu.reg_D & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_D = (cpu.reg_D >> 1) | (cpu.Flags & 0x80);
-                        break;
-
-                    case 0x0B: //RRC e
-                        ((cpu.reg_E & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_E = (cpu.reg_E >> 1) | (cpu.Flags & 0x80);
-                        break;
-
-                    case 0x0C: //RRC h
-                        ((cpu.reg_H & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_H = (cpu.reg_H >> 1) | (cpu.Flags & 0x80);
-                        break;
-
-                    case 0x0D: //RRC l
-                        ((cpu.reg_L & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_L = (cpu.reg_L >> 1) | (cpu.Flags & 0x80);
-                        break;
-
-                    case 0x0E: //RRC (hl)
-                        ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 1) | (cpu.Flags & 0x01)));
-                        break;
-
-                    case 0x0F: //RRC a
-                        ((cpu.reg_A & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_A = (cpu.reg_A >> 1) | (cpu.Flags & 0x80);
-                        break;
-
-
-
-
-
-
-                    case 0x10: // rl b
-
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_B & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_B = (cpu.reg_B << 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x11: // rl c
-
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_C & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_C = (cpu.reg_C << 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x12: // rl d
-                    
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_D & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_D = (cpu.reg_D << 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x13: // rl e
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_E & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_E = (cpu.reg_E << 1) | preFlagC;
-                        }
-                        
-                        break; 
-
-                    case 0x14: // rl h
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_H & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_H = (cpu.reg_H << 1) | preFlagC;
-                        }
-                        
-                        break;
-
-                    case 0x15: // rl l
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_L & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_L = (cpu.reg_L << 1) | preFlagC;
-                        }
-                        
-                        break;
-
-                    case 0x16: // rl (hl)
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ( (z80_mem_read(((cpu.regH << 8) | cpu.regL)))| preFlagC));
-                        }
-                        
-                        break;
-
-                    case 0x17: // rl a
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_A & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_A = (cpu.reg_A << 1) | preFlagC;
-                        }
-                        
-                        break;
-
-
-
-
-
-
-
-
-
-                    case 0x18: // rr b 
-
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_B & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_B = (cpu.reg_B >> 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x19: // rr c
-                    
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_C & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_C = (cpu.reg_C >> 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x1A: // rr d
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_D & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_D = (cpu.reg_D >> 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x1B: // rr e
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_E & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_E = (cpu.reg_E >> 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x1C: // rr h
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_H & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_H = (cpu.reg_H >> 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x1D: // rr l
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_L & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_L = (cpu.reg_L >> 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x1E: // rr (hl)
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ( (z80_mem_read(((cpu.regH << 8) | cpu.regL)))| preFlagC));
-                        }
-                        
-                        break;
-
-                    case 0x1F: // rr a
-                                        
-                        {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.reg_A & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.reg_A = (cpu.reg_A >> 1) | preFlagC;
-                        }
-
-                        break;
-
-                    case 0x20:
-                        break;
-
-                    case 0x21:
-                        break;
-
-                    case 0x22:
-                        break;
-
-                    case 0x23:
-                        break;
-
-                    case 0x24:
-                        break;
-
-                    case 0x25:
-                        break;
-
-                    case 0x26:
-                        break;
-
-                    case 0x27:
-                        {
+                    case 0x27: //shift left one byte A
+                    {
                         bool msb = (cpu.regA & 0x80) != 0;
                         cpu.reg_A <<= 1;
                         (msb) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
@@ -1689,29 +1406,8 @@ int decode()
                         break;
                     }
 
-                    case 0x28:
-                        break;
-
-                    case 0x29:
-                        break;
-
-                    case 0x2A:
-                        break;
-
-                    case 0x2B:
-                        break;
-
-                    case 0x2C:
-                        break;
-
-                    case 0x2D:
-                        break;
-
-                    case 0x2E:
-                        break;
-
-                    case 0x2F:
-                        {
+                    case 0x2f: //shift right one byte
+                    {
                         bool lsb = (cpu.regA & 0x01) != 0; 
                         // since we shift in this direction it is necessary to 
                         //make sure that when shifting, we dont lose any data.
@@ -1729,426 +1425,7 @@ int decode()
                         //sets the sign flag to 1 or 0 depending on if the sign bit is 1 or 0 
                         cpu.cycleCnt += 8;
                         break;
-                        }
-
-                    case 0x30:
-                        break;
-                    case 0x31:
-                        break;
-                    case 0x32:
-                        break;
-                    case 0x33:
-                        break;
-                    case 0x34:
-                        break;
-                    case 0x35:
-                        break;
-                    case 0x36:
-                        break;
-                    case 0x37:
-                        break;
-                    case 0x38:
-                        break;
-                    case 0x39:
-                        break;
-                    case 0x3A:
-                        break;
-                    case 0x3B:
-                        break;
-                    case 0x3C:
-                        break;
-                    case 0x3D:
-                        break;
-                    case 0x3E:
-                        break;
-                    case 0x3F:
-                        break;
-                    case 0x40:
-                        break;
-                    case 0x41:
-                        break;
-                    case 0x42:
-                        break;
-                    case 0x43:
-                        break;
-                    case 0x44:
-                        break;
-                    case 0x45:
-                        break;
-                    case 0x46:
-                        break;
-                    case 0x47:
-                        break;
-                    case 0x48:
-                        break;
-                    case 0x49:
-                        break;
-                    case 0x4A:
-                        break;
-                    case 0x4B:
-                        break;
-                    case 0x4C:
-                        break;
-                    case 0x4D:
-                        break;
-                    case 0x4E:
-                        break;
-                    case 0x4F:
-                        break;
-                    case 0x50:
-                        break;
-                    case 0x51:
-                        break;
-                    case 0x52:
-                        break;
-                    case 0x53:
-                        break;
-                    case 0x54:
-                        break;
-                    case 0x55:
-                        break;
-                    case 0x56:
-                        break;
-                    case 0x57:
-                        break;
-                    case 0x58:
-                        break;
-                    case 0x59:
-                        break;
-                    case 0x5A:
-                        break;
-                    case 0x5B:
-                        break;
-                    case 0x5C:
-                        break;
-                    case 0x5D:
-                        break;
-                    case 0x5E:
-                        break;
-                    case 0x5F:
-                        break;
-                    case 0x60:
-                        break;
-                    case 0x61:
-                        break;
-                    case 0x62:
-                        break;
-                    case 0x63:
-                        break;
-                    case 0x64:
-                        break;
-                    case 0x65:
-                        break;
-                    case 0x66:
-                        break;
-                    case 0x67:
-                        break;
-                    case 0x68:
-                        break;
-                    case 0x69:
-                        break;
-                    case 0x6A:
-                        break;
-                    case 0x6B:
-                        break;
-                    case 0x6C:
-                        break;
-                    case 0x6D:
-                        break;
-                    case 0x6E:
-                        break;
-                    case 0x6F:
-                        break;
-                    case 0x70:
-                        break;
-                    case 0x71:
-                        break;
-                    case 0x72:
-                        break;
-                    case 0x73:
-                        break;
-                    case 0x74:
-                        break;
-                    case 0x75:
-                        break;
-                    case 0x76:
-                        break;
-                    case 0x77:
-                        break;
-                    case 0x78:
-                        break;
-                    case 0x79:
-                        break;
-                    case 0x7A:
-                        break;
-                    case 0x7B:
-                        break;
-                    case 0x7C:
-                        break;
-                    case 0x7D:
-                        break;
-                    case 0x7E:
-                        break;
-                    case 0x7F:
-                        break;
-                    case 0x80:
-                        break;
-                    case 0x81:
-                        break;
-                    case 0x82:
-                        break;
-                    case 0x83:
-                        break;
-                    case 0x84:
-                        break;
-                    case 0x85:
-                        break;
-                    case 0x86:
-                        break;
-                    case 0x87:
-                        break;
-                    case 0x88:
-                        break;
-                    case 0x89:
-                        break;
-                    case 0x8A:
-                        break;
-                    case 0x8B:
-                        break;
-                    case 0x8C:
-                        break;
-                    case 0x8D:
-                        break;
-                    case 0x8E:
-                        break;
-                    case 0x8F:
-                        break;
-                    case 0x90:
-                        break;
-                    case 0x91:
-                        break;
-                    case 0x92:
-                        break;
-                    case 0x93:
-                        break;
-                    case 0x94:
-                        break;
-                    case 0x95:
-                        break;
-                    case 0x96:
-                        break;
-                    case 0x97:
-                        break;
-                    case 0x98:
-                        break;
-                    case 0x99:
-                        break;
-                    case 0x9A:
-                        break;
-                    case 0x9B:
-                        break;
-                    case 0x9C:
-                        break;
-                    case 0x9D:
-                        break;
-                    case 0x9E:
-                        break;
-                    case 0x9F:
-                        break;
-                    case 0xA0:
-                        break;
-                    case 0xA1:
-                        break;
-                    case 0xA2:
-                        break;
-                    case 0xA3:
-                        break;
-                    case 0xA4:
-                        break;
-                    case 0xA5:
-                        break;
-                    case 0xA6:
-                        break;
-                    case 0xA7:
-                        break;
-                    case 0xA8:
-                        break;
-                    case 0xA9:
-                        break;
-                    case 0xAA:
-                        break;
-                    case 0xAB:
-                        break;
-                    case 0xAC:
-                        break;
-                    case 0xAD:
-                        break;
-                    case 0xAE:
-                        break;
-                    case 0xAF:
-                        break;
-                    case 0xB0:
-                        break;
-                    case 0xB1:
-                        break;
-                    case 0xB2:
-                        break;
-                    case 0xB3:
-                        break;
-                    case 0xB4:
-                        break;
-                    case 0xB5:
-                        break;
-                    case 0xB6:
-                        break;
-                    case 0xB7:
-                        break;
-                    case 0xB8:
-                        break;
-                    case 0xB9:
-                        break;
-                    case 0xBA:
-                        break;
-                    case 0xBB:
-                        break;
-                    case 0xBC:
-                        break;
-                    case 0xBD:
-                        break;
-                    case 0xBE:
-                        break;
-                    case 0xBF:
-                        break;
-                    case 0xC0:
-                        break;
-                    case 0xC1:
-                        break;
-                    case 0xC2:
-                        break;
-                    case 0xC3:
-                        break;
-                    case 0xC4:
-                        break;
-                    case 0xC5:
-                        break;
-                    case 0xC6:
-                        break;
-                    case 0xC7:
-                        break;
-                    case 0xC8:
-                        break;
-                    case 0xC9:
-                        break;
-                    case 0xCA:
-                        break;
-                    case 0xCB:
-                        break;
-                    case 0xCC:
-                        break;
-                    case 0xCD:
-                        break;
-                    case 0xCE:
-                        break;
-                    case 0xCF:
-                        break;
-                    case 0xD0:
-                        break;
-                    case 0xD1:
-                        break;
-                    case 0xD2:
-                        break;
-                    case 0xD3:
-                        break;
-                    case 0xD4:
-                        break;
-                    case 0xD5:
-                        break;
-                    case 0xD6:
-                        break;
-                    case 0xD7:
-                        break;
-                    case 0xD8:
-                        break;
-                    case 0xD9:
-                        break;
-                    case 0xDA:
-                        break;
-                    case 0xDB:
-                        break;
-                    case 0xDC:
-                        break;
-                    case 0xDD:
-                        break;
-                    case 0xDE:
-                        break;
-                    case 0xDF:
-                        break;
-                    case 0xE0:
-                        break;
-                    case 0xE1:
-                        break;
-                    case 0xE2:
-                        break;
-                    case 0xE3:
-                        break;
-                    case 0xE4:
-                        break;
-                    case 0xE5:
-                        break;
-                    case 0xE6:
-                        break;
-                    case 0xE7:
-                        break;
-                    case 0xE8:
-                        break;
-                    case 0xE9:
-                        break;
-                    case 0xEA:
-                        break;
-                    case 0xEB:
-                        break;
-                    case 0xEC:
-                        break;
-                    case 0xED:
-                        break;
-                    case 0xEE:
-                        break;
-                    case 0xEF:
-                        break;
-                    case 0xF0:
-                        break;
-                    case 0xF1:
-                        break;
-                    case 0xF2:
-                        break;
-                    case 0xF3:
-                        break;
-                    case 0xF4:
-                        break;
-                    case 0xF5:
-                        break;
-                    case 0xF6:
-                        break;
-                    case 0xF7:
-                        break;
-                    case 0xF8:
-                        break;
-                    case 0xF9:
-                        break;
-                    case 0xFA:
-                        break;
-                    case 0xFB:
-                        break;
-                    case 0xFC:
-                        break;
-                    case 0xFD:
-                        break;
-                    case 0xFE:
-                        break;
-                    case 0xFF:
-                        break;
-
-
+                    }
                 }
                 break;
             }
@@ -2653,6 +1930,7 @@ int decode()
             {
 
                 //LOAD INSTRUCTIONS------------------------------------------------------------------------
+            {
                 case 0x43://LOAD INSTRUCTION - load memory address (nn) with C and (nn+1) with B 
                 {    
                     uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
@@ -2755,15 +2033,121 @@ int decode()
 
                     cpu.cycleCnt += 9;
                     break;
+            }
                 
+                //BLOCK TRANSFER INSTRUCTIONS------------------------------------------------------------------
+            {
+                case 0xa0://BLOCK TRANSF INSTRUCTION - (DE) ← (HL), DE ← DE + 1, HL ← HL + 1, BC ← BC – 1
+                {   
+                    uint8_t n = cpu.regA + z80_mem_read((cpu.regH << 8) | cpu.regL);
 
+                    z80_mem_write((cpu.regD<<8)|cpu.regE, z80_mem_read((cpu.regH << 8) | cpu.regL)); //(DE) <- (HL)
+                    cpu.regD = (((cpu.regD<<8)|cpu.regE) + 1) >> 8;//De++
+                    cpu.regE = (((cpu.regD<<8)|cpu.regE) + 1) & 0xff;//dE++
+                    cpu.regH = (((cpu.regH<<8)|cpu.regL) + 1) >> 8;//Hl++
+                    cpu.regL = (((cpu.regH<<8)|cpu.regL) + 1) & 0xff;//hL++
+                    cpu.regB = (((cpu.regB<<8)|cpu.regC) - 1) >> 8;//Bc--
+                    cpu.regC = (((cpu.regB<<8)|cpu.regC) - 1) & 0xff;//bC--
+                    
+                    //S, Z, C are not affected.
+                    cpu.Flags &= ~0x10; //H is reset.
+                    (bool(cpu.regB | cpu.regC)) ? (cpu.Flags |= 0x04):(cpu.Flags &= ~0x04);//P/V is reset if BC == 0, set otherwise 
+                    cpu.Flags &= ~0x02; //N is reset.
+                    (n & 0x01)? (cpu.Flags |= 0x20):(cpu.Flags &= ~0x20);//YF based on a+(hl old) bit 1
+                    (n & 0x08)? (cpu.Flags |= 0x08):(cpu.Flags &= ~0x08);//XF based on a+(hl old) bit 3
+
+                    cpu.cycleCnt += 16;
+                    break;
+                }
+                
+                case 0xb0://BLOCK TRANSF INSTRUCTION - while (BC ≠ 0) {(DE) ← (HL), DE ← DE + 1, HL ← HL + 1, BC ← BC – 1}
+                {    
+                    while(bool(cpu.regB|cpu.regC)) //While BC != 0
+                    {
+                        uint8_t n = cpu.regA + z80_mem_read((cpu.regH << 8) | cpu.regL);
+
+                        z80_mem_write((cpu.regD<<8)|cpu.regE, z80_mem_read((cpu.regH << 8) | cpu.regL)); //(DE) <- (HL)
+                        cpu.regD = (((cpu.regD<<8)|cpu.regE) + 1) >> 8;//De++
+                        cpu.regE = (((cpu.regD<<8)|cpu.regE) + 1) & 0xff;//dE++
+                        cpu.regH = (((cpu.regH<<8)|cpu.regL) + 1) >> 8;//Hl++
+                        cpu.regL = (((cpu.regH<<8)|cpu.regL) + 1) & 0xff;//hL++
+                        cpu.regB = (((cpu.regB<<8)|cpu.regC) - 1) >> 8;//Bc--
+                        cpu.regC = (((cpu.regB<<8)|cpu.regC) - 1) & 0xff;//bC--
+                        
+                        //S, Z, C are not affected.
+                        cpu.Flags &= ~0x10; //H is reset.
+                        (bool(cpu.regB | cpu.regC)) ? (cpu.Flags |= 0x04):(cpu.Flags &= ~0x04);//P/V is reset if BC == 0, set otherwise 
+                        cpu.Flags &= ~0x02; //N is reset.
+                        (n & 0x01)? (cpu.Flags |= 0x20):(cpu.Flags &= ~0x20);//YF based on a+(hl old) bit 1
+                        (n & 0x08)? (cpu.Flags |= 0x08):(cpu.Flags &= ~0x08);//XF based on a+(hl old) bit 3
+
+                        cpu.reg_PC -= 2;
+                        cpu.cycleCnt += 21;
+                    }
+
+                    cpu.cycleCnt += 16; //For BC = 0 check
+                    break;
+                }
+                    
+                case 0xa8://BLOCK TRANSF INSTRUCTION - (DE) ← (HL), DE ← DE – 1, HL ← HL– 1, BC ← BC– 1
+                {
+                    uint8_t n = cpu.regA + z80_mem_read((cpu.regH << 8) | cpu.regL);
+
+                    z80_mem_write((cpu.regD<<8)|cpu.regE, z80_mem_read((cpu.regH << 8) | cpu.regL)); //(DE) <- (HL)
+                    cpu.regD = (((cpu.regD<<8)|cpu.regE) - 1) >> 8;//De--
+                    cpu.regE = (((cpu.regD<<8)|cpu.regE) - 1) & 0xff;//dE--
+                    cpu.regH = (((cpu.regH<<8)|cpu.regL) - 1) >> 8;//Hl--
+                    cpu.regL = (((cpu.regH<<8)|cpu.regL) - 1) & 0xff;//hL--
+                    cpu.regB = (((cpu.regB<<8)|cpu.regC) - 1) >> 8;//Bc--
+                    cpu.regC = (((cpu.regB<<8)|cpu.regC) - 1) & 0xff;//bC--
+                    
+                    //S, Z, C are not affected.
+                    cpu.Flags &= ~0x10; //H is reset.
+                    (bool(cpu.regB | cpu.regC)) ? (cpu.Flags |= 0x04):(cpu.Flags &= ~0x04);//P/V is reset if BC == 0, set otherwise 
+                    cpu.Flags &= ~0x02; //N is reset.
+                    (n & 0x01)? (cpu.Flags |= 0x20):(cpu.Flags &= ~0x20);//YF based on a+(hl old) bit 1
+                    (n & 0x08)? (cpu.Flags |= 0x08):(cpu.Flags &= ~0x08);//XF based on a+(hl old) bit 3
+
+                    cpu.cycleCnt += 16;
+                    break;
+                }
+            
+                case 0xb8://BLOCK TRANSF INSTRUCTION - while (BC ≠ 0) {(DE) ← (HL), DE ← DE - 1, HL ← HL - 1, BC ← BC – 1}
+                {    
+                    while(bool(cpu.regB|cpu.regC)) //While BC != 0
+                    {
+                        uint8_t n = cpu.regA + z80_mem_read((cpu.regH << 8) | cpu.regL);
+
+                        z80_mem_write((cpu.regD<<8)|cpu.regE, z80_mem_read((cpu.regH << 8) | cpu.regL)); //(DE) <- (HL)
+                        cpu.regD = (((cpu.regD<<8)|cpu.regE) - 1) >> 8;//De--
+                        cpu.regE = (((cpu.regD<<8)|cpu.regE) - 1) & 0xff;//dE--
+                        cpu.regH = (((cpu.regH<<8)|cpu.regL) - 1) >> 8;//Hl--
+                        cpu.regL = (((cpu.regH<<8)|cpu.regL) - 1) & 0xff;//hL--
+                        cpu.regB = (((cpu.regB<<8)|cpu.regC) - 1) >> 8;//Bc--
+                        cpu.regC = (((cpu.regB<<8)|cpu.regC) - 1) & 0xff;//bC--
+                        
+                        //S, Z, C are not affected.
+                        cpu.Flags &= ~0x10; //H is reset.
+                        (bool(cpu.regB | cpu.regC)) ? (cpu.Flags |= 0x04):(cpu.Flags &= ~0x04);//P/V is reset if BC == 0, set otherwise 
+                        cpu.Flags &= ~0x02; //N is reset.
+                        (n & 0x01)? (cpu.Flags |= 0x20):(cpu.Flags &= ~0x20);//YF based on a+(hl old) bit 1
+                        (n & 0x08)? (cpu.Flags |= 0x08):(cpu.Flags &= ~0x08);//XF based on a+(hl old) bit 3
+
+                        cpu.reg_PC -= 2;
+                        cpu.cycleCnt += 21;
+                    }
+
+                    cpu.cycleCnt += 16; //For BC = 0 check
+                    break;
+                }
+            }
                 //UNIDENTIFIED INSTRUCTION=================================================================
                 default:
                     cout << "Unknown ED Instruction: " << hex << int(inst2) << endl;
                     printReg(cpu);
                     return 1;
                     break;
-            }
+            }//Close switch
 
             break; //Break for end of ED instructions in big alpha switch statement
     }
@@ -3064,8 +2448,22 @@ int main(){
     z80_mem_write(0x04, 0x55);//n
     z80_mem_write(0x05, 0x44);//n */
 
+   cpu.regH = 0x11;
+   cpu.regL = 0x14;
+   cpu.regD = 0x22;
+   cpu.regE = 0x25;
+   cpu.regB = 0x00;
+   cpu.regC = 0x03;
+   memory[0x1114] = 0xa5;
+   memory[0x1113] = 0x36;
+   memory[0x1112] = 0x88;
+   memory[0x2225] = 0xc5;
+   memory[0x2224] = 0x59;
+   memory[0x2223] = 0x66;
+   cpu.Flags = 0x00;
+
     z80_mem_write(0x00, 0xed);//ed instruction
-    z80_mem_write(0x01, 0x5f);//load a with i
+    z80_mem_write(0x01, 0xb8);//ldir
     
 
     //z80_mem_write(0x05, 0x84); //a+=h
@@ -3086,11 +2484,13 @@ int main(){
     z80_execute();
 
 
-    for (int i =0x5540; i < 0x5547; i++)
+    
+    for (int i =0; i < 3; i++)
     {
-        {printf("ram[%04x] = %02x\n", i, memory[i]);}
+        printf("\tram[%04x] = %02x\t ", 0x1114-i, memory[0x1114-i]);
+        printf("ram[%04x] = %02x\n ", 0x2225-i, memory[0x2225-i]);
     }
-    printf("num: %02x", z80_mem_read((cpu.regH << 8)|cpu.regL));
+
 
     return 0;
 }
