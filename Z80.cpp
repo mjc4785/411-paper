@@ -46,6 +46,8 @@ uint8_t decFlags(uint8_t);
 uint16_t decPaired(uint8_t, uint8_t);
 uint8_t adcFlags(uint8_t, uint8_t);
 uint8_t sbcFlags(uint8_t, uint8_t);
+void retS();
+uint16_t popS();
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -2741,53 +2743,43 @@ int decode()
         
         
         // POP FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
-        /*The memory location pointed to by SP is stored into C and SP is incremented.
-         The memory location pointed to by SP is stored into B and SP is incremented again.*/
-        case 0xc1:
-            cpu.reg_C = cpu.reg_SP;
-            cpu.reg_SP++;
-
-            cpu.reg_B = cpu.reg_SP;
-            cpu.reg_SP++;
-
+    {
+        case 0xc1: //POP into BC
+        {
+            uint16_t temp = popS();
+            cpu.regB = temp >> 8;
+            cpu.regC = temp & 0xff;
             cpu.cycleCnt += 10;
             break;
+        }    
 
-        /*The memory location pointed to by SP is stored into E and SP is incremented. 
-        The memory location pointed to by SP is stored into D and SP is incremented again.*/
-        case 0xd1:
-            cpu.reg_C = cpu.reg_SP;
-            cpu.reg_SP++;
-
-            cpu.reg_B = cpu.reg_SP;
-            cpu.reg_SP++;
-
+        case 0xd1: //POP into DE
+        {
+            uint16_t temp = popS();
+            cpu.regD = temp >> 8;
+            cpu.regE = temp & 0xff;
             cpu.cycleCnt += 10;
             break;
+        }  
 
-        /*The memory location pointed to by SP is stored into L and SP is incremented. 
-        The memory location pointed to by SP is stored into H and SP is incremented again.*/
-        case 0xe1:
-            cpu.reg_C = cpu.reg_SP;
-            cpu.reg_SP++;
-
-            cpu.reg_B = cpu.reg_SP;
-            cpu.reg_SP++;
-
+        case 0xe1: //POP into HL
+        {
+            uint16_t temp = popS();
+            cpu.regH = temp >> 8;
+            cpu.regL = temp & 0xff;
             cpu.cycleCnt += 10;
             break;
+        }  
 
-        /*The memory location pointed to by SP is stored into F and SP is incremented. 
-        The memory location pointed to by SP is stored into A and SP is incremented again.*/
-        case 0xf1:
-            cpu.reg_C = cpu.reg_SP;
-            cpu.reg_SP++;
-
-            cpu.reg_B = cpu.reg_SP;
-            cpu.reg_SP++;
-
+        case 0xf1: //POP into AF
+        {
+            uint16_t temp = popS();
+            cpu.regA = temp >> 8;
+            cpu.Flags = temp & 0xff;
             cpu.cycleCnt += 10;
             break;
+        }  
+    }
 
 
 
@@ -2796,46 +2788,91 @@ int decode()
 
 
         // RETURN FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
-        /*If the zero flag is unset, the top stack entry is popped into PC.*/
-        case 0xc0:
-            if ( (cpu.Flags & 0b010000000) == 0)
+        case 0xc0: //zero flag unset: top stack entry is popped into PC.
+            if ( (cpu.Flags & 0x40) == 0)
             {
-                cpu.reg_PC = cpu.reg_SP;
-                cpu.cycleCnt+=10;
+                retS();
+                cpu.cycleCnt+=11;
+                break;
+            }
+            cpu.cycleCnt+=5;
+            break;
+        
+        case 0xc8: //zero flag set: top stack entry is popped into PC.
+            if ( (cpu.Flags & 0x40) >> 6)
+            {
+                retS();
+                cpu.cycleCnt+=11;
                 break;
             }
             cpu.cycleCnt+=5;
             break;
 
-        case 0xd0: // carry flag
-            if ( (cpu.Flags & 0b000000001) == 0)
+        case 0xd0: // carry flag unset
+            if ( (cpu.Flags & 0x01) == 0)
             {
-                cpu.reg_PC = cpu.reg_SP;
-                cpu.cycleCnt+=10;
+                retS();
+                cpu.cycleCnt+=11;
+                break;
+            }
+            cpu.cycleCnt+=5;
+            break;
+        
+        case 0xd8: // carry flag set
+            if ( (cpu.Flags & 0x01))
+            {
+                retS();
+                cpu.cycleCnt+=11;
                 break;
             }
             cpu.cycleCnt+=5;
             break;
 
-        case 0xe0: // P/V flag
-            if ( (cpu.Flags & 0b000000100) == 0)
+        case 0xe0: // P/V flag unset
+            if ( (cpu.Flags & 0x04) == 0)
             {
-                cpu.reg_PC = cpu.reg_SP;
-                cpu.cycleCnt+=10;
+                retS();
+                cpu.cycleCnt+=11;
+                break;
+            }
+            cpu.cycleCnt+=5;
+            break;
+        
+        case 0xe8: // P/V flag set
+            if ( (cpu.Flags & 0x04) >> 2)
+            {
+                retS();
+                cpu.cycleCnt+=11;
                 break;
             }
             cpu.cycleCnt+=5;
             break;
 
-        case 0xf0: // sign flag
-            if ( (cpu.Flags & 0b100000000) == 0)
+        case 0xf0: // sign flag unset
+            if ( (cpu.Flags & 0x80) == 0)
             {
-                cpu.reg_PC = cpu.reg_SP;
-                cpu.cycleCnt+=10;
+                retS();
+                cpu.cycleCnt+=11;
                 break;
             }
             cpu.cycleCnt+=5;
             break;
+        
+        case 0xf8: // sign flag set
+            if ( (cpu.Flags & 0x80) >>7)
+            {
+                retS();
+                cpu.cycleCnt+=11;
+                break;
+            }
+            cpu.cycleCnt+=5;
+            break;
+        
+        case 0xc9: // ret
+            retS();
+            cpu.cycleCnt+=10;
+            break;
+            
 
         
 
@@ -2871,6 +2908,50 @@ int decode()
             uint8_t inst2 = z80_mem_read(cpu.reg_PC++); //Reads the next instuction and incraments program counter
             switch(inst2)
             {
+                //NOPS---------------------------------------------------------------------------------------
+            {    
+                case 0x40: break;
+                case 0x50: break;
+                case 0x60: break;
+                case 0x70: break;
+
+                case 0x41: break;
+                case 0x51: break;
+                case 0x61: break;
+                case 0x71: break;
+
+                case 0x48: break;
+                case 0x58: break;
+                case 0x68: break;
+                case 0x78: break;
+
+                case 0x49: break;
+                case 0x59: break;
+                case 0x69: break;
+                case 0x79: break;
+
+                case 0xa2: break;
+                case 0xb2: break;
+                case 0xa3: break;
+                case 0xb3: break;
+                case 0xaa: break;
+                case 0xba: break;
+                case 0xab: break;
+                case 0xbb: break;
+            }    
+                
+                //PROJECT SPECIFIC INSTRUCTIONS---------------------------------------------------------------
+            {
+                case 0x00: //Print out the state of all registers to the terminal
+                    printReg(cpu);
+                    cpu.cycleCnt += 0; //NOT SPECIFIED ON WEBPAGE SO I JUST WILL NOT CHANGE IT
+                    break;
+                
+                case 0x01: //dump memory to a file called memory.bin
+                    z80_mem_dump("memory.bin");
+                    cpu.cycleCnt += 0; //NOT SPECIFIED ON WEBPAGE SO I JUST WILL NOT CHANGE IT
+                    break;
+            }
 
                 //LOAD INSTRUCTIONS------------------------------------------------------------------------
             {
@@ -3084,6 +3165,58 @@ int decode()
                     break;
                 }
             }
+
+                //SUBTRACTION W CARRY INSTRUCTIONS---------------------------------------------------------
+            {
+
+            }
+
+                //ADDITION W CARRY INSTRUCTIONS---------------------------------------------------------
+            {
+
+            }
+
+                //WEIRD INSTRUCTIONS------------------------------------------------------------------------------
+            {
+                case 0x44: //NEG - 2's complement of A
+                {    
+                    uint8_t temp = cpu.regA; 
+                    cpu.regA = subFlags(0, cpu.regA);
+
+                    (temp == 0x80)? (cpu.Flags |= 0x04):(cpu.Flags &= ~0x04); //V: set if 80 before comp, reset otherwise
+                    (temp != 0x00)? (cpu.Flags |= 0x01):(cpu.Flags &= ~0x01); //C: set if A != 00 pre comp; else reset.
+
+                    cpu.cycleCnt += 8;
+                    break;
+                }
+
+                case 0x45: //RETURN - PROJECT SPECIFIC :top stack entry popped into PC
+                    retS();
+                    cpu.cycleCnt += 14;
+                    break;
+
+                case 0x4d: //RETURN - PROJECT SPECIFIC :top stack entry popped into PC
+                    retS();
+                    cpu.cycleCnt += 14;
+                    break;
+                
+                case 0x67: //RRD - (HL)L->AL' (HL)H->(HL)L'  AL->(HL)H' 
+                {
+                    uint8_t lowHL = z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0xf; //(HL)L
+                    uint8_t highHL = z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 4; //(HL)H
+
+                    z80_mem_write(((cpu.regH << 8) | cpu.regL), ((cpu.regA & 0xf)<<4)|highHL); //(HL)' = AL|(HL)H
+                    cpu.regA = (cpu.regA << 5) | lowHL; //A' = AH|(HL)L
+
+                    cpu.Flags = ZSPXYtable[cpu.regA] | (cpu.Flags & 0x01); //S, Z, Y, X , P normal, cary unaffected
+                    cpu.Flags &= ~0x10; //H is reset.
+                    cpu.Flags &= ~0x02; //N is reset.
+
+                    cpu.cycleCnt += 18;
+                    break;
+                }
+            }
+
                 //UNIDENTIFIED INSTRUCTION=================================================================
                 default:
                     cout << "Unknown ED Instruction: " << hex << int(inst2) << endl;
@@ -3363,6 +3496,22 @@ uint8_t sbcFlags(uint8_t reg1, uint8_t reg2)
     return diff & 0xff;
 }
 
+//Pop off top of stack into pc
+void retS()
+{
+    uint16_t low = z80_mem_read(cpu.reg_SP++); 
+    uint16_t high = z80_mem_read(cpu.reg_SP++); 
+    cpu.reg_PC = (high << 8) | low;
+}
+
+//pops off top of stack into a register
+uint16_t popS()
+{
+    uint16_t low = z80_mem_read(cpu.reg_SP++); 
+    uint16_t high = z80_mem_read(cpu.reg_SP++); 
+    return (high << 8) | low;
+}
+
 //MAIN==============================================================================================================================
 int main(){
     cout << "Max Castle is feeling thankful" << endl; //File running check
@@ -3391,6 +3540,7 @@ int main(){
     z80_mem_write(0x04, 0x55);//n
     z80_mem_write(0x05, 0x44);//n */
 
+/*
    cpu.regH = 0x11;
    cpu.regL = 0x14;
    cpu.regD = 0x22;
@@ -3404,9 +3554,16 @@ int main(){
    memory[0x2224] = 0x59;
    memory[0x2223] = 0x66;
    cpu.Flags = 0x00;
+*/
 
+    cpu.regH = 0x50;
+    cpu.regL = 0x00;
+    cpu.regA = 0b10000100;
+    memory[0x5000] = 0b00100000;
+
+    //cpu.Flags |= 0x01;
     z80_mem_write(0x00, 0xed);//ed instruction
-    z80_mem_write(0x01, 0xb8);//ldir
+    z80_mem_write(0x01, 0x67);//rrd
     
 
     //z80_mem_write(0x05, 0x84); //a+=h
@@ -3415,6 +3572,7 @@ int main(){
 
 
     z80_mem_write(0x02, 0x76);//halt
+    
 
 
     
@@ -3426,7 +3584,7 @@ int main(){
 
     z80_execute();
 
-
+    cout << bitset<8>(memory[0x5000]) << endl;
     
     for (int i =0; i < 3; i++)
     {
