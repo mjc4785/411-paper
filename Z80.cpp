@@ -3206,7 +3206,23 @@ int decode()
                     uint8_t highHL = z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 4; //(HL)H
 
                     z80_mem_write(((cpu.regH << 8) | cpu.regL), ((cpu.regA & 0xf)<<4)|highHL); //(HL)' = AL|(HL)H
-                    cpu.regA = (cpu.regA << 5) | lowHL; //A' = AH|(HL)L
+                    cpu.regA = ((cpu.regA >>4)<<4) | lowHL; //A' = AH|(HL)L
+
+                    cpu.Flags = ZSPXYtable[cpu.regA] | (cpu.Flags & 0x01); //S, Z, Y, X , P normal, cary unaffected
+                    cpu.Flags &= ~0x10; //H is reset.
+                    cpu.Flags &= ~0x02; //N is reset.
+
+                    cpu.cycleCnt += 18;
+                    break;
+                }
+
+                case 0x6f: //RLD -   A' = AH|(HL)H     (HL)' = (HL)L|AL
+                {
+                    uint8_t lowHL = z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0xf; //(HL)L
+                    uint8_t highHL = z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 4; //(HL)H
+
+                    z80_mem_write(((cpu.regH << 8) | cpu.regL), (lowHL<<4)|(cpu.regA & 0xf)); //(HL)' = (HL)L|AL
+                    cpu.regA = ((cpu.regA >>4)<<4) | highHL; //A' = AH|(HL)H
 
                     cpu.Flags = ZSPXYtable[cpu.regA] | (cpu.Flags & 0x01); //S, Z, Y, X , P normal, cary unaffected
                     cpu.Flags &= ~0x10; //H is reset.
@@ -3558,12 +3574,12 @@ int main(){
 
     cpu.regH = 0x50;
     cpu.regL = 0x00;
-    cpu.regA = 0b10000100;
-    memory[0x5000] = 0b00100000;
+    cpu.regA = 0b01111010;
+    memory[0x5000] = 0b00110001;
 
     //cpu.Flags |= 0x01;
     z80_mem_write(0x00, 0xed);//ed instruction
-    z80_mem_write(0x01, 0x67);//rrd
+    z80_mem_write(0x01, 0x6f);//rrd
     
 
     //z80_mem_write(0x05, 0x84); //a+=h
