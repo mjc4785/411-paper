@@ -402,7 +402,6 @@ int decode()
             break;
         
         case 0x44: //LOAD INSTUCTION - Load Register B with Register H
-            cout << "IN THE WRONG PLACE " << endl;
             cpu.regB = cpu.regH;
             cpu.cycleCnt += 4;
             break;
@@ -4054,15 +4053,271 @@ int decode()
         //================================================================================================================================
         //DD INSTRUCTIONS=================================================================================================================
         //================================================================================================================================
-    {
-         case 0xdd:
-            incR();//DD increases R by 2, one is already done by while loop
-            uint8_t inst2 = z80_mem_read(cpu.reg_PC++); //Reads the next instuction and incraments program counter
+    
+        case 0xdd:
+        {   
+            incR();
+            uint8_t inst2 = z80_mem_read(cpu.reg_PC++);
             switch(inst2)
             {
+                //LOAD 8b REGISTER FROM REGISTER INSTRUCTIONS------------------------------------------
+            {
+                case 0x40: //LOAD INSTUCTION - Load Register B with Register B
+                    cpu.regB = cpu.regB;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x41: //LOAD INSTUCTION - Load Register B with Register C
+                    cpu.regB = cpu.regC;
+                    cpu.cycleCnt += 8;
+                    break;
 
-            }//End DD switch
-    }
+                case 0x42: //LOAD INSTUCTION - Load Register B with Register D
+                    cpu.regB = cpu.regD;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x43: //LOAD INSTUCTION - Load Register B with Register E
+                    cpu.regB = cpu.regE;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x44: //LOAD INSTUCTION - Load Register B with Register IX High Bytes
+                    cpu.regB = cpu.reg_IX >> 8; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x45: //LOAD INSTUCTION - Load Register B with Register IX Low Bytes
+                    cpu.regB = cpu.reg_IX & 0xff; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x47: //LOAD INSTUCTION - Load Register B with Register A
+                    cpu.regB = cpu.regA;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x50: //LOAD INSTUCTION - Load Register D with Register B
+                    cpu.regD = cpu.regB;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x51: //LOAD INSTUCTION - Load Register D with Register C
+                    cpu.regD = cpu.regC;
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0x52: //LOAD INSTUCTION - Load Register D with Register D
+                    cpu.regD = cpu.regD;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x53: //LOAD INSTUCTION - Load Register D with Register E
+                    cpu.regD = cpu.regE;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x54: //LOAD INSTUCTION - Load Register D with Register IX High Bytes
+                    cpu.regD = cpu.reg_IX >> 8; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x55: //LOAD INSTUCTION - Load Register D with Register IX Low Bytes
+                    cpu.regD = cpu.reg_IX & 0xff; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x57: //LOAD INSTUCTION - Load Register D with Register A
+                    cpu.regD = cpu.regA;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x48: //LOAD INSTUCTION - Load Register C with Register B
+                    cpu.regC = cpu.regB;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x49: //LOAD INSTUCTION - Load Register C with Register C
+                    cpu.regC = cpu.regC;
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0x4a: //LOAD INSTUCTION - Load Register C with Register D
+                    cpu.regC = cpu.regD;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x4b: //LOAD INSTUCTION - Load Register C with Register E
+                    cpu.regC = cpu.regE;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x4c: //LOAD INSTUCTION - Load Register C with Register IX High Bytes
+                    cpu.regC = cpu.reg_IX >> 8; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x4d: //LOAD INSTUCTION - Load Register C with Register IX Low Bytes
+                    cpu.regC = cpu.reg_IX & 0xff; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x4f: //LOAD INSTUCTION - Load Register C with Register A
+                    cpu.regC = cpu.regA;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x58: //LOAD INSTUCTION - Load Register E with Register B
+                    cpu.regE = cpu.regB;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x59: //LOAD INSTUCTION - Load Register E with Register C
+                    cpu.regE = cpu.regC;
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0x5a: //LOAD INSTUCTION - Load Register E with Register D
+                    cpu.regE = cpu.regD;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x5b: //LOAD INSTUCTION - Load Register E with Register E
+                    cpu.regE = cpu.regE;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x5c: //LOAD INSTUCTION - Load Register E with Register IX High Bytes
+                    cpu.regE = cpu.reg_IX >> 8; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x5d: //LOAD INSTUCTION - Load Register E with Register IX Low Bytes
+                    cpu.regE = cpu.reg_IX & 0xff; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x5f: //LOAD INSTUCTION - Load Register E with Register A
+                    cpu.regE = cpu.regA;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x78: //LOAD INSTUCTION - Load Register A with Register B
+                    cpu.regA = cpu.regB;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x79: //LOAD INSTUCTION - Load Register A with Register C
+                    cpu.regA = cpu.regC;
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0x7a: //LOAD INSTUCTION - Load Register A with Register D
+                    cpu.regA = cpu.regD;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x7b: //LOAD INSTUCTION - Load Register A with Register E
+                    cpu.regA = cpu.regE;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x7c: //LOAD INSTUCTION - Load Register A with Register IX High Bytes
+                    cpu.regA = cpu.reg_IX >> 8; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x7d: //LOAD INSTUCTION - Load Register A with Register IX Low Bytes
+                    cpu.regA = cpu.reg_IX & 0xff; //High Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x7f: //LOAD INSTUCTION - Load Register A with Register A
+                    cpu.regA = cpu.regA;
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x60: //LOAD INSTUCTION - Load IX High Byte with Register B
+                    cpu.reg_IX = (cpu.regB << 8)|(cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x61: //LOAD INSTUCTION - Load IX High Byte with Register C
+                    cpu.reg_IX = (cpu.regC << 8)|(cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0x62: //LOAD INSTUCTION - Load IX High Byte with Register D
+                    cpu.reg_IX = (cpu.regD << 8)|(cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x63: //LOAD INSTUCTION - Load IX High Byte with Register E
+                    cpu.reg_IX = (cpu.regE << 8)|(cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x64: //LOAD INSTUCTION - Load IX High Byte with Register IX High Bytes
+                    //Do nothing
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x65: //LOAD INSTUCTION - Load IX High Byte with Register IX Low Bytes
+                    cpu.reg_IX = ((cpu.reg_IX & 0xff) << 8)|(cpu.reg_IX & 0xff); //low Byte
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x67: //LOAD INSTUCTION - Load IX High Byte with Register A
+                    cpu.reg_IX = (cpu.regA << 8)|(cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x68: ////LOAD INSTUCTION - Load IX Low Byte with Register B
+                    cpu.reg_IX = ((cpu.reg_IX >>8) << 8)|(cpu.regB);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0x69: ////LOAD INSTUCTION - Load IX Low Byte with Register C
+                    cpu.reg_IX = ((cpu.reg_IX >>8) << 8)|(cpu.regC);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x6a: ////LOAD INSTUCTION - Load IX Low Byte with Register D
+                    cpu.reg_IX = ((cpu.reg_IX >>8) << 8)|(cpu.regD);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x6b: ////LOAD INSTUCTION - Load IX Low Byte with Register E
+                    cpu.reg_IX = (cpu.reg_IX >>8) <<8|(cpu.regE);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x6c: ////LOAD INSTUCTION - Load IX Low Byte with Register IX high
+                    cpu.reg_IX = ((cpu.reg_IX >> 8) << 8)|(cpu.reg_IX >> 8);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x6d: ////LOAD INSTUCTION - Load IX Low Byte with Register IX low
+                    //Do nothing
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x6f: ////LOAD INSTUCTION - Load IX Low Byte with Register IX high
+                    cpu.reg_IX = ((cpu.reg_IX >> 8) << 8)|(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+            }                
+                
+                
+                default:
+                    cout << "Unknown DD Instruction: " << hex << int(inst) << endl;
+                    return 1;
+                    break;
+            }
+
+            break;//DD BREAK
+        }
+            
 
 
         //UNIDENTIFIED INSTRUCTION----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -4420,7 +4675,7 @@ int main(){
     z80_mem_write(0x04, 0x55);//n
     z80_mem_write(0x05, 0x44);//n */
 
-
+    /*
    cpu.regH = 0x11;
    cpu.regL = 0x18;
    cpu.regA = 0xf3;
@@ -4433,10 +4688,15 @@ int main(){
    memory[0x2224] = 0x59;
    memory[0x2223] = 0x66;
    //cpu.Flags |= 0x01;
+   */
+
+   
+    cpu.reg_IX = 0x1234;
+    cpu.regA = 0x11;
 
     //cpu.Flags |= 0x01;
-    z80_mem_write(0x00, 0xed);//ed instruction
-    z80_mem_write(0x01, 0x4a);//cpir
+    z80_mem_write(0x00, 0xdd);//ed instruction
+    z80_mem_write(0x01, 0x6f);//
     
 
     //z80_mem_write(0x05, 0x84); //a+=h
