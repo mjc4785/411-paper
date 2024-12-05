@@ -17,7 +17,7 @@ using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\simple-sub.bin";
-const string filenameMAX = "C:\\411\\rotate.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
+const string filenameMAX = "C:\\411\\call-return.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameMAX;
 
 
@@ -1210,42 +1210,128 @@ int decode()
         //LOGICAL INSTRUCTIONS=====================================================================================
     { 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// rst 00 ops 
+
+
+        case 0xc7: // 00h
+            cpu.reg_SP = ++cpu.reg_PC;
+            cpu.reg_PC = 0;
+            break;
+
+        case 0xd7: // 10h
+            cpu.reg_SP = ++cpu.reg_PC;
+            cpu.reg_PC = 16;
+            break;
+ 
+        case 0xe7: // 20h
+            cpu.reg_SP = ++cpu.reg_PC;
+            cpu.reg_PC = 32;
+            break;
+
+        case 0xf7: // 30h
+            cpu.reg_SP = ++cpu.reg_PC;
+            cpu.reg_PC = 48;
+            break;
+
+
+
+
+
+
+        case 0xcf: // 08h
+            cpu.reg_SP = ++cpu.reg_PC;
+            cpu.reg_PC = 8;
+            break;
+
+        case 0xdf: // 18h
+            cpu.reg_SP = ++cpu.reg_PC;
+            cpu.reg_PC = 24;
+            break;
+
+        case 0xef: // 28h
+            cpu.reg_SP = ++cpu.reg_PC;
+            cpu.reg_PC = 40;
+            break;
+
+        case 0xff: // 38h
+            cpu.reg_SP = ++cpu.reg_PC;
+            cpu.reg_PC = 56;
+            break;
+
+
+
+
+
+
+
+
+
+
+
         // JUMP INST -----------------------------------------------------------------------------------------------------------------
 
         case 0x10: // jump if zero is not set after decrementing b reg 
-            cpu.reg_B--;
-            if(cpu.reg_B > 0)
-            {
-                cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt+=13;
-                break;
+        {
+            cpu.regB--; // Decrement the B register
+            // Read the offset as unsigned but interpret it as signed
+            int8_t offset = static_cast<int8_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+
+            if (cpu.regB != 0) {
+                cpu.reg_PC += offset; // Apply the signed relative jump
+                cpu.cycleCnt += 13; // Jump takes 13 cycles
+            } else {
+                cout << "No jump, B = 0" << endl;
+                cpu.cycleCnt += 8; // No jump takes 8 cycles
             }
-            cpu.cycleCnt+=8;
             break;
-
-
+        }
 
         case 0x20: // jump if zero is unset 
-            if ((cpu.Flags & 0b010000000) == 0)
+        {
+            int8_t offset = static_cast<int8_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x40) == 0)
             {
-                cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
+                cpu.reg_PC += offset;
                 cpu.cycleCnt += 12; 
                 break;
+            
             }
             cpu.cycleCnt+=7;
             break;
-
+        }
 
             
         case 0x30: // jump if carry is unset
-        if ((cpu.Flags & 0b000000001) == 0)
+        {
+            int8_t offset = static_cast<int8_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x01) == 0)
             {
-                cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
+                cpu.reg_PC += offset;
                 cpu.cycleCnt += 12; 
                 break;
+            
             }
-            cpu.cycleCnt+=7; 
+            cpu.cycleCnt+=7;
             break;
+        }
 
 
 
@@ -1257,120 +1343,189 @@ int decode()
 
 
         case 0x28: // jump if zero flag is set from opcode to d 
-            if ((cpu.Flags & 0b010000000) > 0)
             {
-                cpu.reg_PC += memory[int(cpu.reg_PC++)];
+            int8_t offset = static_cast<int8_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x40) != 0)
+            {
+                cpu.reg_PC += offset;
                 cpu.cycleCnt += 12; 
                 break;
+            
             }
             cpu.cycleCnt+=7;
             break;
+        }
 
 
 
         case 0x38: // jump is carry flag is set from opcode to d 
-            if ((cpu.Flags & 0b000000001) > 0)
             {
-                cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
+            int8_t offset = static_cast<int8_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x01) != 0)
+            {
+                cpu.reg_PC += offset;
                 cpu.cycleCnt += 12; 
                 break;
+            
             }
             cpu.cycleCnt+=7;
             break;
+        }
+
+
+
+
+
 
 
         case 0xc2: //zero flag unset, jump to nn
-        if ((cpu.Flags & 0b010000000) == 0)
+        {
+            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x40) == 0)
             {
-                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt += 10; 
+                cpu.reg_PC += offset;
+                cpu.cycleCnt += 12; 
                 break;
+            
             }
-            cpu.cycleCnt+=10;
+            cpu.cycleCnt+=7;
             break;
+        }
 
         case 0xd2:
-        if ((cpu.Flags & 0b000000001) == 0)
+        {
+            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x01) == 0)
             {
-                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt += 10; 
+                cpu.reg_PC += offset;
+                cpu.cycleCnt += 12; 
                 break;
+            
             }
-            cpu.cycleCnt+=10;
+            cpu.cycleCnt+=7;
             break;
+        }
 
         case 0xe2:
-        if ((cpu.Flags & 0b000000100) == 0)
+        {
+            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x04) == 0)
             {
-                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt += 10; 
+                cpu.reg_PC += offset;
+                cpu.cycleCnt += 12; 
                 break;
+            
             }
-            cpu.cycleCnt+=10;
+            cpu.cycleCnt+=7;
             break;
+        }
 
         case 0xf2:
-        if ((cpu.Flags & 0b100000000) == 0)
+        {
+            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x80) == 0)
             {
-                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt += 10; 
+                cpu.reg_PC += offset;
+                cpu.cycleCnt += 12; 
                 break;
+            
             }
-            cpu.cycleCnt+=10;
+            cpu.cycleCnt+=7;
             break;
+        }
+
+
+
+
+
 
 
         case 0xca: //zero flag set, jump to nn
-        if ((cpu.Flags & 0b010000000) > 0)
+        {
+            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x40) != 0)
             {
-                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt += 10; 
+                cpu.reg_PC += offset;
+                cpu.cycleCnt += 12; 
                 break;
+            
             }
-            cpu.cycleCnt+=10;
+            cpu.cycleCnt+=7;
             break;
+        }
 
         case 0xda: // if carry flag set jump to nn 
-        if ((cpu.Flags & 0b000000001) > 0)
+        {
+            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x01) != 0)
             {
-                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt += 10; 
+                cpu.reg_PC += offset;
+                cpu.cycleCnt += 12; 
                 break;
+            
             }
-            cpu.cycleCnt+=10;
+            cpu.cycleCnt+=7;
             break;
+        }
 
         case 0xea: // uf the P/V flag is unset, jump to nn
-        if ((cpu.Flags & 0b000000100) > 0)
+        {
+            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x04) != 0)
             {
-                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt += 10; 
+                cpu.reg_PC += offset;
+                cpu.cycleCnt += 12; 
                 break;
+            
             }
-            cpu.cycleCnt+=10;
+            cpu.cycleCnt+=7;
             break;
+        }
 
         case 0xfa: // if the sign flag us set, jump to nn
-        if ((cpu.Flags & 0b100000000) > 0)
+        {
+            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+            
+            if ((cpu.Flags & 0x80) != 0)
             {
-                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt += 10; 
+                cpu.reg_PC += offset;
+                cpu.cycleCnt += 12; 
                 break;
+            
             }
-            cpu.cycleCnt+=10;
+            cpu.cycleCnt+=7;
             break;
+        }
 
 
-        case 0xc3: //jumps to nn if zero flag isnt set
-            if ((cpu.Flags & 0b010000000) == 0)
-            {
-                cpu.reg_PC = z80_mem_read(int(cpu.reg_PC++));
-                cpu.cycleCnt += 10; //cycle count for Jp   
-                break;
-            }
+        case 0xc3: //jumps to nn 
+        {
+            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
+            cpu.reg_PC++; // Increment PC to move past the offset byte
+
+            cpu.reg_PC += offset;
+            cpu.cycleCnt += 12; 
             break;
-
-
+        }
 
 
        
@@ -3079,56 +3234,56 @@ int decode()
 
         //XOR Instruction --------------------------------------------------------
         case 0xa8: // XOR A with B 
-            cpu.reg_A = cpu.reg_A ^ cpu.reg_B; //bitwise XOR for reg a with a 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA ^ cpu.regB; //bitwise XOR for reg a with a 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xa9: // XOR A with C 
-            cpu.reg_A = cpu.reg_A ^ cpu.reg_C; //bitwise XOR for reg a with a 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA ^ cpu.regC; //bitwise XOR for reg a with a 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xaa: // XOR A with D 
-            cpu.reg_A = cpu.reg_A ^ cpu.reg_D; //bitwise XOR for reg a with a 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA ^ cpu.regD; //bitwise XOR for reg a with a 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xab: // XOR A with E 
-            cpu.reg_A = cpu.reg_A ^ cpu.reg_E; //bitwise XOR for reg a with e  
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA ^ cpu.regE; //bitwise XOR for reg a with e  
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xac: // XOR A with H 
-            cpu.reg_A = cpu.reg_A ^ cpu.reg_H; //bitwise XOR for reg a with h 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA ^ cpu.regH; //bitwise XOR for reg a with h 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xad: // XOR A with L 
-            cpu.reg_A = cpu.reg_A ^ cpu.reg_L; //bitwise XOR for reg a with l 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA ^ cpu.regL; //bitwise XOR for reg a with l 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xae: // XOR A with HL 
-            cpu.reg_A = cpu.reg_A ^ z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise XOR for reg a with hl 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA ^ z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise XOR for reg a with hl 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 7;
             break;
 
         case 0xaf: // XOR A with A 
-            cpu.reg_A = cpu.reg_A ^ cpu.reg_B; //bitwise XOR for reg a with a 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA ^ cpu.regB; //bitwise XOR for reg a with a 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xee:
-            cpu.reg_A = cpu.reg_A ^ z80_mem_read(int(cpu.reg_PC++));
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA ^ z80_mem_read(int(cpu.reg_PC++));
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 7;
             break;
 
@@ -3144,56 +3299,56 @@ int decode()
 
         //OR INSTRUCTIONS =================================================================
         case 0xb0: // OR A with B 
-            cpu.reg_A = cpu.reg_A | cpu.reg_B; //bitwise OR for reg a with a 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA | cpu.regB; //bitwise OR for reg a with a 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xb1: // OR A with C 
-            cpu.reg_A = cpu.reg_A | cpu.reg_C; //bitwise OR for reg a with a 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA | cpu.regC; //bitwise OR for reg a with a 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xb2: // OR A with D 
-            cpu.reg_A = cpu.reg_A | cpu.reg_D; //bitwise OR for reg a with a 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA | cpu.regD; //bitwise OR for reg a with a 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xb3: // OR A with E 
-            cpu.reg_A = cpu.reg_A | cpu.reg_E; //bitwise OR for reg a with e  
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA | cpu.regE; //bitwise OR for reg a with e  
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xb4: // OR A with H 
-            cpu.reg_A = cpu.reg_A | cpu.reg_H; //bitwise OR for reg a with h 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA | cpu.regH; //bitwise OR for reg a with h 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xb5: // OR A with L 
-            cpu.reg_A = cpu.reg_A | cpu.reg_L; //bitwise OR for reg a with l 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA | cpu.regL; //bitwise OR for reg a with l 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
 
         case 0xb6: // OR A with HL 
-            cpu.reg_A = cpu.reg_A | z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise OR for reg a with hl 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA | z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise OR for reg a with hl 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 7;
             break;
 
         case 0xb7: // OR A with A 
-            cpu.reg_A = cpu.reg_A | cpu.reg_B; //bitwise OR for reg a with a 
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA | cpu.regB; //bitwise OR for reg a with a 
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
         
         case 0xf6:// OR A with n memory[int(cpu.reg_PC++)];
-            cpu.reg_A = cpu.reg_A | memory[int(cpu.reg_PC++)]; //bitwise OR for reg a with a             
-            xorFlags(cpu.reg_A);
+            cpu.regA = cpu.regA | z80_mem_read(int(cpu.reg_PC++)); //bitwise OR for reg a with a             
+            xorFlags(cpu.regA);
             cpu.cycleCnt += 7;
             break;
 
@@ -3213,11 +3368,12 @@ int decode()
         /*SP is decremented and B is stored into the memory location pointed to by SP.
          SP is decremented again and C is stored into the memory location pointed to by SP*/
         case 0xc5:
-            cpu.reg_SP--;
-            memory[cpu.reg_SP] = cpu.reg_B;
 
-            cpu.reg_SP--;
-            memory[cpu.reg_SP] = cpu.reg_C;
+            cpu.regB--;
+            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regB );
+
+            cpu.regB--;
+            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regC );
 
             cpu.cycleCnt += 11;
             
@@ -3226,11 +3382,12 @@ int decode()
         /*SP is decremented and D is stored into the memory location pointed to by SP. 
         SP is decremented again and E is stored into the memory location pointed to by SP.*/
         case 0xd5: 
-            cpu.reg_SP--;
-            memory[cpu.reg_SP] = cpu.reg_D;
+            
+            cpu.regB--;
+            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regD );
 
-            cpu.reg_SP--;
-            memory[cpu.reg_SP] = cpu.reg_E;
+            cpu.regB--;
+            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regE );
 
             cpu.cycleCnt += 11;
             
@@ -3239,11 +3396,12 @@ int decode()
         /*SP is decremented and H is stored into the memory location pointed to by SP. 
         SP is decremented again and L is stored into the memory location pointed to by SP.*/
         case 0xe5:
-            cpu.reg_SP--;
-            memory[cpu.reg_SP] = cpu.reg_H;
+            
+            cpu.regB--;
+            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regH );
 
-            cpu.reg_SP--;
-            memory[cpu.reg_SP] = cpu.reg_L;
+            cpu.regB--;
+            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regL );
 
             cpu.cycleCnt += 11;
             
@@ -3252,112 +3410,191 @@ int decode()
         /*SP is decremented and A is stored into the memory location pointed to by SP. 
         SP is decremented again and F is stored into the memory location pointed to by SP.*/
         case 0xf5:
-            cpu.reg_SP--;
-            memory[cpu.reg_SP] = cpu.reg_A;
+            
+            cpu.regB--;
+            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regA );
 
-            cpu.reg_SP--;
-            memory[cpu.reg_SP] = cpu.reg_F;
+            cpu.regB--;
+            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.reg_F );
 
             cpu.cycleCnt += 11;
             
             break;
+
+
+
+
         
         // CALL FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
-        case 0xc4:
-        //If the zero flag is unset
-            if ( (cpu.Flags & 0b010000000) == 0)
+        case 0xc4: //If the zero flag is unset
+        
+        
             {
-                cpu.reg_SP = cpu.reg_PC + 3;
-                cpu.reg_PC = memory[cpu.reg_PC++];
-                cpu.cycleCnt+=17;
-                break;
-            }
-            cpu.cycleCnt+=10;
-            break;
+                uint16_t nn = z80_mem_read(cpu.reg_PC) | (z80_mem_read(cpu.reg_PC + 1) << 8);
+                cpu.reg_PC += 2; // Move PC past the nn bytes
 
-        case 0xd4:
-        //If the carry flag is unset
-            if ( (cpu.Flags & 0b00000001) == 0)
-            {
-                cpu.reg_SP = cpu.reg_PC + 3;
-                cpu.reg_PC = memory[cpu.reg_PC++];
-                cpu.cycleCnt+=17;
-                break;
-            }
-            cpu.cycleCnt+=10;
-            break;
+                if ((cpu.Flags & 0x40) == 0) 
+                {  
+                    cpu.reg_SP = cpu.reg_PC + 3;
+                    cpu.reg_PC = nn;
 
-        case 0xe4:
-        //If the P/V flag is unset
-            if ( (cpu.Flags & 0b00000100) == 0)
-            {
-                cpu.reg_SP = cpu.reg_PC + 3;
-                cpu.reg_PC = memory[cpu.reg_PC++];
-                cpu.cycleCnt+=17;
-                break;
-            }
-            cpu.cycleCnt+=10;
-            break;
+                    cpu.cycleCnt += 17; // 
+                }
 
-        case 0xf4:
-        //If the sign flag is unset
-            if ( (cpu.Flags & 0b10000000) == 0)
-            {
-                cpu.reg_SP = cpu.reg_PC + 3;
-                cpu.reg_PC = memory[cpu.reg_PC++];
-                cpu.cycleCnt+=17;
+                else 
+                {
+                    cpu.cycleCnt += 10; 
+                }
                 break;
             }
-            cpu.cycleCnt+=10;
-            break;
 
-        case 0xcc:
-        //If the zero flag is set
-            if ( (cpu.Flags & 0b010000000) > 0)
+        case 0xd4: //If the carry flag is unset
+        
             {
-                cpu.reg_SP = cpu.reg_PC + 3;
-                cpu.reg_PC = memory[cpu.reg_PC++];
-                cpu.cycleCnt+=17;
-                break;
-            }
-            cpu.cycleCnt+=10;
-            break;
+                uint16_t nn = z80_mem_read(cpu.reg_PC) | (z80_mem_read(cpu.reg_PC + 1) << 8);
+                cpu.reg_PC += 2; // Move PC past the nn bytes
 
-        case 0xdc:
-        //If the carry flag is set
-            if ( (cpu.Flags & 0b00000001) > 0)
-            {
-                cpu.reg_SP = cpu.reg_PC + 3;
-                cpu.reg_PC = memory[cpu.reg_PC++];
-                cpu.cycleCnt+=17;
-                break;
-            }
-            cpu.cycleCnt+=10;
-            break;
+                if ((cpu.Flags & 0x10) == 0) 
+                {  
+                    cpu.reg_SP = cpu.reg_PC + 3;
+                    cpu.reg_PC = nn;
 
-        case 0xec:
-        //If the P/V flag is set
-            if ( (cpu.Flags & 0b00000100) > 0)
-            {
-                cpu.reg_SP = cpu.reg_PC + 3;
-                cpu.reg_PC = memory[cpu.reg_PC++];
-                cpu.cycleCnt+=17;
-                break;
-            }
-            cpu.cycleCnt+=10;
-            break;
+                    cpu.cycleCnt += 17; // 
+                }
 
-        case 0xfc:
-        //If the sign flag is set
-            if ( (cpu.Flags & 0b10000000) > 0)
-            {
-                cpu.reg_SP = cpu.reg_PC + 3;
-                cpu.reg_PC = memory[cpu.reg_PC++];
-                cpu.cycleCnt+=17;
+                else 
+                {
+                    cpu.cycleCnt += 10; 
+                }
                 break;
             }
-            cpu.cycleCnt+=10;
-            break;
+
+        case 0xe4: //If the P/V flag is unset
+        
+            {
+                uint16_t nn = z80_mem_read(cpu.reg_PC) | (z80_mem_read(cpu.reg_PC + 1) << 8);
+                cpu.reg_PC += 2; // Move PC past the nn bytes
+
+                if ((cpu.Flags & 0x04) == 0) 
+                {  
+                    cpu.reg_SP = cpu.reg_PC + 3;
+                    cpu.reg_PC = nn;
+
+                    cpu.cycleCnt += 17; // 
+                }
+
+                else 
+                {
+                    cpu.cycleCnt += 10; 
+                }
+                break;
+            }
+
+        case 0xf4: //If the sign flag is unset
+        
+            {
+                uint16_t nn = z80_mem_read(cpu.reg_PC) | (z80_mem_read(cpu.reg_PC + 1) << 8);
+                cpu.reg_PC += 2; // Move PC past the nn bytes
+
+                if ((cpu.Flags & 0x80) == 0) 
+                {  
+                    cpu.reg_SP = cpu.reg_PC + 3;
+                    cpu.reg_PC = nn;
+
+                    cpu.cycleCnt += 17; // 
+                }
+
+                else 
+                {
+                    cpu.cycleCnt += 10; 
+                }
+                break;
+            }
+
+        case 0xcc: //If the zero flag is set
+        
+            {
+                uint16_t nn = z80_mem_read(cpu.reg_PC) | (z80_mem_read(cpu.reg_PC + 1) << 8);
+                cpu.reg_PC += 2; // Move PC past the nn bytes
+
+                if ((cpu.Flags & 0x40) != 0) 
+                {  
+                    cpu.reg_SP = cpu.reg_PC + 3;
+                    cpu.reg_PC = nn;
+
+                    cpu.cycleCnt += 17; // 
+                }
+
+                else 
+                {
+                    cpu.cycleCnt += 10; 
+                }
+                break;
+            }
+
+        case 0xdc: //If the carry flag is set
+        
+            {
+                uint16_t nn = z80_mem_read(cpu.reg_PC) | (z80_mem_read(cpu.reg_PC + 1) << 8);
+                cpu.reg_PC += 2; // Move PC past the nn bytes
+
+                if ((cpu.Flags & 0x01) != 0) 
+                {  
+                    cpu.reg_SP = cpu.reg_PC + 3;
+                    cpu.reg_PC = nn;
+
+                    cpu.cycleCnt += 17; // 
+                }
+
+                else 
+                {
+                    cpu.cycleCnt += 10; 
+                }
+                break;
+            }
+
+        case 0xec: //If the P/V flag is set
+        
+            {
+                uint16_t nn = z80_mem_read(cpu.reg_PC) | (z80_mem_read(cpu.reg_PC + 1) << 8);
+                cpu.reg_PC += 2; // Move PC past the nn bytes
+
+                if ((cpu.Flags & 0x04) != 0) 
+                {  
+                    cpu.reg_SP = cpu.reg_PC + 3;
+                    cpu.reg_PC = nn;
+
+                    cpu.cycleCnt += 17; // 
+                }
+
+                else 
+                {
+                    cpu.cycleCnt += 10; 
+                }
+                break;
+            }
+
+        case 0xfc: //If the sign flag is set
+        
+            {
+                uint16_t nn = z80_mem_read(cpu.reg_PC) | (z80_mem_read(cpu.reg_PC + 1) << 8);
+                cpu.reg_PC += 2; // Move PC past the nn bytes
+
+                if ((cpu.Flags & 0x80) != 0) 
+                {  
+                    cpu.reg_SP = cpu.reg_PC + 3;
+                    cpu.reg_PC = nn;
+
+                    cpu.cycleCnt += 17; // 
+                }
+
+                else 
+                {
+                    cpu.cycleCnt += 10; 
+                }
+                break;
+            }
+
 
         case 0xe9: // jp (hl): adds contence of HL into PC
             cpu.reg_PC = z80_mem_read(((cpu.regH << 8) | cpu.regL));
@@ -3368,11 +3605,19 @@ int decode()
         case 0xcd:
         //unconditional jump call
             cpu.reg_SP = cpu.reg_PC + 3;
-            cpu.reg_PC = memory[cpu.reg_PC++];
+            cpu.reg_PC = z80_mem_read(cpu.reg_PC++);
             cpu.cycleCnt+=17;
             break;
 
         
+
+
+
+
+
+
+
+
         
         // POP FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
     {
@@ -4649,12 +4894,17 @@ void incR() //INCREASING R DOES NOT CHANGE THE 8th BIT
 
 //MAIN==============================================================================================================================
 int main(){
-    cout << "Max Castle is feeling thankful" << endl; //File running check
+    
+    
+    cout << "Max Castle is feeling tired" << endl; //File running check
+    
+    // NECESSSARY CODE
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+   z80_mem_load(fileRun.c_str()); //Load into memory
 
-   //z80_mem_load(fileRun.c_str()); //Load into memory
-
-   
+   //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    
     /*z80_mem_write(0x00, 0x3e);//load A
     z80_mem_write(0x01, 0x0f);// goes into A*/
 
@@ -4675,45 +4925,100 @@ int main(){
     z80_mem_write(0x04, 0x55);//n
     z80_mem_write(0x05, 0x44);//n */
 
-    /*
-   cpu.regH = 0x11;
-   cpu.regL = 0x18;
-   cpu.regA = 0xf3;
-   cpu.regB = 0xfe;
-   cpu.regC = 0xff;
-   memory[0x1118] = 0x52;
-   memory[0x1117] = 0x00;
-   memory[0x1116] = 0xF3;
-   memory[0x2225] = 0xc5;
-   memory[0x2224] = 0x59;
-   memory[0x2223] = 0x66;
-   //cpu.Flags |= 0x01;
-   */
+
+//    cpu.regH = 0x11;
+//    cpu.regL = 0x18;
+//    cpu.regA = 0xf3;
+//    cpu.regB = 0xfe;
+//    cpu.regC = 0xff;
+//    memory[0x1118] = 0x52;
+//    memory[0x1117] = 0x00;
+//    memory[0x1116] = 0xF3;
+//    memory[0x2225] = 0xc5;
+//    memory[0x2224] = 0x59;
+//    memory[0x2223] = 0x66;
+//    //cpu.Flags |= 0x01;
 
    
     cpu.reg_IX = 0x1234;
     cpu.regA = 0x11;
 
-    //cpu.Flags |= 0x01;
-    z80_mem_write(0x00, 0xdd);//ed instruction
-    z80_mem_write(0x01, 0x6f);//
+//     //cpu.Flags |= 0x01;
+//     z80_mem_write(0x00, 0xed);//ed instruction
+//     z80_mem_write(0x01, 0x4a);//cpir
     
 
-    //z80_mem_write(0x05, 0x84); //a+=h
-    //z80_mem_write(0x05, 0x94); //a-=h
-    //z80_mem_write(0x05, 0x3c); // a++
+//     //z80_mem_write(0x05, 0x84); //a+=h
+//     //z80_mem_write(0x05, 0x94); //a-=h
+//     //z80_mem_write(0x05, 0x3c); // a++
 
 
-    z80_mem_write(0x02, 0x76);//halt
+//     z80_mem_write(0x02, 0x76);//halt
     
 
 
-    
-    /*for (int i =0; i < MEMSIZE; i++)
+// call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   /*{ // max testing code
+
+   printReg(cpu);
+
+// Set up the test program in memory
+
+// Load B with a nonzero value (e.g., 0x05)
+z80_mem_write(0x00, 0x06); // LD B, n
+z80_mem_write(0x01, 0x05); // n = 0x05
+
+// DJNZ to a label (relative jump backwards by 2 bytes)
+z80_mem_write(0x02, 0x10); // DJNZ d
+z80_mem_write(0x03, 0xFE); // d = -2 (loop back to DJNZ)
+
+// Halt the CPU after the loop to prevent further execution
+z80_mem_write(0x04, 0x76); // HALT
+
+// Expected Behavior:
+// The DJNZ instruction decrements B and jumps back to itself until B reaches 0.
+// The HALT instruction will only execute after DJNZ completes all iterations (5 in this case).
+
+// Test Execution:
+// Initialize your Z80 emulator, set the program counter to 0x00, and run the program.
+// Verify that B starts at 0x05, decrements with each iteration, and stops at 0 after 5 loops.
+// Ensure that the emulator halts at 0x04 as expected.
+
+
+   }*/
+
+
+
+// call functions test------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/*
+  {
+// Write the program into memory
+z80_mem_write(0x0000, 0xC4); // CALL NZ, nn
+z80_mem_write(0x0001, 0x34); // Low byte of address nn (0x1234)
+z80_mem_write(0x0002, 0x12); // High byte of address nn (0x1234)
+z80_mem_write(0x1234, 0x76); // HALT
+
+// Initialize CPU state
+cpu.reg_PC = 0x0000; // Start at 0x0000
+cpu.reg_SP = 0xFFFE; // Stack pointer
+cpu.Flags = 0x00;    // Zero flag unset
+
+
+  }*/
+
+
+
+
+
+    for (int i =0; i < MEMSIZE; i++)
     {
         if(memory[i] != 0)
             {printf("ram[%04x] = %02x\n", i, memory[i]);}
-    }*/
+    }
+
+
 
     z80_execute();
 
@@ -4725,6 +5030,7 @@ int main(){
         printf("ram[%04x] = %02x\n ", 0x2225-i, memory[0x2225-i]);
     }
 
+    printReg(cpu);
 
     return 0;
 }
