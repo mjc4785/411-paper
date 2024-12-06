@@ -51,6 +51,7 @@ uint16_t popS();
 uint16_t sbc16Flags(uint16_t, uint16_t);
 uint16_t adc16Flags(uint16_t, uint16_t);
 void incR();
+uint16_t displ(uint16_t, int8_t);
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -4305,7 +4306,7 @@ int decode()
             uint8_t inst2 = z80_mem_read(cpu.reg_PC++);
             switch(inst2)
             {
-                //LOAD 8b REGISTER FROM REGISTER INSTRUCTIONS------------------------------------------
+                //LOAD REGISTER INSTRUCTIONS======================================================================
             {
                 case 0x40: //LOAD INSTUCTION - Load Register B with Register B
                     cpu.regB = cpu.regB;
@@ -4517,43 +4518,152 @@ int decode()
                     cpu.cycleCnt += 8;
                     break;
                 
-                case 0x68: ////LOAD INSTUCTION - Load IX Low Byte with Register B
+                case 0x68: //LOAD INSTUCTION - Load IX Low Byte with Register B
                     cpu.reg_IX = ((cpu.reg_IX >>8) << 8)|(cpu.regB);
                     cpu.cycleCnt += 8;
                     break;
 
-                case 0x69: ////LOAD INSTUCTION - Load IX Low Byte with Register C
+                case 0x69: //LOAD INSTUCTION - Load IX Low Byte with Register C
                     cpu.reg_IX = ((cpu.reg_IX >>8) << 8)|(cpu.regC);
                     cpu.cycleCnt += 8;
                     break;
                 
-                case 0x6a: ////LOAD INSTUCTION - Load IX Low Byte with Register D
+                case 0x6a: //LOAD INSTUCTION - Load IX Low Byte with Register D
                     cpu.reg_IX = ((cpu.reg_IX >>8) << 8)|(cpu.regD);
                     cpu.cycleCnt += 8;
                     break;
                 
-                case 0x6b: ////LOAD INSTUCTION - Load IX Low Byte with Register E
+                case 0x6b: //LOAD INSTUCTION - Load IX Low Byte with Register E
                     cpu.reg_IX = (cpu.reg_IX >>8) <<8|(cpu.regE);
                     cpu.cycleCnt += 8;
                     break;
                 
-                case 0x6c: ////LOAD INSTUCTION - Load IX Low Byte with Register IX high
+                case 0x6c: //LOAD INSTUCTION - Load IX Low Byte with Register IX high
                     cpu.reg_IX = ((cpu.reg_IX >> 8) << 8)|(cpu.reg_IX >> 8);
                     cpu.cycleCnt += 8;
                     break;
                 
-                case 0x6d: ////LOAD INSTUCTION - Load IX Low Byte with Register IX low
+                case 0x6d: //LOAD INSTUCTION - Load IX Low Byte with Register IX low
                     //Do nothing
                     cpu.cycleCnt += 8;
                     break;
                 
-                case 0x6f: ////LOAD INSTUCTION - Load IX Low Byte with Register IX high
+                case 0x6f: //LOAD INSTUCTION - Load IX Low Byte with Register IX high
                     cpu.reg_IX = ((cpu.reg_IX >> 8) << 8)|(cpu.regA);
                     cpu.cycleCnt += 8;
                     break;
+                
+                case 0xf9: //LOAD INSTRUCTION - Load SP with IX
+                    cpu.reg_SP = cpu.reg_IX;
+                    cpu.cycleCnt += 10;
+                    break;
+                
+                case 0x21: //LOAD INSTRUCTION - Load IX with nn
+                {
+                    cpu.reg_IX = (z80_mem_read(cpu.reg_PC++)<<8)|(z80_mem_read(cpu.reg_PC++) & 0xff);
+                    cpu.cycleCnt += 14;
+                    break;
+                }
+
+                case 0x06: //LOAD INSTRUCTION - Load value at n into register B
+                    cpu.regB = z80_mem_read(int(cpu.reg_PC++));
+                    cpu.cycleCnt += 11;
+                    break;
+        
+                case 0x0e: //LOAD INSTRUCTION - Load value at n into register C
+                    cpu.regC = z80_mem_read(int(cpu.reg_PC++));
+                    cpu.cycleCnt += 11;
+                    break;
+                
+                case 0x16: //LOAD INSTRUCTION - Load value at n into register D
+                    cpu.regD = z80_mem_read(int(cpu.reg_PC++));
+                    cpu.cycleCnt += 11;
+                    break;
+                
+                case 0x1e: //LOAD INSTRUCTION - Load value at n into register E
+                    cpu.regE = z80_mem_read(int(cpu.reg_PC++));
+                    cpu.cycleCnt += 11;
+                    break;
+                
+                case 0x3e: //LOAD INSTRUCTION - Load value at n into register A
+                    cpu.regA = z80_mem_read(int(cpu.reg_PC++));
+                    cpu.cycleCnt += 11;
+                    break;
+                
+                case 0x26: //LOAD INSTRUCTION - Load value at n into high byte of IX
+                    cpu.reg_IX = (z80_mem_read(int(cpu.reg_PC++)) << 8)|(cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 11;
+                    break;
+                
+                case 0x2e: //LOAD INSTRUCTION - Load value at n into low byte of IX
+                    cpu.reg_IX = ((cpu.reg_IX >>8) <<8) | (z80_mem_read(int(cpu.reg_PC++)));
+                    cpu.cycleCnt += 11;
+                    break;
+
+                case 0x22: //LOAD INSTRUCTION - Load IX into memory (nn)
+                    z80_mem_write16(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1)), cpu.reg_IX); 
+                    cpu.cycleCnt += 20;
+                    break;
+                
+                case 0x2a: //LOAD INSTRUCTION - Load IX with (nn)
+                    cpu.reg_IX =(z80_mem_read16(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1))));
+                    cpu.cycleCnt += 20;
+                    break;
+                
+                case 0x70: //LOAD INSTRUCTION - Load (IX+d) with b
+                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regB);
+                    cpu.cycleCnt += 19;
+                    break;
+
             }                
                 
                 
+                //ARTITHMETIC INSTRUCTIONS ======================================================================
+            {
+                // INCREMENT INST -------------------------------------------------
+                case 0x04: //INCRAMENT INSTRUCTION - Adds 1 to Register B
+                    cpu.regB = incFlags(cpu.regB);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x14: //INCRAMENT INSTRUCTION - Adds 1 to Register D
+                    cpu.regD = incFlags(cpu.regD);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x24: //INCRAMENT INSTRUCTION - Adds 1 to high byte of IX
+                    cpu.reg_IX = (incFlags(cpu.reg_IX >> 8)<<8)|(cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x0c: //INCRAMENT INSTRUCTION - Adds 1 to Register C
+                    cpu.regC = incFlags(cpu.regC);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x1c: //INCRAMENT INSTRUCTION - Adds 1 to Register E
+                    cpu.regE = incFlags(cpu.regE);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x2c: //INCRAMENT INSTRUCTION - Adds 1 to low byte of IX
+                    cpu.reg_IX = (cpu.reg_IX >> 8)<<8|(incFlags(cpu.reg_IX & 0xff));
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x3c: //INCRAMENT INSTRUCTION - Adds 1 to Register A
+                    cpu.regA = incFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x23: //INCRAMENT INSTRUCTION - Adds 1 to IX
+                    cpu.reg_IX++;
+                    cpu.cycleCnt += 10;
+                    break;
+            }   
+            
+
+
                 default:
                     cout << "Unknown DD Instruction: " << hex << int(inst) << endl;
                     return 1;
@@ -4892,6 +5002,14 @@ void incR() //INCREASING R DOES NOT CHANGE THE 8th BIT
     (bit7)? (cpu.reg_R |= 0x80):(cpu.reg_R &= ~0x80);//8th bit restored
 }
 
+uint16_t displ(uint16_t val, int8_t d)
+{
+    if(bool(d&0x80))
+        {cout << "min" << endl; return (val - (d&0x7f));}
+    else 
+        {cout << "add" << endl; return (val + (d&0x7f));}
+}
+
 //MAIN==============================================================================================================================
 int main(){
     
@@ -4901,7 +5019,7 @@ int main(){
     // NECESSSARY CODE
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-   z80_mem_load(fileRun.c_str()); //Load into memory
+   //z80_mem_load(fileRun.c_str()); //Load into memory
 
    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -4939,21 +5057,23 @@ int main(){
 //    memory[0x2223] = 0x66;
 //    //cpu.Flags |= 0x01;
 
+    uint16_t start1 = 0x6666;
+    uint16_t start2 = 0x6663;
    
-    cpu.reg_IX = 0x1234;
-    cpu.regA = 0x11;
+    cpu.reg_IX = start1;
+    //memory[start1] = 0x92;
+    //memory[start1+1] = 0xda;
+    cpu.regB = 0xfe;
 
 //     //cpu.Flags |= 0x01;
-//     z80_mem_write(0x00, 0xed);//ed instruction
-//     z80_mem_write(0x01, 0x4a);//cpir
-    
-
-//     //z80_mem_write(0x05, 0x84); //a+=h
-//     //z80_mem_write(0x05, 0x94); //a-=h
-//     //z80_mem_write(0x05, 0x3c); // a++
+     z80_mem_write(0x00, 0xdd);//dd instruction
+     z80_mem_write(0x01, 0x23);// ix++
+     z80_mem_write(0x02, 0xdd);
+     z80_mem_write(0x03, 0x70);//
+     z80_mem_write(0x04, 0x81);
 
 
-//     z80_mem_write(0x02, 0x76);//halt
+     z80_mem_write(0x05, 0x76);//halt
     
 
 
@@ -5024,13 +5144,14 @@ cpu.Flags = 0x00;    // Zero flag unset
 
     cout << bitset<8>(memory[0x5000]) << endl;
     
+    
     for (int i =0; i < 3; i++)
     {
-        printf("\tram[%04x] = %02x\t ", 0x1118-i, memory[0x1118-i]);
-        printf("ram[%04x] = %02x\n ", 0x2225-i, memory[0x2225-i]);
+        printf("\tram[%04x] = %02x\t ", start1+i, memory[start1+i]);
+        printf("ram[%04x] = %02x\n ", start2+i, memory[start2+i]);
     }
 
-    printReg(cpu);
+    //printReg(cpu);
 
     return 0;
 }
