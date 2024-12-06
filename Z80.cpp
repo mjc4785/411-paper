@@ -4296,9 +4296,23 @@ int decode()
             break; //Break for end of ED instructions in big alpha switch statement
     }
 
+
+
+
+
+
+
+
         //================================================================================================================================
         //DD INSTRUCTIONS=================================================================================================================
         //================================================================================================================================
+
+
+
+
+
+
+
     
         case 0xdd:
         {   
@@ -4308,6 +4322,1614 @@ int decode()
             {
                 //LOAD REGISTER INSTRUCTIONS======================================================================
             {
+                case 0xcb:
+                {
+                    incR();
+                    uint8_t inst3 = z80_mem_read(cpu.reg_PC++);
+                    switch(inst3)
+                    {
+
+                        case 0x00: // RLC b 
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regB = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | (cpu.Flags & 0x01);
+                            cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x01: // RLC c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regC = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | (cpu.Flags & 0x01);
+                            cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x02: // RLC d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regD = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | (cpu.Flags & 0x01);
+                            cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x03: // RLC e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regE = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | (cpu.Flags & 0x01);
+                            cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x04: // RLC h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regH = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | (cpu.Flags & 0x01);
+                            cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x05: // RLC l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regL = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | (cpu.Flags & 0x01);
+                            cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x06: // RLC (hl)
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)), (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | (cpu.Flags & 0x01));
+                            cpu.Flags = ZSPXYtable[int(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)))]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x07: // RLC a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regA = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | (cpu.Flags & 0x01);
+                            cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+
+
+
+
+                        case 0x08: //RRC b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regB = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | (cpu.Flags & 0x80);
+                            cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x09: //RRC c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regC = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | (cpu.Flags & 0x80);
+                            cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x0A: //RRC d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regD = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | (cpu.Flags & 0x80);
+                            cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x0B: //RRC e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regE = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | (cpu.Flags & 0x80);
+                            cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x0C: //RRC h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regH = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | (cpu.Flags & 0x80);
+                            cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x0D: //RRC l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regL = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | (cpu.Flags & 0x80);
+                            cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x0E: //RRC (hl)
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)), (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | (cpu.Flags & 0x01)));
+                            cpu.Flags = ZSPXYtable[int(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)))]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x0F: //RRC a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regA = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | (cpu.Flags & 0x80);
+                            cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+
+
+
+                        case 0x10: // rl b
+
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regB = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+                        case 0x11: // rl c
+
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regC = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+                        case 0x12: // rl d
+                        
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regD = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+                        case 0x13: // rl e
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regE = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+                            
+                            break; 
+
+                        case 0x14: // rl h
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regH = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+                            
+                            break;
+
+                        case 0x15: // rl l
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regL = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+                            
+                            break;
+
+                        case 0x16: // rl (hl)
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)), ( (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1))  << 1 ) | preFlagC));
+                            cpu.Flags = ZSPXYtable[int(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)))]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            }
+                            
+                            break;
+
+                        case 0x17: // rl a
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regA = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+                            
+                            break;
+
+
+
+
+
+
+
+
+
+                        case 0x18: // rr b 
+
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regB = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+                        case 0x19: // rr c
+                        
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regC = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+                        case 0x1A: // rr d
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regD = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+                        case 0x1B: // rr e
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regE = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+                        case 0x1C: // rr h
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regH = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+                        case 0x1D: // rr l
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regL = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+                        case 0x1E: // rr (hl)
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)), ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1))>> 1)| preFlagC));
+                            cpu.Flags = ZSPXYtable[int(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)))]; //Set Z, S, X, Y 
+                            cpu.cycleCnt+=23;
+                            }
+                            
+                            break;
+
+                        case 0x1F: // rr a
+                                            
+                            {
+                            uint8_t preFlagC = cpu.Flags & 0x01;
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regA = (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | preFlagC;
+                            cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            }
+
+                            break;
+
+
+
+
+
+
+
+                        case 0x20: //sla b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x21: //sla c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x22: //sla d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x23: //sla e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x24: //sla h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x25: //sla l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x26: //sla (hl)
+                        (((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01));
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)), z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1);
+                            cpu.Flags = ZSPXYtable[int(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)))]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break; 
+
+                        case 0x27: //sla a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1));
+                            cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+
+
+
+                        case 0x28: // sra b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x29: // sra c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x2A: // sra d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x2B: // sra e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x2C: // sra h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x2D: // sra l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x2E: // sra (hl)
+                            (((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01));
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)), z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1);
+                            cpu.Flags = ZSPXYtable[int((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1))))]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+    
+                        case 0x2F: // sra a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+
+
+
+
+                        case 0x30: // sll b 
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.regB |= 0x01;
+                            cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x31: // sll c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.regC |= 0x01;
+                            cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x32: // sll d 
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.regD |= 0x01;
+                            cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x33: // sll e 
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.regE |= 0x01;
+                            cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x34: // sll h 
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.regH |= 0x01;
+                            cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x35: // sll l 
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.regL |= 0x01;
+                            cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x36: // sll (hl) 
+                        (((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01));
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)), ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1) | 0x01));
+                            cpu.Flags = ZSPXYtable[int((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1))))]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x37: // sll a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) << 1;
+                            cpu.regA |= 0x01;
+                            cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                            
+                        case 0x38: // srl b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.regB |= 0x80;
+                            cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x39: // srl c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.regC |= 0x80;
+                            cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x3A: // srl d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.regD |= 0x80;
+                            cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x3B: // srl e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.regE |= 0x80;
+                            cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x3C: // srl h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.regH |= 0x80;
+                            cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x3D: // srl l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.regL |= 0x80;
+                            cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x3E: // srl (hl)
+                            (((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01));
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)), ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1) | 0x80));
+                            cpu.Flags = ZSPXYtable[int((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1))))]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+                        case 0x3F: // srl a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) >> 1;
+                            cpu.regA |= 0x80;
+                            cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                            cpu.cycleCnt+=23;
+                            break;
+                            
+
+
+
+    // bit test 
+
+
+
+                        case 0x40: // bit 0, b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x41: // bit 0, c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x42: // bit 0, d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x43: // bit 0, e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x44: // bit 0, h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x45: // bit 0, l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x46: // bit 0, (hl)
+                            (z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x47: // bit 0, a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+
+
+                        case 0x48: // bit 1, b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x49: // bit 1, c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x4A: // bit 1, d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x4B: // bit 1, e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x4C: // bit 1, h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x4D: // bit 1, l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x4E: // bit 1, (hl)
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x4F: // bit 1, a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+
+
+                        case 0x50: // bit 2, b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x51: // bit 2, c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x52: // bit 2, d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x53: // bit 2, e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x54: // bit 2, h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x55: // bit 2, l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x56: // bit 2, (hl)
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x57: // bit 2, a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+
+
+                        case 0x58: // bit 3, b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x59: // bit 3, c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x5A: // bit 3, d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x5B: // bit 3, e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x5C: // bit 3, h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x5D: // bit 3, l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x5E: // bit 3, (hl)
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x5F: // bit 3, a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+
+
+                        case 0x60: // bit 4, b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x61: // bit 4, c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x62: // bit 4, d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x63: // bit 4, e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x64: // bit 4, h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x65: // bit 4, l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x66: // bit 4, (hl)
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+    
+                        case 0x67: // bit 4, a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+
+
+                        case 0x68: // bit 5, b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x69: // bit 5, c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x6A: // bit 5, d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x6B: // bit 5, e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x6C: // bit 5, h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x6D: // bit 5, l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x6E: // bit 5, (hl)
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x6F: // bit 5, a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+
+
+                        case 0x70: // bit 6, b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x71: // bit 6, c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x72: // bit 6, d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x73: // bit 6, e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x74: // bit 6, h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x75: // bit 6, l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x76: // bit 6, (hl)
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x77: // bit 6, a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+
+
+                        case 0x78: // bit 7, b
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x79: // bit 7, c
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x7A: // bit 7, d
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x7B: // bit 7, e
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x7C: // bit 7, h
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x7D: // bit 7, l
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x7E: // bit 7, (hl)
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+                        case 0x7F: // bit 7, a
+                            ((z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            cpu.cycleCnt+=20;
+                            break;
+
+
+    // reset 
+
+
+                        case 0x80: // res 0, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x81: // res 0, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x82: // res 0, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x83: // res 0, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x84: // res 0, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x85: // res 0, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x86: // res 0, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x01);
+                            cpu.cycleCnt+=23;
+                            break;
+    
+                        case 0x87: // res 0, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0x88: // res 1, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x89: // res 1, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x8A: // res 1, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x8B: // res 1, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x8C: // res 1, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x8D: // res 1, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x8E: // res 1, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x02);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x8F: // res 1, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0x90: // res 2, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x91: // res 2, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x92: // res 2, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x93: // res 2, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x94: // res 2, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x95: // res 2, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x96: // res 2, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x04);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x97: // res 2, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0x98: // res 3, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x99: // res 3, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x9A: // res 3, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x9B: // res 3, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x9C: // res 3, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x9D: // res 3, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x9E: // res 3, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x08);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0x9F: // res 3, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xA0: // res 4, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xA1: // res 4, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xA2: // res 4, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xA3: // res 4, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xA4: // res 4, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xA5: // res 4, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xA6: // res 4, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x10);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xA7: // res 4, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xA8: // res 5, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xA9: // res 5, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xAA: // res 5, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xAB: // res 5, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xAC: // res 5, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xAD: // res 5, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xAE: // res 5, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x20);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xAF: // res 5, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xB0: // res 6, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xB1: // res 6, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xB2: // res 6, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xB3: // res 6, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xB4: // res 6, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xB5: // res 6, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xB6: // res 6, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x40);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xB7: // res 6, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xB8: // res 7, b
+                            cpu.regB =  z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xB9: // res 7, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xBA: // res 7, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xBB: // res 7, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xBC: // res 7, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xBD: // res 7, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xBE: // res 7, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x80);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xBF: // res 7, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) & ~0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+    // set 
+
+
+                        case 0xC0:// set 0, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xC1:// set 0, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xC2:// set 0, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xC3:// set 0, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xC4:// set 0, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xC5:// set 0, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xC6: // set 0, hl
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x01);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xC7:// set 0, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x01;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xC8: // set 1, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xC9: // set 1, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xCA: // set 1, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xCB: // set 1, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xCC: // set 1, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xCD: // set 1, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xCE: // set 1, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x02);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xCF: // set 1, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x02;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xD0: // set 2, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xD1: // set 2, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xD2: // set 2, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xD3: // set 2, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xD4: // set 2, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xD5: // set 2, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xD6: // set 2, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x04);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xD7: // set 2, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x04;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xD8: // set 3, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xD9: // set 3, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xDA: // set 3, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xDB: // set 3, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xDC: // set 3, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xDD: // set 3, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xDE: // set 3, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x08);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xDF: // set 3, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x08;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xE0: // set 4, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xE1: // set 4, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xE2: // set 4, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xE3: // set 4, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xE4: // set 4, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xE5: // set 4, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xE6: // set 4, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x10);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xE7: // set 4, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x10;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xE8: // set 5, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xE9: // set 5, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xEA: // set 5, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xEB: // set 5, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xEC: // set 5, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xED: // set 5, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xEE: // set 5, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x20);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xEF: // set 5, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x20;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xF0: // set 6, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xF1: // set 6, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xF2: // set 6, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xF3: // set 6, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xF4: // set 6, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xF5: // set 6, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xF6: // set 6, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x40);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xF7: // set 6, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x40;
+                            cpu.cycleCnt+=23;
+                            break;
+
+
+
+                        case 0xF8: // set 7, b
+                            cpu.regB = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xF9: // set 7, c
+                            cpu.regC = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xFA: // set 7, d
+                            cpu.regD = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xFB: // set 7, e
+                            cpu.regE = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xFC: // set 7, h
+                            cpu.regH = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xFD: // set 7, l
+                            cpu.regL = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xFE: // set 7, (hl)
+                            z80_mem_write(z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) , z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x80);
+                            cpu.cycleCnt+=23;
+                            break;
+
+                        case 0xFF: // set 7, a
+                            cpu.regA = z80_mem_read(cpu.reg_IX + (cpu.reg_PC - 1)) | 0x80;
+                            cpu.cycleCnt+=23;
+                            break;
+
+                    }
+                    break;
+                }
                 case 0x40: //LOAD INSTUCTION - Load Register B with Register B
                     cpu.regB = cpu.regB;
                     cpu.cycleCnt += 8;
