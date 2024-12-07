@@ -824,13 +824,13 @@ int decode()
             cpu.cycleCnt += 4;
             break;
         
-        case 0xc6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
-            cpu.regA = addFlags(cpu.regA,z80_mem_read(int(cpu.reg_PC++)));
+        case 0x86: //ADD INSTRUCTION - RegA += memory[regHL]
+            cpu.regA = addFlags(cpu.regA,z80_mem_read((((cpu.regH << 8) | cpu.regL))));
             cpu.cycleCnt += 7;
             break;
         
-        case 0x86: //ADD INSTRUCTION - RegA += memory[regHL]
-            cpu.regA = addFlags(cpu.regA,z80_mem_read((((cpu.regH << 8) | cpu.regL))));
+        case 0xc6: //ADD IMMEDIATE INSTRUCTION - RegA += memory[pc+1] 
+            cpu.regA = addFlags(cpu.regA,z80_mem_read(int(cpu.reg_PC++)));
             cpu.cycleCnt += 7;
             break;
 
@@ -6408,6 +6408,52 @@ int decode()
                     cpu.cycleCnt += 23;
                     break;
                 
+                //ADDITION-------------------------------------------------------------------------
+                case 0x80: //ADD INSTRUCTION - RegA += RegB
+                    cpu.regA = addFlags(cpu.regA, cpu.regB);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0x81: //ADD INSTRUCTION - RegA += RegC
+                    cpu.regA = addFlags(cpu.regA, cpu.regC);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x82: //ADD INSTRUCTION - RegA += RegD
+                    cpu.regA = addFlags(cpu.regA, cpu.regD);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x83: //ADD INSTRUCTION - RegA += RegE 
+                    cpu.regA = addFlags(cpu.regA, cpu.regE);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x84: //ADD INSTRUCTION - RegA += IX high
+                    cpu.regA = addFlags(cpu.regA, cpu.reg_IX >> 8);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x85: //ADD INSTRUCTION - RegA += IX Low
+                    cpu.regA = addFlags(cpu.regA, cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x86: //ADD INSTRUCTION - RegA += memory[IX+d]
+                    cpu.regA = addFlags(cpu.regA,z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x87: //ADD INSTRUCTION - RegA += RegA
+                    cpu.regA = addFlags(cpu.regA, cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                //ADDITION WITH CARRY----------------------------------------------------------------
+
+        
+        
+                
             }   
             
 
@@ -8444,11 +8490,11 @@ int main(){
 
     uint16_t start1 = 0x6666;
     uint16_t start2 = 0x6669;
-   /*
-    cpu.reg_IX = start1;
+   
+    /*cpu.reg_IX = start1;
     memory[start1] = 0x92;
     //memory[start1+1] = 0xda;
-    cpu.regA = 0xff;
+    cpu.regA = 0x02;
 
 //     //cpu.Flags |= 0x01;
      z80_mem_write(0x00, 0xdd); //dd instruction
@@ -8457,12 +8503,10 @@ int main(){
      z80_mem_write(0x03, 0x77); //(IX+d) = A
      z80_mem_write(0x04, 0x03); //d
      z80_mem_write(0x05, 0xdd); //dd
-     z80_mem_write(0x06, 0x2b); //IX--
+     z80_mem_write(0x06, 0x86); //A += 
+     z80_mem_write(0x07, 0x81);
 
-
-
-
-     z80_mem_write(0x07, 0x76);//halt*/
+     z80_mem_write(0x08, 0x76);//halt*/
     
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
