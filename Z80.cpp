@@ -3268,7 +3268,7 @@ int decode()
             break;
 
         case 0xaf: // XOR A with A 
-            cpu.regA = cpu.regA ^ cpu.regB; //bitwise XOR for reg a with a 
+            cpu.regA = cpu.regA ^ cpu.regA; //bitwise XOR for reg a with a 
             xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
@@ -3333,7 +3333,7 @@ int decode()
             break;
 
         case 0xb7: // OR A with A 
-            cpu.regA = cpu.regA | cpu.regB; //bitwise OR for reg a with a 
+            cpu.regA = cpu.regA | cpu.regA; //bitwise OR for reg a with a 
             xorFlags(cpu.regA);
             cpu.cycleCnt += 4;
             break;
@@ -6602,6 +6602,56 @@ int decode()
                     cpu.regA = andFlags(cpu.regA, cpu.regA); //bitwise AND for reg a with A
                     cpu.cycleCnt += 8;
                     break;
+                
+                //OR INSTRUCTIONS--------------------------------------------------------------------------------------
+                case 0xb0: // OR A with B 
+                    cpu.regA = cpu.regA | cpu.regB; //bitwise OR for reg a with a 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xb1: // OR A with C 
+                    cpu.regA = cpu.regA | cpu.regC; //bitwise OR for reg a with a 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xb2: // OR A with D 
+                    cpu.regA = cpu.regA | cpu.regD; //bitwise OR for reg a with a 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xb3: // OR A with E 
+                    cpu.regA = cpu.regA | cpu.regE; //bitwise OR for reg a with e  
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xb4: // OR A with IX high
+                    cpu.regA = cpu.regA | (cpu.reg_IX >> 8); //bitwise OR for reg a with h 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xb5: // OR A with IX low
+                    cpu.regA = cpu.regA | (cpu.reg_IX & 0xff); //bitwise OR for reg a with l 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xb6: // OR A with (IX+b) 
+                    cpu.regA = cpu.regA | z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))); //bitwise OR for reg a with hl 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 19;
+                    break;
+
+                case 0xb7: // OR A with A 
+                    cpu.regA = cpu.regA | cpu.regA; //bitwise OR for reg a with a 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
 
 
             } //logical instruct
@@ -8386,13 +8436,20 @@ uint8_t andFlags(uint8_t reg1, uint8_t reg2){
 
 void xorFlags(uint8_t reg){
 
+    cpu.Flags = ZSPXYtable[reg]; //does S, Z, P , X , Y
+    cpu.Flags &= ~0x10; //Reset H
+    cpu.Flags &= ~0x02; // Reset N
+    cpu.Flags &= ~0x01; // Reset C
+
+
+    /*
     cpu.Flags |= ~0x01; // sets the carry flag to 0 
     cpu.Flags |= ~0x02; // sets the sub flag 
     (__builtin_popcount(reg) % 2) ? (cpu.Flags |= ~0x04) : (cpu.Flags |= 0x04); // sets the parity flag
     cpu.Flags |= ~0x08;
     (reg = 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags |= ~0x40);
     (reg >= 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags |= ~0x80);
-
+    */
 }
 
 //Does the logic for adding a register to another, returns their sum and sets their flags.
@@ -8655,6 +8712,7 @@ int main(){
     uint16_t start1 = 0x6666;
     uint16_t start2 = start1 + 3;
    
+   /*
    
     cpu.reg_IX = start1;
     memory[start1] = 0x92;
@@ -8669,11 +8727,11 @@ int main(){
      z80_mem_write(0x03, 0x77); //(IX+d) = A
      z80_mem_write(0x04, 0x03); //d
      z80_mem_write(0x05, 0xdd); //dd
-     z80_mem_write(0x06, 0xa6); //A += 
-     z80_mem_write(0x07, 0x81);
+     z80_mem_write(0x06, 0xb7); //A += 
+     //z80_mem_write(0x07, 0x81);
 
-     z80_mem_write(0x08, 0x76);//halt
-    
+     z80_mem_write(0x07, 0x76);//halt
+    */
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
