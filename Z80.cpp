@@ -4614,6 +4614,76 @@ int decode()
                     z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regB);
                     cpu.cycleCnt += 19;
                     break;
+                
+                case 0x71: //LOAD INSTRUCTION - Load (IX+d) with c
+                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regC);
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x72: //LOAD INSTRUCTION - Load (IX+d) with D
+                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regD);
+                    cpu.cycleCnt += 19;
+                    break;
+
+                case 0x73: //LOAD INSTRUCTION - Load (IX+d) with E
+                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regE);
+                    cpu.cycleCnt += 19;
+                    break;
+
+                case 0x74: //LOAD INSTRUCTION - Load (IX+d) with H
+                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regH);
+                    cpu.cycleCnt += 19;
+                    break;
+
+                case 0x75: //LOAD INSTRUCTION - Load (IX+d) with L
+                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regL);
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x36: //LOAD INSTRUCTION - Load (IX+d) with n
+                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(++cpu.reg_PC-2)))),z80_mem_read(++cpu.reg_PC));
+                    cpu.cycleCnt += 19;
+                    break;
+
+                case 0x77: //LOAD INSTRUCTION - Load (IX+d) with A
+                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regA);
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x46: //LOAD INSTRUCTION - Load B with (IX+d)
+                    cpu.regB = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x56: //LOAD INSTRUCTION - Load D with (IX+d)
+                    cpu.regD = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x66: //LOAD INSTRUCTION - Load H with (IX+d)
+                    cpu.regH = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x4e: //LOAD INSTRUCTION - Load C with (IX+d)
+                    cpu.regC = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x5e: //LOAD INSTRUCTION - Load E with (IX+d)
+                    cpu.regE = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x6e: //LOAD INSTRUCTION - Load L with (IX+d)
+                    cpu.regL = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x7e: //LOAD INSTRUCTION - Load A with (IX+d)
+                    cpu.regA = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.cycleCnt += 19;
+                    break;
 
             }                
                 
@@ -5002,6 +5072,7 @@ void incR() //INCREASING R DOES NOT CHANGE THE 8th BIT
     (bit7)? (cpu.reg_R |= 0x80):(cpu.reg_R &= ~0x80);//8th bit restored
 }
 
+//Displaces a unsigned value by (signed) d.
 uint16_t displ(uint16_t val, int8_t d)
 {
     if(bool(d&0x80))
@@ -5058,24 +5129,28 @@ int main(){
 //    //cpu.Flags |= 0x01;
 
     uint16_t start1 = 0x6666;
-    uint16_t start2 = 0x6663;
-   /*
+    uint16_t start2 = 0x6669;
+   
     cpu.reg_IX = start1;
-    //memory[start1] = 0x92;
+    memory[start1] = 0x92;
     //memory[start1+1] = 0xda;
-    cpu.regB = 0xfe;
+    cpu.regA = 0xfe;
 
 //     //cpu.Flags |= 0x01;
-     z80_mem_write(0x00, 0xdd);//dd instruction
-     z80_mem_write(0x01, 0x23);// ix++
-     z80_mem_write(0x02, 0xdd);
-     z80_mem_write(0x03, 0x70);//
-     z80_mem_write(0x04, 0x81);
+     z80_mem_write(0x00, 0xdd); //dd instruction
+     z80_mem_write(0x01, 0x23); // ix++
+     z80_mem_write(0x02, 0xdd); //dd
+     z80_mem_write(0x03, 0x77); //(IX+d) = A
+     z80_mem_write(0x04, 0x03); //d
+     z80_mem_write(0x05, 0xdd); //dd
+     z80_mem_write(0x06, 0x7e); //B = (IX+d)
+     z80_mem_write(0x07, 0x81); //d
 
 
-     z80_mem_write(0x05, 0x76);//halt
-    */
 
+
+     z80_mem_write(0x08, 0x76);//halt
+    
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
