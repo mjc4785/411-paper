@@ -6352,6 +6352,62 @@ int decode()
                     cpu.reg_IX++;
                     cpu.cycleCnt += 10;
                     break;
+
+                case 0x34: //INCRAMENT INSTRUCTION - Adds 1 to (IX+d)
+                    z80_mem_write(
+                        (displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),
+                        incFlags(z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC)))))));
+                    cpu.cycleCnt += 23;
+                    break;
+                
+                //DECREMENT INSTRUCTIONS------------------------------------------------------------------------------
+                case 0x05: //DECREMENT INSTRUCTION - Subs 1 from Register B
+                    cpu.regB = decFlags(cpu.regB);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x15: //DECREMENT INSTRUCTION - Subs 1 from Register D
+                    cpu.regD = decFlags(cpu.regD);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x25: //DECREMENT INSTRUCTION - Subs 1 from high byte of IX
+                    cpu.reg_IX = (decFlags(cpu.reg_IX >> 8)<<8)|(cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x0d: //DECREMENT INSTRUCTION - Subs 1 from Register C
+                    cpu.regC = decFlags(cpu.regC);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x1d: //DECREMENT INSTRUCTION - Subs 1 from Register E
+                    cpu.regE = decFlags(cpu.regE);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x2d: //DECREMENT INSTRUCTION - Subs 1 from low byte of IX
+                    cpu.reg_IX = (cpu.reg_IX >> 8)<<8|(decFlags(cpu.reg_IX & 0xff));
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x3d: //DECREMENT INSTRUCTION - Subs 1 from Register A
+                    cpu.regA = decFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x2b: //DECREMENT INSTRUCTION - Subs 1 from IX
+                    cpu.reg_IX--;
+                    cpu.cycleCnt += 10;
+                    break;
+
+                case 0x35: //DECREMENT INSTRUCTION - Subs 1 from (IX+d)
+                    z80_mem_write(
+                        (displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),
+                        decFlags(z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC)))))));
+                    cpu.cycleCnt += 23;
+                    break;
+                
             }   
             
 
@@ -8388,11 +8444,11 @@ int main(){
 
     uint16_t start1 = 0x6666;
     uint16_t start2 = 0x6669;
-   
-    /*cpu.reg_IX = start1;
+   /*
+    cpu.reg_IX = start1;
     memory[start1] = 0x92;
     //memory[start1+1] = 0xda;
-    cpu.regA = 0xfe;
+    cpu.regA = 0xff;
 
 //     //cpu.Flags |= 0x01;
      z80_mem_write(0x00, 0xdd); //dd instruction
@@ -8401,13 +8457,12 @@ int main(){
      z80_mem_write(0x03, 0x77); //(IX+d) = A
      z80_mem_write(0x04, 0x03); //d
      z80_mem_write(0x05, 0xdd); //dd
-     z80_mem_write(0x06, 0x7e); //B = (IX+d)
-     z80_mem_write(0x07, 0x81); //d
+     z80_mem_write(0x06, 0x2b); //IX--
 
 
 
 
-     z80_mem_write(0x08, 0x76);//halt*/
+     z80_mem_write(0x07, 0x76);//halt*/
     
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
