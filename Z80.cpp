@@ -6651,6 +6651,55 @@ int decode()
                     xorFlags(cpu.regA);
                     cpu.cycleCnt += 8;
                     break;
+                
+                //XOR INSTRUCTIONS--------------------------------------------------------------------------------------
+                case 0xa8: // XOR A with B 
+                    cpu.regA = cpu.regA ^ cpu.regB; //bitwise XOR for reg a with a 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xa9: // XOR A with C 
+                    cpu.regA = cpu.regA ^ cpu.regC; //bitwise XOR for reg a with a 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xaa: // XOR A with D 
+                    cpu.regA = cpu.regA ^ cpu.regD; //bitwise XOR for reg a with a 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xab: // XOR A with E 
+                    cpu.regA = cpu.regA ^ cpu.regE; //bitwise XOR for reg a with e  
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xac: // XOR A with IX high
+                    cpu.regA = cpu.regA ^ (cpu.reg_IX >> 8); //bitwise XOR for reg a with h 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xad: // XOR A with IX low
+                    cpu.regA = cpu.regA ^ (cpu.reg_IX & 0xff); //bitwise XOR for reg a with l 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xae: // XOR A with (IX+b) 
+                    cpu.regA = cpu.regA ^ (z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise XOR for reg a with hl 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 19;
+                    break;
+
+                case 0xaf: // XOR A with A 
+                    cpu.regA = cpu.regA ^ cpu.regA; //bitwise XOR for reg a with a 
+                    xorFlags(cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
 
 
 
@@ -8712,7 +8761,6 @@ int main(){
     uint16_t start1 = 0x6666;
     uint16_t start2 = start1 + 3;
    
-   /*
    
     cpu.reg_IX = start1;
     memory[start1] = 0x92;
@@ -8727,11 +8775,11 @@ int main(){
      z80_mem_write(0x03, 0x77); //(IX+d) = A
      z80_mem_write(0x04, 0x03); //d
      z80_mem_write(0x05, 0xdd); //dd
-     z80_mem_write(0x06, 0xb7); //A += 
-     //z80_mem_write(0x07, 0x81);
+     z80_mem_write(0x06, 0xae); //A += 
+     z80_mem_write(0x07, 0x81);
 
-     z80_mem_write(0x07, 0x76);//halt
-    */
+     z80_mem_write(0x08, 0x76);//halt
+    
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
