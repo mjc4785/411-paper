@@ -1115,47 +1115,47 @@ int decode()
 
         // SUBTRACT FLAGS CHANGE, RESGISTERS DONT-----------------------------------------------------
         case 0xb8: //cp B from A
-            subFlags(cpu.reg_A, cpu.reg_B);
+            subFlags(cpu.regA, cpu.regB);
             cpu.cycleCnt+=4;
             break;
 
         case 0xb9: //cp C from A
-            subFlags(cpu.reg_A, cpu.reg_C);
+            subFlags(cpu.regA, cpu.regC);
             cpu.cycleCnt+=4;
             break;
 
         case 0xba: //cp D from A
-            subFlags(cpu.reg_A, cpu.reg_D);
+            subFlags(cpu.regA, cpu.regD);
             cpu.cycleCnt+=4;
             break;
 
         case 0xbb: //cp E from A
-            subFlags(cpu.reg_A, cpu.reg_E);
+            subFlags(cpu.regA, cpu.regE);
             cpu.cycleCnt+=4;
             break; 
 
         case 0xbc: //cp H from A
-            subFlags(cpu.reg_A, cpu.reg_H);
+            subFlags(cpu.regA, cpu.regH);
             cpu.cycleCnt+=4;
             break;
 
         case 0xbd: //cp L from A
-            subFlags(cpu.reg_A, cpu.reg_L);
+            subFlags(cpu.regA, cpu.regL);
             cpu.cycleCnt+=4;
             break;
 
         case 0xbe: //cp HL from A
-            subFlags(cpu.reg_A, z80_mem_read(((cpu.regH << 8) | cpu.regL)));
+            subFlags(cpu.regA, z80_mem_read(((cpu.regH << 8) | cpu.regL)));
             cpu.cycleCnt+=7;
             break;
 
         case 0xbf: //cp A from A
-            subFlags(cpu.reg_A, cpu.reg_A);
+            subFlags(cpu.regA, cpu.regA);
             cpu.cycleCnt+=4;
             break;
         
         case 0xfe: //cp n from A
-            subFlags(cpu.reg_A, z80_mem_read(cpu.reg_PC++));
+            subFlags(cpu.regA, z80_mem_read(cpu.reg_PC++));
             cpu.cycleCnt+=7;
             break;
 
@@ -3344,83 +3344,35 @@ int decode()
             cpu.cycleCnt += 7;
             break;
 
-
-
-
-
-
-        
-
-
-
-
         
         // PUSH FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        /*SP is decremented and B is stored into the memory location pointed to by SP.
-         SP is decremented again and C is stored into the memory location pointed to by SP*/
-        case 0xc5:
-
-            cpu.regB--;
-            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regB );
-
-            cpu.regB--;
-            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regC );
-
+        case 0xc5: //PUSH BC
+            z80_mem_write( --cpu.reg_SP, cpu.regB );
+            z80_mem_write( --cpu.reg_SP, cpu.regC );
             cpu.cycleCnt += 11;
-            
             break;
 
-        /*SP is decremented and D is stored into the memory location pointed to by SP. 
-        SP is decremented again and E is stored into the memory location pointed to by SP.*/
-        case 0xd5: 
-            
-            cpu.regB--;
-            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regD );
-
-            cpu.regB--;
-            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regE );
-
+        case 0xd5: //PUSH DE
+            z80_mem_write( --cpu.reg_SP, cpu.regD );
+            z80_mem_write( --cpu.reg_SP, cpu.regE );
             cpu.cycleCnt += 11;
-            
             break;
 
-        /*SP is decremented and H is stored into the memory location pointed to by SP. 
-        SP is decremented again and L is stored into the memory location pointed to by SP.*/
-        case 0xe5:
-            
-            cpu.regB--;
-            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regH );
-
-            cpu.regB--;
-            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regL );
-
+        case 0xe5: //PUSH HL
+            z80_mem_write( --cpu.reg_SP, cpu.regH );
+            z80_mem_write( --cpu.reg_SP, cpu.regL );
             cpu.cycleCnt += 11;
-            
             break;
-
-        /*SP is decremented and A is stored into the memory location pointed to by SP. 
-        SP is decremented again and F is stored into the memory location pointed to by SP.*/
-        case 0xf5:
-            
-            cpu.regB--;
-            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.regA );
-
-            cpu.regB--;
-            z80_mem_write( z80_mem_read(cpu.reg_SP), cpu.reg_F );
-
+        
+        case 0xf5: //PUSH AF
+            z80_mem_write( --cpu.reg_SP, cpu.regA );
+            z80_mem_write( --cpu.reg_SP, cpu.Flags );
             cpu.cycleCnt += 11;
-            
             break;
-
-
-
 
         
         // CALL FUNCS ------------------------------------------------------------------------------------------------------------------------------------------------------------
         case 0xc4: //If the zero flag is unset
-        
-        
             {
                 uint16_t nn = z80_mem_read(cpu.reg_PC) | (z80_mem_read(cpu.reg_PC + 1) << 8);
                 cpu.reg_PC += 2; // Move PC past the nn bytes
@@ -6700,10 +6652,85 @@ int decode()
                     xorFlags(cpu.regA);
                     cpu.cycleCnt += 8;
                     break;
+                
+                // SUBTRACT FLAGS CHANGE, RESGISTERS DONT-----------------------------------------------------
+                case 0xb8: //cp B from A
+                    subFlags(cpu.regA, cpu.regB);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xb9: //cp C from A
+                    subFlags(cpu.regA, cpu.regC);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xba: //cp D from A
+                    subFlags(cpu.regA, cpu.regD);
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xbb: //cp E from A
+                    subFlags(cpu.regA, cpu.regE);
+                    cpu.cycleCnt += 8;
+                    break; 
+
+                case 0xbc: //cp IX High from A
+                    subFlags(cpu.regA, (cpu.reg_IX >> 8));
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xbd: //cp IX low from A
+                    subFlags(cpu.regA, (cpu.reg_IX & 0xff));
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xbe: //cp HL from A
+                    subFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.cycleCnt += 19;
+                    break;
+
+                case 0xbf: //cp A from A
+                    subFlags(cpu.regA, cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0xfe: //cp n from A
+                    subFlags(cpu.regA, z80_mem_read(cpu.reg_PC++));
+                    cpu.cycleCnt+=7;
+                    break;
 
 
 
             } //logical instruct
+
+            //OTHER=======================================================================
+            {
+                case 0xe1: //POP into IX
+                    cpu.reg_IX = popS();
+                    cpu.cycleCnt += 14;
+                    break;
+                
+                case  0xe3: //EXCHANGE INSTRUCTION - swap (sp) with L and (sp+1) with H
+                {
+                    uint16_t temp = cpu.reg_IX;
+                    cpu.reg_IX= (z80_mem_read(cpu.reg_SP+1)<<8)|(z80_mem_read(cpu.reg_SP));
+                    z80_mem_write16(cpu.reg_SP, temp);
+                    cpu.cycleCnt += 23;
+                    break;
+                }
+
+                case 0xe5: //PUSH INSTRUCTION- add IX onto stack
+                    z80_mem_write( --cpu.reg_SP, (cpu.reg_IX >> 8) );
+                    z80_mem_write( --cpu.reg_SP, (cpu.reg_IX & 0xff) );
+                    cpu.cycleCnt += 15;
+                    break;
+                
+                case 0xe9: // JUMP (IX): adds contence of IX into PC
+                    cpu.reg_PC = cpu.reg_IX;
+                    cpu.cycleCnt+=8;
+                    break;
+
+            }//Other instructions
                 
         
         
@@ -8758,27 +8785,31 @@ int main(){
 //    memory[0x2223] = 0x66;
 //    //cpu.Flags |= 0x01;
 
-    uint16_t start1 = 0x6666;
+    uint16_t start1 = 0x1004;
     uint16_t start2 = start1 + 3;
    
    
-    cpu.reg_IX = start1;
-    memory[start1] = 0x92;
-    //memory[start1+1] = 0xda;
+    cpu.reg_IX = 0x2233;
+    cpu.reg_SP = 0x1007;
+    //memory[start1] = 0x90;
+    //memory[start1+1] = 0x48;
     cpu.regA = 0x55;
     cpu.regB = 0x66;
 
-     cpu.Flags |= 0x01;
-     z80_mem_write(0x00, 0xdd); //dd instruction
-     z80_mem_write(0x01, 0x23); // ix++
-     z80_mem_write(0x02, 0xdd); //dd
-     z80_mem_write(0x03, 0x77); //(IX+d) = A
-     z80_mem_write(0x04, 0x03); //d
-     z80_mem_write(0x05, 0xdd); //dd
-     z80_mem_write(0x06, 0xae); //A += 
-     z80_mem_write(0x07, 0x81);
+    
+    cpu.Flags |= 0x01;
+    z80_mem_write(0x00, 0xdd); //dd instruction
+    z80_mem_write(0x01, 0x23); // ix++
+    z80_mem_write(0x02, 0xdd); //dd
+    z80_mem_write(0x03, 0x77); //(IX+d) = A
+    z80_mem_write(0x04, 0x03); //d
+    z80_mem_write(0x05, 0xdd); //dd
+    z80_mem_write(0x06, 0xe5); //A += 
+    //z80_mem_write(0x07, 0x81);
+    
 
-     z80_mem_write(0x08, 0x76);//halt
+
+    z80_mem_write(0x07, 0x76);//halt
     
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
