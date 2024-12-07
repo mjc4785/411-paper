@@ -38,7 +38,7 @@ uint8_t addFlags(uint8_t, uint8_t);
 uint8_t subFlags(uint8_t, uint8_t);
 uint8_t incFlags(uint8_t);
 uint8_t twosComp(uint8_t);
-void andFlags(uint8_t);
+uint8_t andFlags(uint8_t, uint8_t);
 void xorFlags(uint8_t);
 uint16_t incPaired(uint8_t, uint8_t);
 uint16_t add16Flags(uint8_t, uint8_t, uint16_t);
@@ -3176,56 +3176,47 @@ int decode()
 
         //AND INSTRUCTIONS -----------------------------------------------
         case 0xa0: //bitwise and register A with B
-            cpu.reg_A = cpu.reg_A & cpu.reg_B; //bitwise AND for reg a with b 
-            andFlags(cpu.reg_A);
+            cpu.regA = andFlags(cpu.regA, cpu.regB); //bitwise AND for reg a with b 
             cpu.cycleCnt += 4;
             break;
 
         case 0xa1: //bitwise and register A with C
-            cpu.reg_A = cpu.reg_A & cpu.reg_C; //bitwise AND for reg a with c
-            andFlags(cpu.reg_A);
+            cpu.regA = andFlags(cpu.regA, cpu.regC); //bitwise AND for reg a with c
             cpu.cycleCnt += 4;
             break;
 
         case 0xa2: //bitwise and register A with D
-            cpu.reg_A = cpu.reg_A & cpu.reg_D; //bitwise AND for reg a with d 
-            andFlags(cpu.reg_A);
+            cpu.regA = andFlags(cpu.regA, cpu.regD); //bitwise AND for reg a with D
             cpu.cycleCnt += 4;
             break;
 
         case 0xa3: //bitwise and register A with E
-            cpu.reg_A = cpu.reg_A & cpu.reg_E; //bitwise AND for reg a with e 
-            andFlags(cpu.reg_A);
+            cpu.regA = andFlags(cpu.regA, cpu.regE); //bitwise AND for reg a with E
             cpu.cycleCnt += 4;
             break;
 
         case 0xa4: //bitwise and register A with H
-            cpu.reg_A = cpu.reg_A & cpu.reg_H; //bitwise AND for reg a with H 
-            andFlags(cpu.reg_A);
+            cpu.regA = andFlags(cpu.regA, cpu.regH); //bitwise AND for reg a with H
             cpu.cycleCnt += 4;
             break;
 
         case 0xa5: //bitwise and register A with L
-            cpu.reg_A = cpu.reg_A & cpu.reg_B; //bitwise AND for reg a with l 
-            andFlags(cpu.reg_A);
+            cpu.regA = andFlags(cpu.regA, cpu.regL); //bitwise AND for reg a with L
             cpu.cycleCnt += 4;
             break;
 
         case 0xa6: //bitwise and register A with HL
-            cpu.reg_A = cpu.reg_A & z80_mem_read(((cpu.regH << 8) | cpu.regL)); //bitwise AND for reg a with HL 
-            andFlags(cpu.reg_A);
+            cpu.regA = andFlags(cpu.regA, z80_mem_read(((cpu.regH << 8) | cpu.regL))); //bitwise AND for reg a with HL 
             cpu.cycleCnt += 7;
             break;
 
         case 0xa7: //bitwise and register A with A
-            cpu.reg_A = cpu.reg_A & cpu.reg_A; //bitwise AND for reg a with a 
-            andFlags(cpu.reg_A);
+            cpu.regA = andFlags(cpu.regA, cpu.regA); //bitwise AND for reg a with A
             cpu.cycleCnt += 4;
             break;
 
         case 0xe6:
-            cpu.reg_A = cpu.reg_A & memory[int(cpu.reg_PC++)]; //bitwise AND for reg a with n 
-            andFlags(cpu.reg_A);
+            cpu.regA = andFlags(cpu.regA, memory[int(cpu.reg_PC++)]); //bitwise AND for reg a with n 
             cpu.cycleCnt += 7;
             break;
 
@@ -4305,23 +4296,16 @@ int decode()
 
         //================================================================================================================================
         //DD INSTRUCTIONS=================================================================================================================
-        //================================================================================================================================
-
-
-
-
-
-
-
-    
+        //================================================================================================================================    
         case 0xdd:
         {   
             incR();
             uint8_t inst2 = z80_mem_read(cpu.reg_PC++);
             switch(inst2)
             {
-                //LOAD REGISTER INSTRUCTIONS======================================================================
-            {
+                //============================================================================================================
+                //DDCB TABLE==================================================================================================
+                //============================================================================================================
                 case 0xcb:
                 {
                     incR();
@@ -5930,6 +5914,9 @@ int decode()
                     }
                     break;
                 }
+
+                //LOAD REGISTER INSTRUCTIONS======================================================================
+            {
                 case 0x40: //LOAD INSTUCTION - Load Register B with Register B
                     cpu.regB = cpu.regB;
                     cpu.cycleCnt += 8;
@@ -6571,12 +6558,58 @@ int decode()
                     cpu.regA = sbcFlags(cpu.regA, cpu.regA);
                     cpu.cycleCnt += 8;
                     break;
-                
+            }  //arithmetic instruct
+
+            //LOGICAL STUFF=============================================================================================================
+            {
+                //AND INSTRUCTIONS -----------------------------------------------
+                case 0xa0: //bitwise and register A with B
+                    cpu.regA = andFlags(cpu.regA, cpu.regB); //bitwise AND for reg a with B
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xa1: //bitwise and register A with C
+                    cpu.regA = andFlags(cpu.regA, cpu.regC); //bitwise AND for reg a with C
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xa2: //bitwise and register A with D
+                    cpu.regA = andFlags(cpu.regA, cpu.regD); //bitwise AND for reg a with D
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xa3: //bitwise and register A with E
+                    cpu.regA = andFlags(cpu.regA, cpu.regE); //bitwise AND for reg a with E
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xa4: //bitwise and register A with IX high
+                    cpu.regA = andFlags(cpu.regA, (cpu.reg_IX >> 8)); //bitwise AND for reg a with H 
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xa5: //bitwise and register A with IX low
+                    cpu.regA = andFlags(cpu.regA, (cpu.reg_IX & 0xff)); //bitwise AND for reg a with l 
+                    cpu.cycleCnt += 8;
+                    break;
+
+                case 0xa6: //bitwise and register A with (IX+d)
+                    cpu.regA = andFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise AND
+                    cpu.cycleCnt += 19;
+                    break;
+
+                case 0xa7: //bitwise and register A with A
+                    cpu.regA = andFlags(cpu.regA, cpu.regA); //bitwise AND for reg a with A
+                    cpu.cycleCnt += 8;
+                    break;
+
+
+            } //logical instruct
                 
         
         
                 
-            }   
+              
             
 
 
@@ -8330,15 +8363,24 @@ void printRegTest(Z80 cpu)
 }
 
 
-void andFlags(uint8_t reg){
+uint8_t andFlags(uint8_t reg1, uint8_t reg2){
 
-            //flags (move this into a func that gets passed reg a) 
+    uint8_t res = reg1 & reg2;
+
+    cpu.Flags = ZSPXYtable[res]; //does S, Z, P , X , Y
+    cpu.Flags |= 0x10; //Set H
+    cpu.Flags &= ~0x02; // Reset N
+    cpu.Flags &= ~0x01; // Reset C
+
+    return res;
+
+    /*            //flags (move this into a func that gets passed reg a) 
     cpu.Flags |= ~0x01; // sets the carry flag to 0 
     cpu.Flags |= ~0x02; // sets the sub flag 
     (__builtin_popcount(reg) % 2) ? (cpu.Flags |= ~0x04) : (cpu.Flags |= 0x04); // sets the parity flag
     cpu.Flags |= ~0x08;
     (reg = 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags |= ~0x40);
-    (reg >= 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags |= ~0x80);
+    (reg >= 0x80) ? (cpu.Flags |= 0x80) : (cpu.Flags |= ~0x80);*/
 
 }
 
@@ -8611,13 +8653,14 @@ int main(){
 //    //cpu.Flags |= 0x01;
 
     uint16_t start1 = 0x6666;
-    uint16_t start2 = 0x6669;
+    uint16_t start2 = start1 + 3;
    
-   /*
+   
     cpu.reg_IX = start1;
     memory[start1] = 0x92;
     //memory[start1+1] = 0xda;
-    cpu.regA = 0x99;
+    cpu.regA = 0x55;
+    cpu.regB = 0x66;
 
      cpu.Flags |= 0x01;
      z80_mem_write(0x00, 0xdd); //dd instruction
@@ -8626,11 +8669,11 @@ int main(){
      z80_mem_write(0x03, 0x77); //(IX+d) = A
      z80_mem_write(0x04, 0x03); //d
      z80_mem_write(0x05, 0xdd); //dd
-     z80_mem_write(0x06, 0x9f); //A += 
-     //z80_mem_write(0x07, 0x81);
+     z80_mem_write(0x06, 0xa6); //A += 
+     z80_mem_write(0x07, 0x81);
 
-     z80_mem_write(0x07, 0x76);//halt
-    */
+     z80_mem_write(0x08, 0x76);//halt
+    
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
