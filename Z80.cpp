@@ -6732,11 +6732,29 @@ int decode()
 
             }//Other instructions
                 
-        
-        
+            //16 BIT ARITHMETIC=====================================================
+            {
+                case 0x09: // ADD IX += BC
+                    cpu.reg_IX = add16Flags(cpu.regB, cpu.regC, cpu.reg_IX);
+                    cpu.cycleCnt+=15;
+                    break;
                 
-              
-            
+                case 0x19: // ADD IX += DE
+                    cpu.reg_IX = add16Flags(cpu.regD, cpu.regE, cpu.reg_IX);
+                    cpu.cycleCnt+=15;
+                    break;
+                
+                case 0x29: // ADD IX += IX
+                    cpu.reg_IX = add16Flags(cpu.reg_IX>>8, cpu.reg_IX&0xff, cpu.reg_IX);
+                    cpu.cycleCnt+=15;
+                    break;
+                
+                case 0x39: // ADD IX += sp
+                    cpu.reg_IX = add16Flags(cpu.reg_SP >> 8, cpu.reg_SP & 0xff, cpu.reg_IX);
+                    cpu.cycleCnt+=15;
+                    break;
+
+            }//16b math 
 
 
                 default:
@@ -8789,27 +8807,23 @@ int main(){
     uint16_t start2 = start1 + 3;
    
    
-    cpu.reg_IX = 0x2233;
-    cpu.reg_SP = 0x1007;
+    cpu.reg_IX = 0x2211;
+    cpu.reg_SP = 0x1122;
     //memory[start1] = 0x90;
     //memory[start1+1] = 0x48;
-    cpu.regA = 0x55;
-    cpu.regB = 0x66;
+    cpu.regD = 0x11;
+    cpu.regE = 0x22;
 
     
     cpu.Flags |= 0x01;
-    z80_mem_write(0x00, 0xdd); //dd instruction
-    z80_mem_write(0x01, 0x23); // ix++
-    z80_mem_write(0x02, 0xdd); //dd
-    z80_mem_write(0x03, 0x77); //(IX+d) = A
-    z80_mem_write(0x04, 0x03); //d
-    z80_mem_write(0x05, 0xdd); //dd
-    z80_mem_write(0x06, 0xe5); //A += 
-    //z80_mem_write(0x07, 0x81);
+    
+    
+    z80_mem_write(0x00, 0xdd); //dd
+    z80_mem_write(0x01, 0x39); //A += 
     
 
 
-    z80_mem_write(0x07, 0x76);//halt
+    z80_mem_write(0x02, 0x76);//halt
     
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
