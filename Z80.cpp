@@ -6531,6 +6531,47 @@ int decode()
                     cpu.cycleCnt += 8;
                     break;
                 
+                //SUB WITH CARRY-----------------------------------------------------------------------------------------------
+                case 0x98: //SUB W CARRY INSTRUCTION - RegA -= RegB - Carry
+                    cpu.regA = sbcFlags(cpu.regA, cpu.regB);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x99: //SUB W CARRY INSTRUCTION - RegA -= RegC - Carry
+                    cpu.regA = sbcFlags(cpu.regA, cpu.regC);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x9a: //SUB W CARRY INSTRUCTION - RegA -= RegD - Carry
+                    cpu.regA = sbcFlags(cpu.regA, cpu.regD);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x9b: //SUB W CARRY INSTRUCTION - RegA -= RegE - Carry
+                    cpu.regA = sbcFlags(cpu.regA, cpu.regE);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x9c: //SUB W CARRY INSTRUCTION - RegA -= RegIX High - Carry
+                    cpu.regA = sbcFlags(cpu.regA, cpu.reg_IX >> 8);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x9d: //SUB W CARRY INSTRUCTION - RegA -= RegIX low - Carry
+                    cpu.regA = sbcFlags(cpu.regA, cpu.reg_IX & 0xff);
+                    cpu.cycleCnt += 8;
+                    break;
+                
+                case 0x9e: //SUB W CARRY INSTRUCTION - RegA -= (IX+d) - Carry
+                    cpu.regA = sbcFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.cycleCnt += 19;
+                    break;
+                
+                case 0x9f: //SUB W CARRY INSTRUCTION - RegA -= RegA - Carry
+                    cpu.regA = sbcFlags(cpu.regA, cpu.regA);
+                    cpu.cycleCnt += 8;
+                    break;
+                
                 
         
         
@@ -8572,23 +8613,24 @@ int main(){
     uint16_t start1 = 0x6666;
     uint16_t start2 = 0x6669;
    
+   /*
     cpu.reg_IX = start1;
     memory[start1] = 0x92;
     //memory[start1+1] = 0xda;
-    cpu.regA = 0x02;
+    cpu.regA = 0x99;
 
-     //cpu.Flags |= 0x01;
+     cpu.Flags |= 0x01;
      z80_mem_write(0x00, 0xdd); //dd instruction
      z80_mem_write(0x01, 0x23); // ix++
      z80_mem_write(0x02, 0xdd); //dd
      z80_mem_write(0x03, 0x77); //(IX+d) = A
      z80_mem_write(0x04, 0x03); //d
      z80_mem_write(0x05, 0xdd); //dd
-     z80_mem_write(0x06, 0x8e); //A += 
-     z80_mem_write(0x07, 0x81);
+     z80_mem_write(0x06, 0x9f); //A += 
+     //z80_mem_write(0x07, 0x81);
 
-     z80_mem_write(0x08, 0x76);//halt
-    
+     z80_mem_write(0x07, 0x76);//halt
+    */
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
