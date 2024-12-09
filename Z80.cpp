@@ -16,7 +16,7 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\call-return.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\divide-8.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameEMMA;
 
@@ -54,6 +54,7 @@ uint16_t adc16Flags(uint16_t, uint16_t);
 void incR();
 uint16_t displ(uint16_t, int8_t);
 uint16_t displ2(uint16_t , uint8_t );
+uint8_t sraFlags(uint8_t);
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -1860,58 +1861,42 @@ int decode()
 
 
                     case 0x28: // sra b
-                        ((cpu.regB & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regB >>= 1;
-                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                        cpu.regB = sraFlags(cpu.regB);
                         cpu.cycleCnt+=8;
                         break;
 
                     case 0x29: // sra c
-                        ((cpu.regC & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regC >>= 1;
-                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.regC = sraFlags(cpu.regC);
                         cpu.cycleCnt+=8;
                         break;
 
                     case 0x2A: // sra d
-                        ((cpu.regD & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regD >>= 1;
-                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.regD = sraFlags(cpu.regD);
                         cpu.cycleCnt+=8;
                         break;
 
                     case 0x2B: // sra e
-                        ((cpu.regE & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regE >>= 1;
-                        cpu.Flags = ZSPXYtable[int(cpu.regE)]; //Set Z, S, X, Y
+                        cpu.regE = sraFlags(cpu.regE);
                         cpu.cycleCnt+=8;
                         break;
 
                     case 0x2C: // sra h
-                        ((cpu.regH & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regH >>= 1;
-                        cpu.Flags = ZSPXYtable[int(cpu.regH)]; //Set Z, S, X, Y
+                        cpu.regH = sraFlags(cpu.regH);
                         cpu.cycleCnt+=8;
                         break;
 
                     case 0x2D: // sra l
-                        ((cpu.regL & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regL >>= 1;
-                        cpu.Flags = ZSPXYtable[int(cpu.regL)]; //Set Z, S, X, Y
+                        cpu.regL = sraFlags(cpu.regL);
                         cpu.cycleCnt+=8;
                         break;
 
                     case 0x2E: // sra (hl)
-                        (((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01));
-                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 1)));
-                        cpu.Flags = ZSPXYtable[int((z80_mem_read(((cpu.regH << 8) | cpu.regL))))]; //Set Z, S, X, Y
+                        z80_mem_write( ((cpu.regH << 8) | cpu.regL), sraFlags((z80_mem_read(((cpu.regH << 8) | cpu.regL))))) ;
                         cpu.cycleCnt+=15;
                         break;
  
                     case 0x2F: // sra a
-                        ((cpu.regA & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regA >>= 1;
-                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                        cpu.regA = sraFlags(cpu.regA);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -9593,6 +9578,16 @@ uint16_t displ2(uint16_t val, uint8_t d)
     return val + offset;
 }
 
+uint8_t sraFlags(uint8_t reg)
+{
+    uint8_t carry = reg & 0x01; //bit 0 coppied into carry flag 
+    reg = reg&0x80 | reg >> 1; //Shift right by 1, preserve bit 7
+    cpu.Flags = ZSPXYtable[reg] | carry; //Does, S Z Y X P, C flags
+    //H & N Flags reset
+
+    return reg;
+}
+
 //MAIN==============================================================================================================================
 int main(){
     
@@ -9602,7 +9597,7 @@ int main(){
     // NECESSSARY CODE
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-   z80_mem_load(fileRun.c_str()); //Load into memory
+   //z80_mem_load(fileRun.c_str()); //Load into memory
 
    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -9644,27 +9639,27 @@ int main(){
     uint16_t start2 = start1 + 3;
    
    
-    /*cpu.reg_IY = 0x2211;
-    cpu.reg_SP = 0x1122;
-    //memory[start1] = 0x90;
-    //memory[start1+1] = 0x48;
-    cpu.regD = 0x11;
-    cpu.regE = 0x22;*/
+    cpu.reg_IX = 1000;
+    memory[start1] = 0x00;
+    memory[start1+3] = 0xb0;
+    cpu.regB = 0x02;
 
-
-   
-    /*cpu.Flags |= 0x01;
     
     
-    z80_mem_write(0x00, 0x38); //jp to nn if z unset
-    z80_mem_write(0x01, 0x05); //d
-    z80_mem_write(0x03, 0x04); //b++
-    z80_mem_write(0x04, 0x76); //halt
-    z80_mem_write(0x05, 0x38); //jr
-    z80_mem_write(0x06, 0xfe); //d
-    z80_mem_write(0x07, 0x3c); //a++
-    z80_mem_write(0x08, 0x76); //halt*/
-    
+    z80_mem_write(0x00, 0xdd); //dd
+    z80_mem_write(0x01, 0xcb); //cb
+    z80_mem_write(0x02, 0x03); //IX+d
+    z80_mem_write(0x03, 0x28); //
+    z80_mem_write(0x04, 0xdd); //dd
+    z80_mem_write(0x05, 0xcb); //cb
+    z80_mem_write(0x06, 0x03); //IX+d
+    z80_mem_write(0x07, 0x28); //
+    z80_mem_write(0x08, 0xdd); //dd
+    z80_mem_write(0x09, 0xcb); //cb
+    z80_mem_write(0x0a, 0x03); //IX+d
+    z80_mem_write(0x0b, 0x28); //
+    z80_mem_write(0x0c, 0x80); //a+=b
+    z80_mem_write(0x0d, 0x76); //halt
 
     
 
