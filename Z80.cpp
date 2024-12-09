@@ -16,7 +16,7 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\jump-relative.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\call-return.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameEMMA;
 
@@ -48,6 +48,7 @@ uint8_t adcFlags(uint8_t, uint8_t);
 uint8_t sbcFlags(uint8_t, uint8_t);
 void retS();
 uint16_t popS();
+void push(uint16_t);
 uint16_t sbc16Flags(uint16_t, uint16_t);
 uint16_t adc16Flags(uint16_t, uint16_t);
 void incR();
@@ -3450,15 +3451,14 @@ int decode()
 
 
         case 0xe9: // jp (hl): adds contence of HL into PC
-            cpu.reg_PC = z80_mem_read(((cpu.regH << 8) | cpu.regL));
+            cpu.reg_PC = (((cpu.regH << 8) | cpu.regL));
             cpu.cycleCnt+=4;
             break;
 
 
-        case 0xcd:
-        //unconditional jump call
-            cpu.reg_SP = cpu.reg_PC + 3;
-            cpu.reg_PC = z80_mem_read(cpu.reg_PC++);
+        case 0xcd: //unconditional jump call
+            push(cpu.reg_PC+2); //Insturction following this one pushed onto stack
+            cpu.reg_PC = z80_mem_read16(cpu.reg_PC); //jump to nn
             cpu.cycleCnt+=17;
             break;
 
@@ -9490,12 +9490,38 @@ uint8_t sbcFlags(uint8_t reg1, uint8_t reg2)
     return diff & 0xff;
 }
 
+//Push a value onto the stack
+void push(uint16_t val)
+{  
+    cpu.reg_SP-=2;
+    z80_mem_write16(cpu.reg_SP,val);
+
+    /*
+    printf("Pushed %04x\n", val);
+    cout <<"STACK----------"<<endl;
+    for(uint32_t i = cpu.reg_SP; i< 0x10000; i++)
+        {printf("[%04x] = %02x\n", i, memory[i]);}
+    */
+}
+
 //Pop off top of stack into pc
 void retS()
 {
-    uint16_t low = z80_mem_read(cpu.reg_SP++); 
-    uint16_t high = z80_mem_read(cpu.reg_SP++); 
-    cpu.reg_PC = (high << 8) | low;
+    cpu.reg_PC = z80_mem_read16(cpu.reg_SP);
+    cpu.reg_SP += 2;
+
+    /*
+    printf("Popped %04x\n", cpu.reg_PC);
+    cout <<"STACK----------"<<endl;
+    if(cpu.reg_SP != 0 )
+    {
+        for(uint32_t i = cpu.reg_SP; i< 0x10000 && i >0; i++)
+        {printf("[%04x] = %02x\n", i, memory[i]);}
+    }
+    else    
+        {cout << "EMPTY STACK\n" << endl;}
+    */
+    
 }
 
 //pops off top of stack into a register
@@ -9627,11 +9653,11 @@ int main(){
 
 
    
-    cpu.Flags |= 0x01;
+    /*cpu.Flags |= 0x01;
     
     
     z80_mem_write(0x00, 0x38); //jp to nn if z unset
-    /*z80_mem_write(0x01, 0x05); //d
+    z80_mem_write(0x01, 0x05); //d
     z80_mem_write(0x03, 0x04); //b++
     z80_mem_write(0x04, 0x76); //halt
     z80_mem_write(0x05, 0x38); //jr
@@ -9715,8 +9741,6 @@ cpu.Flags = 0x00;    // Zero flag unset
         printf("\tram[%04x] = %02x\t ", start1+i, memory[start1+i]);
         printf("ram[%04x] = %02x\n ", start2+i, memory[start2+i]);
     }
-
-    //printReg(cpu);
 
     return 0;
 }
