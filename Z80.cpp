@@ -9653,6 +9653,13 @@ uint8_t sraFlags(uint8_t reg)
     return reg;
 }
 
+uint8_t offsetFunc(uint8_t value1)
+{
+
+
+    return 0;
+}
+
 //MAIN==============================================================================================================================
 int main(){
     
@@ -9711,21 +9718,44 @@ int main(){
 
     
     
-    z80_mem_write(0x00, 0xdd); //dd
-    z80_mem_write(0x01, 0xcb); //cb
-    z80_mem_write(0x02, 0x03); //IX+d
-    z80_mem_write(0x03, 0x28); //
-    z80_mem_write(0x04, 0xdd); //dd
-    z80_mem_write(0x05, 0xcb); //cb
-    z80_mem_write(0x06, 0x03); //IX+d
-    z80_mem_write(0x07, 0x28); //
-    z80_mem_write(0x08, 0xdd); //dd
-    z80_mem_write(0x09, 0xcb); //cb
-    z80_mem_write(0x0a, 0x03); //IX+d
-    z80_mem_write(0x0b, 0x28); //
-    z80_mem_write(0x0c, 0x80); //a+=b
-    z80_mem_write(0x0d, 0x76); //halt
+    // z80_mem_write(0x00, 0xdd); //dd
+    // z80_mem_write(0x01, 0xcb); //cb
+    // z80_mem_write(0x02, 0x03); //IX+d
+    // z80_mem_write(0x03, 0x28); //
+    // z80_mem_write(0x04, 0xdd); //dd
+    // z80_mem_write(0x05, 0xcb); //cb
+    // z80_mem_write(0x06, 0x03); //IX+d
+    // z80_mem_write(0x07, 0x28); //
+    // z80_mem_write(0x08, 0xdd); //dd
+    // z80_mem_write(0x09, 0xcb); //cb
+    // z80_mem_write(0x0a, 0x03); //IX+d
+    // z80_mem_write(0x0b, 0x28); //
+    // z80_mem_write(0x0c, 0x80); //a+=b
+    // z80_mem_write(0x0d, 0x76); //halt
 
+
+    // ======= TESTING DAA OP =========
+
+    z80_mem_write(0x00, 0x3E); // LD A, 0x15 (Load 0x15 into A)
+    z80_mem_write(0x01, 0x15); 
+    z80_mem_write(0x02, 0x06); // LD B, 0x27 (Load 0x27 into B)
+    z80_mem_write(0x03, 0x27); 
+    z80_mem_write(0x04, 0x80); // ADD A, B (Add A and B; result is 0x3C)
+    z80_mem_write(0x05, 0x27); // DAA (Adjust A to BCD; result should be 0x42)
+
+    // z80_mem_write(0x06, 0x3E); // LD A, 0x99 (Load 0x99 into A)
+    // z80_mem_write(0x07, 0x99); 
+    // z80_mem_write(0x08, 0xC6); // ADD A, 0x01 (Add 0x01 to A; result is 0x9A)
+    // z80_mem_write(0x09, 0x01); 
+    // z80_mem_write(0x0A, 0x27); // DAA (Adjust A to BCD; result should be 0x00, CF set)
+    // z80_mem_write(0x0B, 0x3E); // LD A, 0x45 (Load 0x45 into A)
+    // z80_mem_write(0x0C, 0x45); 
+    // z80_mem_write(0x0D, 0xD6); // SUB A, 0x25 (Subtract 0x25 from A; result is 0x20)
+    // z80_mem_write(0x0E, 0x25); 
+    // z80_mem_write(0x0F, 0x27); // DAA (Adjust A to BCD; result should be 0x20)
+    z80_mem_write(0x10, 0x76); // HALT
+
+// =============================================================================================
     
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
