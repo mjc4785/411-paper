@@ -16,9 +16,9 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\basic.bin";
-const string filenameMAX = "C:\\411\\load-regs.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
-const string fileRun = filenameEMMA;
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\simple-sub.bin";
+const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
+const string fileRun = filenameMAX;
 
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
@@ -2210,7 +2210,7 @@ int decode()
                         break;
 
                     case 0x4F: // bit 1, a
-                        ((cpu.regB & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                        ((cpu.regA & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -2252,7 +2252,7 @@ int decode()
                         break;
 
                     case 0x57: // bit 2, a
-                        ((cpu.regB & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                        ((cpu.regA & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -2294,7 +2294,7 @@ int decode()
                         break;
 
                     case 0x5F: // bit 3, a
-                        ((cpu.regB & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                        ((cpu.regA & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -2336,7 +2336,7 @@ int decode()
                         break;
  
                     case 0x67: // bit 4, a
-                        ((cpu.regB & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                        ((cpu.regA & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -2378,7 +2378,7 @@ int decode()
                         break;
 
                     case 0x6F: // bit 5, a
-                        ((cpu.regB & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                        ((cpu.regA & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -2420,7 +2420,7 @@ int decode()
                         break;
 
                     case 0x77: // bit 6, a
-                        ((cpu.regB & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                        ((cpu.regA & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -2462,7 +2462,7 @@ int decode()
                         break;
 
                     case 0x7F: // bit 7, a
-                        ((cpu.regB & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                        ((cpu.regA & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -9641,7 +9641,7 @@ uint16_t displ(uint16_t val, int8_t d)
 int main(){
     
     
-    cout << "Max Castle is feeling tired" << endl; //File running check
+    cout << "Max Castle is feeling festive" << endl; //File running check
     
     // NECESSSARY CODE
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
