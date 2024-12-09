@@ -60,6 +60,7 @@
     "cstdint": "cpp",
     "iostream": "cpp",
     "bitset": "cpp",
-    "cmath": "cpp"
+    "cmath": "cpp",
+    "ostream": "cpp"
   }
 }

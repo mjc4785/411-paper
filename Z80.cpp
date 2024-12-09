@@ -16,9 +16,9 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\simple-sub.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\jump-relative.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
-const string fileRun = filenameMAX;
+const string fileRun = filenameEMMA;
 
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
@@ -52,6 +52,7 @@ uint16_t sbc16Flags(uint16_t, uint16_t);
 uint16_t adc16Flags(uint16_t, uint16_t);
 void incR();
 uint16_t displ(uint16_t, int8_t);
+uint16_t displ2(uint16_t , uint8_t );
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -1286,7 +1287,7 @@ int decode()
             break;
         }
 
-        case 0x20: // jump if zero is unset 
+        case 0x20: //if Z flag unset, shift PC by d
         {
             int8_t offset = static_cast<int8_t>(z80_mem_read(int(cpu.reg_PC))); 
             cpu.reg_PC++; // Increment PC to move past the offset byte
@@ -1303,7 +1304,7 @@ int decode()
         }
 
             
-        case 0x30: // jump if carry is unset
+        case 0x30: //if C flag unset, shift PC by d
         {
             int8_t offset = static_cast<int8_t>(z80_mem_read(int(cpu.reg_PC))); 
             cpu.reg_PC++; // Increment PC to move past the offset byte
@@ -1321,14 +1322,14 @@ int decode()
 
 
 
-        case 0x18: // jump from inst opcode to d 
+        case 0x18: // shift PC by d
             cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 12; 
             break;
 
 
 
-        case 0x28: // jump if zero flag is set from opcode to d 
+        case 0x28: //if Z flag set, shift PC by d
             {
             int8_t offset = static_cast<int8_t>(z80_mem_read(int(cpu.reg_PC))); 
             cpu.reg_PC++; // Increment PC to move past the offset byte
@@ -1346,8 +1347,8 @@ int decode()
 
 
 
-        case 0x38: // jump is carry flag is set from opcode to d 
-            {
+        case 0x38: //if C flag set, shift PC by d
+        {
             int8_t offset = static_cast<int8_t>(z80_mem_read(int(cpu.reg_PC))); 
             cpu.reg_PC++; // Increment PC to move past the offset byte
             
@@ -1363,155 +1364,78 @@ int decode()
         }
 
 
-
-
-
-
-
-        case 0xc2: //zero flag unset, jump to nn
-        {
-            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
-            cpu.reg_PC++; // Increment PC to move past the offset byte
-            
-            if ((cpu.Flags & 0x40) == 0)
-            {
-                cpu.reg_PC += offset;
-                cpu.cycleCnt += 12; 
-                break;
-            
-            }
-            cpu.cycleCnt+=7;
+        //JP cc, nn---------------------------------------------------------------------
+        case 0xc2: // if the Z flag is unset, jump to nn
+            if (!bool(cpu.Flags & 0x40))
+                {cpu.reg_PC = z80_mem_read16(cpu.reg_PC);} //jump
+            else
+                {cpu.reg_PC += 2;} //move on
+            cpu.cycleCnt+=10;
             break;
-        }
 
-        case 0xd2:
-        {
-            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
-            cpu.reg_PC++; // Increment PC to move past the offset byte
-            
-            if ((cpu.Flags & 0x01) == 0)
-            {
-                cpu.reg_PC += offset;
-                cpu.cycleCnt += 12; 
-                break;
-            
-            }
-            cpu.cycleCnt+=7;
+        case 0xd2: // if the C flag is unset, jump to nn
+            if (!bool(cpu.Flags & 0x01))
+                {cpu.reg_PC = z80_mem_read16(cpu.reg_PC);} //jump
+            else
+                {cpu.reg_PC += 2;} //move on
+            cpu.cycleCnt+=10;
             break;
-        }
 
-        case 0xe2:
-        {
-            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
-            cpu.reg_PC++; // Increment PC to move past the offset byte
-            
-            if ((cpu.Flags & 0x04) == 0)
-            {
-                cpu.reg_PC += offset;
-                cpu.cycleCnt += 12; 
-                break;
-            
-            }
-            cpu.cycleCnt+=7;
+        case 0xe2: // if the P/V flag is unset, jump to nn
+            if (!bool(cpu.Flags & 0x04))
+                {cpu.reg_PC = z80_mem_read16(cpu.reg_PC);} //jump
+            else
+                {cpu.reg_PC += 2;} //move on
+            cpu.cycleCnt+=10;
             break;
-        }
 
-        case 0xf2:
-        {
-            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
-            cpu.reg_PC++; // Increment PC to move past the offset byte
-            
-            if ((cpu.Flags & 0x80) == 0)
-            {
-                cpu.reg_PC += offset;
-                cpu.cycleCnt += 12; 
-                break;
-            
-            }
-            cpu.cycleCnt+=7;
+        case 0xf2: // if the sign flag is unset, jump to nn
+            if (!bool(cpu.Flags & 0x80))
+                {cpu.reg_PC = z80_mem_read16(cpu.reg_PC);} //jump
+            else
+                {cpu.reg_PC += 2;} //move on
+            cpu.cycleCnt+=10;
             break;
-        }
 
-
-
-
-
-
-
-        case 0xca: //zero flag set, jump to nn
-        {
-            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
-            cpu.reg_PC++; // Increment PC to move past the offset byte
-            
-            if ((cpu.Flags & 0x40) != 0)
-            {
-                cpu.reg_PC += offset;
-                cpu.cycleCnt += 12; 
-                break;
-            
-            }
-            cpu.cycleCnt+=7;
+        case 0xca: // if the Z flag is set, jump to nn
+            if (bool(cpu.Flags & 0x40))
+                {cpu.reg_PC = z80_mem_read16(cpu.reg_PC);} //jump
+            else
+                {cpu.reg_PC += 2;} //move on
+            cpu.cycleCnt+=10;
             break;
-        }
 
-        case 0xda: // if carry flag set jump to nn 
-        {
-            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
-            cpu.reg_PC++; // Increment PC to move past the offset byte
-            
-            if ((cpu.Flags & 0x01) != 0)
-            {
-                cpu.reg_PC += offset;
-                cpu.cycleCnt += 12; 
-                break;
-            
-            }
-            cpu.cycleCnt+=7;
+        case 0xda: // if the C flag is set, jump to nn
+            if (bool(cpu.Flags & 0x01))
+                {cpu.reg_PC = z80_mem_read16(cpu.reg_PC);} //jump
+            else
+                {cpu.reg_PC += 2;} //move on
+            cpu.cycleCnt+=10;
             break;
-        }
 
-        case 0xea: // uf the P/V flag is unset, jump to nn
-        {
-            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
-            cpu.reg_PC++; // Increment PC to move past the offset byte
-            
-            if ((cpu.Flags & 0x04) != 0)
-            {
-                cpu.reg_PC += offset;
-                cpu.cycleCnt += 12; 
-                break;
-            
-            }
-            cpu.cycleCnt+=7;
+        case 0xea: // if the P/V flag is set, jump to nn
+            if (bool(cpu.Flags & 0x04))
+                {cpu.reg_PC = z80_mem_read16(cpu.reg_PC);} //jump
+            else
+                {cpu.reg_PC += 2;} //move on
+            cpu.cycleCnt+=10;
             break;
-        }
 
-        case 0xfa: // if the sign flag us set, jump to nn
-        {
-            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
-            cpu.reg_PC++; // Increment PC to move past the offset byte
-            
-            if ((cpu.Flags & 0x80) != 0)
-            {
-                cpu.reg_PC += offset;
-                cpu.cycleCnt += 12; 
-                break;
-            
-            }
-            cpu.cycleCnt+=7;
+        case 0xfa: // if the sign flag is set, jump to nn
+            if (bool(cpu.Flags & 0x80))
+                {cpu.reg_PC = z80_mem_read16(cpu.reg_PC);} //jump
+            else
+                {cpu.reg_PC += 2;} //move on
+            cpu.cycleCnt+=10;
             break;
-        }
 
-
+        //JP nn------------------------------------------------------------------------
         case 0xc3: //jumps to nn 
-        {
-            int16_t offset = static_cast<int16_t>(z80_mem_read(int(cpu.reg_PC))); 
-            cpu.reg_PC++; // Increment PC to move past the offset byte
-
-            cpu.reg_PC += offset;
-            cpu.cycleCnt += 12; 
+            //The first operand in this assembled object code is the low-order byte of a two-byte address.
+            cpu.reg_PC = z80_mem_read16(cpu.reg_PC);
+            cpu.cycleCnt += 10; 
             break;
-        }
+    
 
 
        
@@ -9637,6 +9561,12 @@ uint16_t displ(uint16_t val, int8_t d)
         {cout << "add" << endl; return (val + (d&0x7f));}
 }
 
+uint16_t displ2(uint16_t val, uint8_t d)
+{
+    int8_t offset = (int8_t)d;
+    return val + offset;
+}
+
 //MAIN==============================================================================================================================
 int main(){
     
@@ -9687,25 +9617,30 @@ int main(){
     uint16_t start1 = 0x1004;
     uint16_t start2 = start1 + 3;
    
-   /*
-    cpu.reg_IY = 0x2211;
+   
+    /*cpu.reg_IY = 0x2211;
     cpu.reg_SP = 0x1122;
     //memory[start1] = 0x90;
     //memory[start1+1] = 0x48;
     cpu.regD = 0x11;
-    cpu.regE = 0x22;
+    cpu.regE = 0x22;*/
 
-    
+
+   
     cpu.Flags |= 0x01;
     
     
-    z80_mem_write(0x00, 0xfd); //fd
-    z80_mem_write(0x01, 0x39); //iy += sp
+    z80_mem_write(0x00, 0x38); //jp to nn if z unset
+    /*z80_mem_write(0x01, 0x05); //d
+    z80_mem_write(0x03, 0x04); //b++
+    z80_mem_write(0x04, 0x76); //halt
+    z80_mem_write(0x05, 0x38); //jr
+    z80_mem_write(0x06, 0xfe); //d
+    z80_mem_write(0x07, 0x3c); //a++
+    z80_mem_write(0x08, 0x76); //halt*/
     
 
-
-    z80_mem_write(0x02, 0x76);//halt
-    */
+    
 
 // call functions test ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
