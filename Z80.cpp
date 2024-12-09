@@ -16,9 +16,9 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\simple-sub.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\basic.bin";
 const string filenameMAX = "C:\\411\\load-regs.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
-const string fileRun = filenameMAX;
+const string fileRun = filenameEMMA;
 
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
@@ -228,7 +228,7 @@ int decode()
         //HALT INSTRUCTION==========================================================================================
         case 0x76: //HALT INSTRUCTION - print out all the registers and dump memory to .bin file
             
-            if(cpu.regIFF1 && cpu.regIFF2)
+            if(!cpu.regIFF1 && !cpu.regIFF2)
             {
                 cpu.cycleCnt += 4; // 4 Cycles for halt
                 //printReg(cpu); //OUR VERSION OF PRINT
