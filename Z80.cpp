@@ -244,6 +244,67 @@ int decode()
             
             break;
 
+
+
+        // DAA inst ================================================================================================================================================================
+        
+        case 0x27:
+        {
+
+            //initialize things needed for the operation
+            int low = cpu.regA & 0x0F;                          //initialize the lower four bits of A
+            int high = cpu.regA >> 4;                           //shiftit over to the right four spaces to make room for higher bits
+            int cf = cpu.regA & 0x01;                           // set the carry flag  
+            int hf = cpu.regA & 0x10;                           // set the half carry flag
+            int nf = cpu.regA & 0x02;                           // set the add/sub flag
+            uint16_t _value = 0;                                // initialize the value int so that at the end we can use it
+
+            if(cf) {                                            //if the carry flag is set
+                _value = (low < 0x0A && !hf) ? 0x60 : 0x66;     
+            }
+            else {                                              //if carry flag isnt set
+                if(low < 0x0A) {
+                    if(high < 0x0A) {
+                        _value = (hf) ? 0x06 : 0x00;
+                    }
+                    else {
+                        _value = (hf) ? 0x66 : 0x60;
+                    }
+                }
+                else {
+                    _value = (high < 0x09) ? 0x06 : 0x66;
+                }
+            }
+
+            if(nf) {                                            //if the add/sub flag is set 
+                cpu.regA -= _value;
+            }
+            else {
+                cpu.regA += _value;
+            }
+
+            cpu.regA = ZSPXYtable[cpu.regA] | (nf);
+
+            if(_value >= 0x60)                                  // if the value is greater than or = to carry without half carry  
+                cpu.regA |= 0x01;
+
+            if(nf) {                                            //if the add/sub flag is set 
+                if(hf && low < 0x06) {
+                    cpu.regA |= 0x10;
+                }
+            }
+            else if(low >= 10) {
+                cpu.regA |= 0x10;
+            }
+
+            cpu.cycleCnt += 4;
+            break;
+        }
+
+        //================================================================================================================================================================
+
+
+
         //NOP INSTUCTION===========================================================================================
         case 0x00: //NOP INSTRUCTION
             cpu.cycleCnt += 4;
@@ -9180,6 +9241,8 @@ int decode()
 
             }//16b math 
 
+            
+
 
 
 
@@ -9192,6 +9255,8 @@ int decode()
             }// end fd switch
             break;
     }//end fd case   
+
+    
 
         //UNIDENTIFIED INSTRUCTION----------------------------------------------------------------------------------------------------------------------------------------------------------
         default:
