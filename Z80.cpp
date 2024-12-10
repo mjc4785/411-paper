@@ -17,7 +17,7 @@ using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\divide-8.bin";
-const string filenameMAX = "C:\\411\\offset-bit.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
+const string filenameMAX = "C:\\411\\bit.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameMAX;
 
 
@@ -234,6 +234,7 @@ int z80_execute(){
         if(decode()) {break;} // if decode returns 1 (either halt or unknown inst), break
                               // otherwise, keep looping. 
     }
+
     cout << "cycles completed: [" << cpu.cycleCnt << "]\n" << endl;
     
     return cpu.cycleCnt; // return CompletedCylces;
@@ -4092,8 +4093,8 @@ int decode()
                 case 0xcb:
                 {
                     incR();
-                    uint16_t offsetIX = displ2(cpu.reg_IX, z80_mem_read(cpu.reg_PC)); // ix addr +d
-                    uint8_t inst3 = z80_mem_read(++cpu.reg_PC);
+                    uint16_t offsetIX = displ2(cpu.reg_IX, z80_mem_read(cpu.reg_PC++)); // ix addr +d
+                    uint8_t inst3 = z80_mem_read(cpu.reg_PC++);
                     switch(inst3)
                     {
                             // z80_mem_write(z80_mem_read(offsetIX), rlcFlags(z80_mem_read(offsetIX)))
@@ -4531,336 +4532,336 @@ int decode()
 
 
                         case 0x40: // bit 0, b
-                            ((z80_mem_read(offsetIX) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitZero(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x41: // bit 0, c
-                            ((z80_mem_read(offsetIX) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitZero(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x42: // bit 0, d
-                            ((z80_mem_read(offsetIX) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitZero(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x43: // bit 0, e
-                            ((z80_mem_read(offsetIX) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitZero(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x44: // bit 0, h
-                            ((z80_mem_read(offsetIX) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitZero(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x45: // bit 0, l
-                            ((z80_mem_read(offsetIX) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitZero(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x46: // bit 0, (hl)
-                            (z80_mem_read(offsetIX) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitZero(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x47: // bit 0, a
-                            ((z80_mem_read(offsetIX) & 0x01) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitZero(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
 
 
                         case 0x48: // bit 1, b
-                            ((z80_mem_read(offsetIX) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitOne(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x49: // bit 1, c
-                            ((z80_mem_read(offsetIX) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitOne(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x4A: // bit 1, d
-                            ((z80_mem_read(offsetIX) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitOne(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x4B: // bit 1, e
-                            ((z80_mem_read(offsetIX) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitOne(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x4C: // bit 1, h
-                            ((z80_mem_read(offsetIX) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitOne(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x4D: // bit 1, l
-                            ((z80_mem_read(offsetIX) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitOne(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x4E: // bit 1, (hl)
-                            ((z80_mem_read(offsetIX) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitOne(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x4F: // bit 1, a
-                            ((z80_mem_read(offsetIX) & 0x02) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitOne(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
 
 
                         case 0x50: // bit 2, b
-                            ((z80_mem_read(offsetIX) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitTwo(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x51: // bit 2, c
-                            ((z80_mem_read(offsetIX) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitTwo(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x52: // bit 2, d
-                            ((z80_mem_read(offsetIX) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitTwo(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x53: // bit 2, e
-                            ((z80_mem_read(offsetIX) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitTwo(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x54: // bit 2, h
-                            ((z80_mem_read(offsetIX) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitTwo(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x55: // bit 2, l
-                            ((z80_mem_read(offsetIX) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitTwo(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x56: // bit 2, (hl)
-                            ((z80_mem_read(offsetIX) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitTwo(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x57: // bit 2, a
-                            ((z80_mem_read(offsetIX) & 0x04) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitTwo(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
 
 
                         case 0x58: // bit 3, b
-                            ((z80_mem_read(offsetIX) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitThree(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x59: // bit 3, c
-                            ((z80_mem_read(offsetIX) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitThree(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x5A: // bit 3, d
-                            ((z80_mem_read(offsetIX) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitThree(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x5B: // bit 3, e
-                            ((z80_mem_read(offsetIX) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitThree(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x5C: // bit 3, h
-                            ((z80_mem_read(offsetIX) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitThree(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x5D: // bit 3, l
-                            ((z80_mem_read(offsetIX) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitThree(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x5E: // bit 3, (hl)
-                            ((z80_mem_read(offsetIX) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitThree(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x5F: // bit 3, a
-                            ((z80_mem_read(offsetIX) & 0x08) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitThree(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
 
 
                         case 0x60: // bit 4, b
-                            ((z80_mem_read(offsetIX) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFour(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x61: // bit 4, c
-                            ((z80_mem_read(offsetIX) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFour(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x62: // bit 4, d
-                            ((z80_mem_read(offsetIX) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFour(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x63: // bit 4, e
-                            ((z80_mem_read(offsetIX) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFour(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x64: // bit 4, h
-                            ((z80_mem_read(offsetIX) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFour(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x65: // bit 4, l
-                            ((z80_mem_read(offsetIX) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFour(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x66: // bit 4, (hl)
-                            ((z80_mem_read(offsetIX) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFour(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
     
                         case 0x67: // bit 4, a
-                            ((z80_mem_read(offsetIX) & 0x10) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFour(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
 
 
                         case 0x68: // bit 5, b
-                            ((z80_mem_read(offsetIX) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFive(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x69: // bit 5, c
-                            ((z80_mem_read(offsetIX) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFive(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x6A: // bit 5, d
-                            ((z80_mem_read(offsetIX) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFive(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x6B: // bit 5, e
-                            ((z80_mem_read(offsetIX) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFive(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x6C: // bit 5, h
-                            ((z80_mem_read(offsetIX) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFive(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x6D: // bit 5, l
-                            ((z80_mem_read(offsetIX) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFive(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x6E: // bit 5, (hl)
-                            ((z80_mem_read(offsetIX) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFive(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x6F: // bit 5, a
-                            ((z80_mem_read(offsetIX) & 0x20) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitFive(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
 
 
                         case 0x70: // bit 6, b
-                            ((z80_mem_read(offsetIX) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSix(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x71: // bit 6, c
-                            ((z80_mem_read(offsetIX) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSix(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x72: // bit 6, d
-                            ((z80_mem_read(offsetIX) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSix(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x73: // bit 6, e
-                            ((z80_mem_read(offsetIX) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSix(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x74: // bit 6, h
-                            ((z80_mem_read(offsetIX) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSix(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x75: // bit 6, l
-                            ((z80_mem_read(offsetIX) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSix(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
-                        case 0x76: // bit 6, (hl)
-                            ((z80_mem_read(offsetIX) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                        case 0x76: // bit 6, (
+                            bitSix(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x77: // bit 6, a
-                            ((z80_mem_read(offsetIX) & 0x40) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSix(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
 
 
                         case 0x78: // bit 7, b
-                            ((z80_mem_read(offsetIX) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSeven(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x79: // bit 7, c
-                            ((z80_mem_read(offsetIX) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSeven(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x7A: // bit 7, d
-                            ((z80_mem_read(offsetIX) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSeven(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x7B: // bit 7, e
-                            ((z80_mem_read(offsetIX) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSeven(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x7C: // bit 7, h
-                            ((z80_mem_read(offsetIX) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSeven(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x7D: // bit 7, l
-                            ((z80_mem_read(offsetIX) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSeven(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
-                        case 0x7E: // bit 7, (hl)
-                            ((z80_mem_read(offsetIX) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                        case 0x7E: // bit 7, (
+                            bitSeven(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
                         case 0x7F: // bit 7, a
-                            ((z80_mem_read(offsetIX) & 0x80) == 0x00) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40);
+                            bitSeven(z80_mem_read(offsetIX));
                             cpu.cycleCnt+=20;
                             break;
 
@@ -9308,6 +9309,8 @@ uint8_t rrFlags(uint8_t reg)
 
 void bitZero(uint8_t reg)
 {
+    cpu.Flags = ZSPXYtable[reg];
+    cpu.Flags&=~0x08;
     if( (reg&0x01) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9322,6 +9325,8 @@ void bitZero(uint8_t reg)
 
 void bitOne(uint8_t reg)
 {
+    cpu.Flags = ZSPXYtable[reg];
+    cpu.Flags&=~0x08;
     if( (reg&0x02) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9336,6 +9341,8 @@ void bitOne(uint8_t reg)
 
 void bitTwo(uint8_t reg)
 {
+    cpu.Flags = ZSPXYtable[reg];
+    cpu.Flags&=~0x08;
     if( (reg&0x04) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9350,6 +9357,8 @@ void bitTwo(uint8_t reg)
 
 void bitThree(uint8_t reg)
 {
+    cpu.Flags = ZSPXYtable[reg];
+    cpu.Flags&=~0x08;
     if( (reg&0x08) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9364,6 +9373,8 @@ void bitThree(uint8_t reg)
 
 void bitFour(uint8_t reg)
 {
+    cpu.Flags = ZSPXYtable[reg];
+    cpu.Flags&=~0x08;
     if( (reg&0x10) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9378,6 +9389,9 @@ void bitFour(uint8_t reg)
 
 void bitFive(uint8_t reg)
 {
+
+    cpu.Flags = ZSPXYtable[reg];
+    cpu.Flags&=~0x08;
     if( (reg&0x20) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9392,6 +9406,8 @@ void bitFive(uint8_t reg)
 
 void bitSix(uint8_t reg)
 {
+    cpu.Flags = ZSPXYtable[reg];
+    cpu.Flags&=~0x08;
     if( (reg&0x40) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9406,6 +9422,8 @@ void bitSix(uint8_t reg)
 
 void bitSeven(uint8_t reg)
 {
+    cpu.Flags = ZSPXYtable[reg];
+    cpu.Flags&=~0x08;
     if( (reg&0x80) == 0x00) 
     {
         cpu.Flags|=0x40;
