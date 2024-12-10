@@ -16,7 +16,7 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\divide-8.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\rotate.bin";
 const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameEMMA;
 
@@ -52,7 +52,6 @@ void push(uint16_t);
 uint16_t sbc16Flags(uint16_t, uint16_t);
 uint16_t adc16Flags(uint16_t, uint16_t);
 void incR();
-uint16_t displ(uint16_t, int8_t);
 uint16_t displ2(uint16_t , uint8_t );
 uint8_t sraFlags(uint8_t);
 
@@ -65,12 +64,13 @@ uint8_t z80_mem_read(uint16_t addr) {
     return memory[addr];
 }
 
-//i dont know what this is used for
+//Writes xAB as xB xA in memory
 void z80_mem_write16(uint16_t addr, uint16_t value) {
     memory[addr] = (uint8_t)(value & 0xff);
     memory[addr + 1] = (uint8_t)(value >> 8);
 }
 
+//Reads in xA xB as xBA, does not incrament PC, should add 2 after calling for instruction read in
 uint16_t z80_mem_read16(uint16_t addr) {
     return ((uint16_t)memory[addr]) | (((uint16_t)memory[addr + 1]) << 8);
 }
@@ -440,8 +440,9 @@ int decode()
             cpu.cycleCnt += 10;
             break;
         
-        case 0x31: //LOAD INSTRUCTION - Load 16 bit value nn into paired register DE
-            cpu.reg_SP = ((z80_mem_read(int(cpu.reg_PC++)) << 8) | z80_mem_read(int(cpu.reg_PC++)));
+        case 0x31: //LOAD INSTRUCTION - Load 16 bit value nn into sp
+            cpu.reg_SP = z80_mem_read16(cpu.reg_PC);
+            cpu.reg_PC += 2; //next instruction
             cpu.cycleCnt += 10;
             break;
 
@@ -6075,11 +6076,11 @@ int decode()
                     break;
                 
                 case 0x21: //LOAD INSTRUCTION - Load IX with nn
-                {
-                    cpu.reg_IX = (z80_mem_read(cpu.reg_PC++)<<8)|(z80_mem_read(cpu.reg_PC++) & 0xff);
+                    cpu.reg_IX = z80_mem_read16(cpu.reg_PC);
+                    cpu.reg_PC += 2; //next instruction
                     cpu.cycleCnt += 14;
                     break;
-                }
+                
 
                 case 0x06: //LOAD INSTRUCTION - Load value at n into register B
                     cpu.regB = z80_mem_read(int(cpu.reg_PC++));
@@ -6127,77 +6128,77 @@ int decode()
                     break;
                 
                 case 0x70: //LOAD INSTRUCTION - Load (IX+d) with b
-                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regB);
+                    z80_mem_write((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regB);
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x71: //LOAD INSTRUCTION - Load (IX+d) with c
-                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regC);
+                    z80_mem_write((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regC);
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x72: //LOAD INSTRUCTION - Load (IX+d) with D
-                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regD);
+                    z80_mem_write((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regD);
                     cpu.cycleCnt += 19;
                     break;
 
                 case 0x73: //LOAD INSTRUCTION - Load (IX+d) with E
-                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regE);
+                    z80_mem_write((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regE);
                     cpu.cycleCnt += 19;
                     break;
 
                 case 0x74: //LOAD INSTRUCTION - Load (IX+d) with H
-                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regH);
+                    z80_mem_write((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regH);
                     cpu.cycleCnt += 19;
                     break;
 
                 case 0x75: //LOAD INSTRUCTION - Load (IX+d) with L
-                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regL);
+                    z80_mem_write((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regL);
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x36: //LOAD INSTRUCTION - Load (IX+d) with n
-                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(++cpu.reg_PC-2)))),z80_mem_read(++cpu.reg_PC));
+                    z80_mem_write((displ2(cpu.reg_IX, int8_t(z80_mem_read(++cpu.reg_PC-2)))),z80_mem_read(++cpu.reg_PC));
                     cpu.cycleCnt += 19;
                     break;
 
                 case 0x77: //LOAD INSTRUCTION - Load (IX+d) with A
-                    z80_mem_write((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regA);
+                    z80_mem_write((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regA);
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x46: //LOAD INSTRUCTION - Load B with (IX+d)
-                    cpu.regB = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regB = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x56: //LOAD INSTRUCTION - Load D with (IX+d)
-                    cpu.regD = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regD = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x66: //LOAD INSTRUCTION - Load H with (IX+d)
-                    cpu.regH = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regH = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x4e: //LOAD INSTRUCTION - Load C with (IX+d)
-                    cpu.regC = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regC = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x5e: //LOAD INSTRUCTION - Load E with (IX+d)
-                    cpu.regE = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regE = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x6e: //LOAD INSTRUCTION - Load L with (IX+d)
-                    cpu.regL = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regL = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x7e: //LOAD INSTRUCTION - Load A with (IX+d)
-                    cpu.regA = z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regA = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
 
@@ -6249,8 +6250,8 @@ int decode()
 
                 case 0x34: //INCRAMENT INSTRUCTION - Adds 1 to (IX+d)
                     z80_mem_write(
-                        (displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),
-                        incFlags(z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC)))))));
+                        (displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),
+                        incFlags(z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC)))))));
                     cpu.cycleCnt += 23;
                     break;
                 
@@ -6297,8 +6298,8 @@ int decode()
 
                 case 0x35: //DECREMENT INSTRUCTION - Subs 1 from (IX+d)
                     z80_mem_write(
-                        (displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),
-                        decFlags(z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC)))))));
+                        (displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))),
+                        decFlags(z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC)))))));
                     cpu.cycleCnt += 23;
                     break;
                 
@@ -6334,7 +6335,7 @@ int decode()
                     break;
                 
                 case 0x86: //ADD INSTRUCTION - RegA += memory[IX+d]
-                    cpu.regA = addFlags(cpu.regA,z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.regA = addFlags(cpu.regA,z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
                 
@@ -6375,7 +6376,7 @@ int decode()
                     break;
                 
                 case 0x96: //SUB INSTRUCTION - RegA -= memory[IX+d]
-                    cpu.regA = subFlags(cpu.regA,z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.regA = subFlags(cpu.regA,z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
                 
@@ -6416,7 +6417,7 @@ int decode()
                     break;
                 
                 case 0x8e: //ADD W CARRY INSTRUCTION - RegA += (IX+d) + Carry
-                    cpu.regA = adcFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.regA = adcFlags(cpu.regA, z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
                 
@@ -6457,7 +6458,7 @@ int decode()
                     break;
                 
                 case 0x9e: //SUB W CARRY INSTRUCTION - RegA -= (IX+d) - Carry
-                    cpu.regA = sbcFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.regA = sbcFlags(cpu.regA, z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
                 
@@ -6501,7 +6502,7 @@ int decode()
                     break;
 
                 case 0xa6: //bitwise and register A with (IX+d)
-                    cpu.regA = andFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise AND
+                    cpu.regA = andFlags(cpu.regA, z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise AND
                     cpu.cycleCnt += 19;
                     break;
 
@@ -6548,7 +6549,7 @@ int decode()
                     break;
 
                 case 0xb6: // OR A with (IX+b) 
-                    cpu.regA = cpu.regA | z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))); //bitwise OR for reg a with hl 
+                    cpu.regA = cpu.regA | z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))); //bitwise OR for reg a with hl 
                     xorFlags(cpu.regA);
                     cpu.cycleCnt += 19;
                     break;
@@ -6597,7 +6598,7 @@ int decode()
                     break;
 
                 case 0xae: // XOR A with (IX+b) 
-                    cpu.regA = cpu.regA ^ (z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise XOR for reg a with hl 
+                    cpu.regA = cpu.regA ^ (z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise XOR for reg a with hl 
                     xorFlags(cpu.regA);
                     cpu.cycleCnt += 19;
                     break;
@@ -6640,7 +6641,7 @@ int decode()
                     break;
 
                 case 0xbe: //cp HL from A
-                    subFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    subFlags(cpu.regA, z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
 
@@ -8594,19 +8595,20 @@ int decode()
                     cpu.cycleCnt += 8;
                     break;
                 
-                case 0x6f: //LOAD INSTUCTION - Load IX Low Byte with Register IX high
+                case 0x6f: //LOAD INSTUCTION - Load IY Low Byte with Register IY high
                     cpu.reg_IY = ((cpu.reg_IY >> 8) << 8)|(cpu.regA);
                     cpu.cycleCnt += 8;
                     break;
                 
-                case 0xf9: //LOAD INSTRUCTION - Load SP with IX
+                case 0xf9: //LOAD INSTRUCTION - Load SP with IY
                     cpu.reg_SP = cpu.reg_IY;
                     cpu.cycleCnt += 10;
                     break;
                 
-                case 0x21: //LOAD INSTRUCTION - Load IX with nn
+                case 0x21: //LOAD INSTRUCTION - Load IY with nn
                 {
-                    cpu.reg_IY = (z80_mem_read(cpu.reg_PC++)<<8)|(z80_mem_read(cpu.reg_PC++) & 0xff);
+                    cpu.reg_IY = z80_mem_read16(cpu.reg_PC);
+                    cpu.reg_PC += 2; //next instruction
                     cpu.cycleCnt += 14;
                     break;
                 }
@@ -8657,77 +8659,77 @@ int decode()
                     break;
                 
                 case 0x70: //LOAD INSTRUCTION - Load (IX+d) with b
-                    z80_mem_write((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regB);
+                    z80_mem_write((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regB);
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x71: //LOAD INSTRUCTION - Load (IX+d) with c
-                    z80_mem_write((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regC);
+                    z80_mem_write((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regC);
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x72: //LOAD INSTRUCTION - Load (IX+d) with D
-                    z80_mem_write((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regD);
+                    z80_mem_write((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regD);
                     cpu.cycleCnt += 19;
                     break;
 
                 case 0x73: //LOAD INSTRUCTION - Load (IX+d) with E
-                    z80_mem_write((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regE);
+                    z80_mem_write((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regE);
                     cpu.cycleCnt += 19;
                     break;
 
                 case 0x74: //LOAD INSTRUCTION - Load (IX+d) with H
-                    z80_mem_write((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regH);
+                    z80_mem_write((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regH);
                     cpu.cycleCnt += 19;
                     break;
 
                 case 0x75: //LOAD INSTRUCTION - Load (IX+d) with L
-                    z80_mem_write((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regL);
+                    z80_mem_write((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regL);
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x36: //LOAD INSTRUCTION - Load (IX+d) with n
-                    z80_mem_write((displ(cpu.reg_IY, int8_t(z80_mem_read(++cpu.reg_PC-2)))),z80_mem_read(++cpu.reg_PC));
+                    z80_mem_write((displ2(cpu.reg_IY, int8_t(z80_mem_read(++cpu.reg_PC-2)))),z80_mem_read(++cpu.reg_PC));
                     cpu.cycleCnt += 19;
                     break;
 
                 case 0x77: //LOAD INSTRUCTION - Load (IX+d) with A
-                    z80_mem_write((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regA);
+                    z80_mem_write((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),cpu.regA);
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x46: //LOAD INSTRUCTION - Load B with (IX+d)
-                    cpu.regB = z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regB = z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x56: //LOAD INSTRUCTION - Load D with (IX+d)
-                    cpu.regD = z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regD = z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x66: //LOAD INSTRUCTION - Load H with (IX+d)
-                    cpu.regH = z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regH = z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x4e: //LOAD INSTRUCTION - Load C with (IX+d)
-                    cpu.regC = z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regC = z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x5e: //LOAD INSTRUCTION - Load E with (IX+d)
-                    cpu.regE = z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regE = z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x6e: //LOAD INSTRUCTION - Load L with (IX+d)
-                    cpu.regL = z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regL = z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
                 
                 case 0x7e: //LOAD INSTRUCTION - Load A with (IX+d)
-                    cpu.regA = z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                    cpu.regA = z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))));
                     cpu.cycleCnt += 19;
                     break;
 
@@ -8779,8 +8781,8 @@ int decode()
 
                 case 0x34: //INCRAMENT INSTRUCTION - Adds 1 to (IX+d)
                     z80_mem_write(
-                        (displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),
-                        incFlags(z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC)))))));
+                        (displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),
+                        incFlags(z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC)))))));
                     cpu.cycleCnt += 23;
                     break;
                 
@@ -8827,8 +8829,8 @@ int decode()
 
                 case 0x35: //DECREMENT INSTRUCTION - Subs 1 from (IX+d)
                     z80_mem_write(
-                        (displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),
-                        decFlags(z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC)))))));
+                        (displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))),
+                        decFlags(z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC)))))));
                     cpu.cycleCnt += 23;
                     break;
                 
@@ -8864,7 +8866,7 @@ int decode()
                     break;
                 
                 case 0x86: //ADD INSTRUCTION - RegA += memory[IX+d]
-                    cpu.regA = addFlags(cpu.regA,z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.regA = addFlags(cpu.regA,z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
                 
@@ -8905,7 +8907,7 @@ int decode()
                     break;
                 
                 case 0x96: //SUB INSTRUCTION - RegA -= memory[IX+d]
-                    cpu.regA = subFlags(cpu.regA,z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.regA = subFlags(cpu.regA,z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
                 
@@ -8946,7 +8948,7 @@ int decode()
                     break;
                 
                 case 0x8e: //ADD W CARRY INSTRUCTION - RegA += (IX+d) + Carry
-                    cpu.regA = adcFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.regA = adcFlags(cpu.regA, z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
                 
@@ -8987,7 +8989,7 @@ int decode()
                     break;
                 
                 case 0x9e: //SUB W CARRY INSTRUCTION - RegA -= (IX+d) - Carry
-                    cpu.regA = sbcFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    cpu.regA = sbcFlags(cpu.regA, z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
                 
@@ -9031,7 +9033,7 @@ int decode()
                     break;
 
                 case 0xa6: //bitwise and register A with (IX+d)
-                    cpu.regA = andFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise AND
+                    cpu.regA = andFlags(cpu.regA, z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise AND
                     cpu.cycleCnt += 19;
                     break;
 
@@ -9078,7 +9080,7 @@ int decode()
                     break;
 
                 case 0xb6: // OR A with (IX+b) 
-                    cpu.regA = cpu.regA | z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))); //bitwise OR for reg a with hl 
+                    cpu.regA = cpu.regA | z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))); //bitwise OR for reg a with hl 
                     xorFlags(cpu.regA);
                     cpu.cycleCnt += 19;
                     break;
@@ -9127,7 +9129,7 @@ int decode()
                     break;
 
                 case 0xae: // XOR A with (IX+b) 
-                    cpu.regA = cpu.regA ^ (z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise XOR for reg a with hl 
+                    cpu.regA = cpu.regA ^ (z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++)))))); //bitwise XOR for reg a with hl 
                     xorFlags(cpu.regA);
                     cpu.cycleCnt += 19;
                     break;
@@ -9170,7 +9172,7 @@ int decode()
                     break;
 
                 case 0xbe: //cp HL from A
-                    subFlags(cpu.regA, z80_mem_read((displ(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
+                    subFlags(cpu.regA, z80_mem_read((displ2(cpu.reg_IY, int8_t(z80_mem_read(cpu.reg_PC++))))));
                     cpu.cycleCnt += 19;
                     break;
 
@@ -9629,14 +9631,6 @@ void incR() //INCREASING R DOES NOT CHANGE THE 8th BIT
 }
 
 //Displaces a unsigned value by (signed) d.
-uint16_t displ(uint16_t val, int8_t d)
-{
-    if(bool(d&0x80))
-        {cout << "min" << endl; return (val - (d&0x7f));}
-    else 
-        {cout << "add" << endl; return (val + (d&0x7f));}
-}
-
 uint16_t displ2(uint16_t val, uint8_t d)
 {
     int8_t offset = (int8_t)d;
@@ -9662,48 +9656,15 @@ int main(){
     // NECESSSARY CODE
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-   //z80_mem_load(fileRun.c_str()); //Load into memory
+   z80_mem_load(fileRun.c_str()); //Load into memory
 
    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    
-    /*z80_mem_write(0x00, 0x3e);//load A
-    z80_mem_write(0x01, 0x0f);// goes into A*/
-
-    
-    /*z80_mem_write(0x00, 0x21);//load HL with n n
-    z80_mem_write(0x01, 0xDA);//H
-    z80_mem_write(0x02, 0x92);//L*/
-
-    /*z80_mem_write(0x00, 0x31);//load sp with n n
-    z80_mem_write(0x01, 0x02);//sp
-    z80_mem_write(0x02, 0x01);//sp*/
-
-    /*z80_mem_write(0x00, 0x01);//load BC with n n
-    z80_mem_write(0x01, 0x33);//B
-    z80_mem_write(0x02, 0x22);//C*/
-
-    /*z80_mem_write(0x03, 0x22);//load nn with HL
-    z80_mem_write(0x04, 0x55);//n
-    z80_mem_write(0x05, 0x44);//n */
-
-
-//    cpu.regH = 0x11;
-//    cpu.regL = 0x18;
-//    cpu.regA = 0xf3;
-//    cpu.regB = 0xfe;
-//    cpu.regC = 0xff;
-//    memory[0x1118] = 0x52;
-//    memory[0x1117] = 0x00;
-//    memory[0x1116] = 0xF3;
-//    memory[0x2225] = 0xc5;
-//    memory[0x2224] = 0x59;
-//    memory[0x2223] = 0x66;
-//    //cpu.Flags |= 0x01;
+    //EMMA TESTINGGGGGGGGGGGGGGGGGGGGGGGGG
 
     uint16_t start1 = 0x1004;
     uint16_t start2 = start1 + 3;
    
-   
+   /*
     cpu.reg_IX = 1000;
     memory[start1] = 0x00;
     memory[start1+3] = 0xb0;
@@ -9725,6 +9686,12 @@ int main(){
     z80_mem_write(0x0b, 0x28); //
     z80_mem_write(0x0c, 0x80); //a+=b
     z80_mem_write(0x0d, 0x76); //halt
+*/
+
+    /*z80_mem_write(0x00, 0x01); //ld bc nn
+    z80_mem_write(0x01, 0x12); //
+    z80_mem_write(0x02, 0x34); //
+    z80_mem_write(0x03, 0x76); //*/
 
     
 
