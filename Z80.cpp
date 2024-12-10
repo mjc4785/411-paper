@@ -17,7 +17,7 @@ using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\divide-8.bin";
-const string filenameMAX = "C:\\411\\shift.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
+const string filenameMAX = "C:\\411\\offset-bit.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
 const string fileRun = filenameMAX;
 
 
