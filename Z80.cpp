@@ -9626,6 +9626,12 @@ uint16_t displ2(uint16_t val, uint8_t d)
     return val + offset;
 }
 
+
+
+
+
+
+
 uint8_t sraFlags(uint8_t reg)
 {
     uint8_t carry = reg & 0x01;                 //bit 0 coppied into carry flag 
@@ -9668,6 +9674,13 @@ uint8_t sllFlags(uint8_t reg)
 
     return reg;
 }
+
+
+
+
+
+
+
 
 uint8_t rlcFlags(uint8_t reg)
 {
@@ -9712,6 +9725,11 @@ uint8_t rrFlags(uint8_t reg)
                                                         //H & N Flags reset     
     return reg;
 }
+
+
+
+
+
 
 
 //MAIN==============================================================================================================================
