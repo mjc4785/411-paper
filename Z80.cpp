@@ -17,8 +17,8 @@ using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
 const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\divide-8.bin";
-const string filenameMAX = "C:\\411\\divide-8.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
-const string fileRun = filenameEMMA;
+const string filenameMAX = "C:\\411\\shift.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
+const string fileRun = filenameMAX;
 
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
@@ -54,7 +54,16 @@ uint16_t adc16Flags(uint16_t, uint16_t);
 void incR();
 uint16_t displ(uint16_t, int8_t);
 uint16_t displ2(uint16_t , uint8_t );
+
 uint8_t sraFlags(uint8_t);
+uint8_t slaFlags(uint8_t);
+uint8_t srlFlags(uint8_t);
+uint8_t sllFlags(uint8_t);
+
+uint8_t rlcFlags(uint8_t);
+uint8_t rrcFlags(uint8_t);
+uint8_t rlFlags(uint8_t);
+uint8_t rrFlags(uint8_t);
 
 //OUT OF SIGHT OUT OF MIND (DONT TOUCH THESE I DIDNT WRITE THEM)====================================================================
 void z80_mem_write(uint16_t addr, uint8_t value) {
@@ -1527,13 +1536,8 @@ int decode()
 
         //SHIFT INSTRUCNTIONS-------------------------------------------------------------------------
 
-        //memwrite(emma code for z80 read, bit to manipulate)
-
-
                     case 0x00: // RLC b 
-                        ((cpu.regB & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regB = (cpu.regB << 1) | (cpu.Flags & 0x01);
-                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y 
+                        rlcFlags(cpu.regB);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -1572,7 +1576,7 @@ int decode()
                         cpu.cycleCnt+=8;
                         break;
 
-                    case 0x06: // RLC (hl)
+                    case 0x06: // RLC (hl) z80_mem_write( ((cpu.regH << 8) | cpu.regL), sraFlags((z80_mem_read(((cpu.regH << 8) | cpu.regL))))) ;
                         ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
                         z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), (z80_mem_read(((cpu.regH << 8) | cpu.regL)) << 1) | (cpu.Flags & 0x01));
                         cpu.Flags = ZSPXYtable[int(z80_mem_read(((cpu.regH << 8) | cpu.regL)))]; //Set Z, S, X, Y 
@@ -1580,9 +1584,7 @@ int decode()
                         break;
 
                     case 0x07: // RLC a
-                        ((cpu.regA & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regA = (cpu.regA << 1) | (cpu.Flags & 0x01);
-                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y 
+                        cpu.regA = rlcFlags(cpu.regA);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -1593,9 +1595,7 @@ int decode()
 
 
                     case 0x08: //RRC b
-                        ((cpu.regB & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regB = (cpu.regB >> 1) | (cpu.Flags & 0x80);
-                        cpu.Flags = ZSPXYtable[int(cpu.regB)]; //Set Z, S, X, Y
+                        cpu.regB = rrcFlags(cpu.regB);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -1668,10 +1668,7 @@ int decode()
                     case 0x11: // rl c
 
                         {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.regC & 0x80)==0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regC = (cpu.regC << 1) | preFlagC;
-                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.regC = rlFlags(cpu.regC);
                         cpu.cycleCnt+=8;
                         }
 
@@ -1784,10 +1781,7 @@ int decode()
                     case 0x1A: // rr d
                                         
                         {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((cpu.regD & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regD = (cpu.regD >> 1) | preFlagC;
-                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.regD = rrFlags(cpu.regD);
                         cpu.cycleCnt+=8;
                         }
 
@@ -1832,10 +1826,7 @@ int decode()
                     case 0x1E: // rr (hl)
                                         
                         {
-                        uint8_t preFlagC = cpu.Flags & 0x01;
-                        ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) & 0x01)==0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        z80_mem_write(z80_mem_read(((cpu.regH << 8) | cpu.regL)), ((z80_mem_read(((cpu.regH << 8) | cpu.regL)) >> 1)| preFlagC));
-                        cpu.Flags = ZSPXYtable[int(z80_mem_read(((cpu.regH << 8) | cpu.regL)))]; //Set Z, S, X, Y 
+                        cpu.regD = rrFlags(cpu.regD);
                         cpu.cycleCnt+=15;
                         }
                         
@@ -1909,10 +1900,7 @@ int decode()
                         break; 
 
                     case 0x27: //sla a
-                    cout << int(cpu.regA) << ":" << int(cpu.regA << 1) << endl;
-                        ((cpu.regA & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regA = (cpu.regA << 1);
-                        cpu.Flags = ZSPXYtable[int(cpu.regA)]; //Set Z, S, X, Y
+                        cpu.regA = slaFlags(cpu.regA);
                         cpu.cycleCnt+=8;
                         break;
 
@@ -1976,10 +1964,7 @@ int decode()
                         break;
                         
                     case 0x31: // sll c
-                        ((cpu.regC & 0x80) == 0x80) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regC <<= 1;
-                        cpu.regC |= 0x01;
-                        cpu.Flags = ZSPXYtable[int(cpu.regC)]; //Set Z, S, X, Y
+                        cpu.regC = sllFlags(cpu.regC);
                         cpu.cycleCnt+=8;
                         break;
                         
@@ -2050,10 +2035,7 @@ int decode()
                         break;
                         
                     case 0x3A: // srl d
-                        ((cpu.regD & 0x01) == 0x01) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01);
-                        cpu.regD >>= 1;
-                        cpu.regD |= 0x80;
-                        cpu.Flags = ZSPXYtable[int(cpu.regD)]; //Set Z, S, X, Y
+                        cpu.regD = srlFlags(cpu.regD);
                         cpu.cycleCnt+=8;
                         break;
                         
@@ -4216,7 +4198,8 @@ int decode()
                 case 0xcb:
                 {
                     incR();
-                    uint8_t inst3 = z80_mem_read(cpu.reg_PC++);
+                    uint16_t offsetIX = displ2(cpu.reg_IX, z80_mem_read(cpu.reg_PC)); // ix addr +d
+                    uint8_t inst3 = z80_mem_read(++cpu.reg_PC);
                     switch(inst3)
                     {
 
@@ -9645,20 +9628,91 @@ uint16_t displ2(uint16_t val, uint8_t d)
 
 uint8_t sraFlags(uint8_t reg)
 {
-    uint8_t carry = reg & 0x01; //bit 0 coppied into carry flag 
-    reg = reg&0x80 | reg >> 1; //Shift right by 1, preserve bit 7
-    cpu.Flags = ZSPXYtable[reg] | carry; //Does, S Z Y X P, C flags
-    //H & N Flags reset
+    uint8_t carry = reg & 0x01;                 //bit 0 coppied into carry flag 
+    reg = reg&0x80 | reg >> 1;                  //Shift right by 1, preserve bit 7
+    cpu.Flags = ZSPXYtable[reg] | carry;        //Does, S Z Y X P, C flags
+                                                //H & N Flags reset
 
     return reg;
 }
 
-uint8_t offsetFunc(uint8_t value1)
+uint8_t slaFlags(uint8_t reg)
 {
-
-
-    return 0;
+    uint8_t carry = 0x00;                       //inisitallized the carry flag as 0 for later
+    if((reg&0x80) != 0x00){carry = 0x01;}       //if the reg's 7th bit is set then the carry bit is set 
+    reg = reg << 1;                             //sets the register shifted to the right one bit with the carry flag
+    cpu.Flags = ZSPXYtable[reg] | carry;        //Does, S Z Y X P, Carry flags
+                                                //H & N Flags reset     
+    
+    return reg;
 }
+
+uint8_t srlFlags(uint8_t reg)
+{
+    uint8_t carry = 0x00;                       //inisitallized the carry flag as 0 for later
+    if((reg&0x01) != 0x00){carry = 0x01;}       //if the reg's 7th bit is set then the carry bit is set 
+    reg = reg >> 1;                  //sets the register shifted to the right one bit with the carry flag
+    cpu.Flags = ZSPXYtable[reg] | carry;        //Does, S Z Y X P, Carry flags
+                                                //H & N Flags reset     
+    
+    return reg;
+}
+
+uint8_t sllFlags(uint8_t reg)
+{
+    uint8_t carry = 0x00;                       //inisitallized the carry flag as 0 for later
+    if((reg&0x08) != 0x00){carry = 0x01;}       //if the reg's 7th bit is set then the carry bit is set 
+    reg = reg << 1 | 0x01;                  //sets the register shifted to the right one bit with the carry flag
+    cpu.Flags = ZSPXYtable[reg] | carry;        //Does, S Z Y X P, Carry flags
+                                                //H & N Flags reset 
+
+    return reg;
+}
+
+uint8_t rlcFlags(uint8_t reg)
+{
+    uint8_t carry = 0x00;                       //inisitallized the carry flag as 0 for later
+    if((reg&0x80) != 0x00){carry = 0x01;}       //if the reg's 7th bit is set then the carry bit is set 
+    reg = reg << 1 | carry;                     //sets the register shifted to the right one bit with the carry flag
+    cpu.Flags = ZSPXYtable[reg] | carry;        //Does, S Z Y X P, Carry flags
+                                                //H & N Flags reset     
+    return reg;
+}
+
+uint8_t rrcFlags(uint8_t reg)
+{
+    uint8_t bitSev = 0x00;
+    uint8_t carry = reg&0x01;                       //inisitallized the carry flag as 0 for later
+    if((reg&0x80) != 0x00){bitSev = 0x80;}       //if the reg's 7th bit is set then the carry bit is set 
+    reg = reg >> 1 | bitSev;                     //sets the register shifted to the right one bit with the carry flag
+    cpu.Flags = ZSPXYtable[reg] | carry;        //Does, S Z Y X P, Carry flags
+                                                //H & N Flags reset     
+    return reg;
+}
+
+uint8_t rlFlags(uint8_t reg)
+{
+    uint8_t preCarry = cpu.Flags &= 0x01;       //sets a variable for the flags reg before stuff happens
+    // cout << int(preCarry) << endl;
+    uint8_t carry = 0x00;                       //inisitallized the carry flag as 0 for later
+    if((reg&0x80) != 0x00){carry = 0x01;}       //if the reg's 7th bit is set then the carry bit is set 
+    reg = reg << 1 | preCarry;                     //sets the register shifted to the right one bit with the carry flag
+    cpu.Flags = ZSPXYtable[reg] | carry;        //Does, S Z Y X P, Carry flags
+                                                //H & N Flags reset     
+    return reg;
+}
+
+uint8_t rrFlags(uint8_t reg)
+{
+    uint8_t preCarry = cpu.Flags&0x01;                            //sets a variable for the flags reg before stuff happens
+    if (preCarry != 0x00) {preCarry = 0x80;}
+    uint8_t carry = reg&0x01;                   
+    reg = reg >> 1 | preCarry;                          //sets the register shifted to the right one bit with the carry flag
+    cpu.Flags = ZSPXYtable[reg] | carry;                //Does, S Z Y X P, Carry flags
+                                                        //H & N Flags reset     
+    return reg;
+}
+
 
 //MAIN==============================================================================================================================
 int main(){
@@ -9669,7 +9723,7 @@ int main(){
     // NECESSSARY CODE
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-   //z80_mem_load(fileRun.c_str()); //Load into memory
+   z80_mem_load(fileRun.c_str()); //Load into memory
 
    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     
@@ -9707,20 +9761,23 @@ int main(){
 //    memory[0x2223] = 0x66;
 //    //cpu.Flags |= 0x01;
 
-    uint16_t start1 = 0x1004;
-    uint16_t start2 = start1 + 3;
+
+
+
+    // uint16_t start1 = 0x1004;
+    // uint16_t start2 = start1 + 3;
    
    
-    cpu.reg_IX = 1000;
-    memory[start1] = 0x00;
-    memory[start1+3] = 0xb0;
-    cpu.regB = 0x02;
+    // cpu.reg_IX = 1000;
+    // memory[start1] = 0x00;
+    // memory[start1+3] = 0xb0;
+    // cpu.regB = 0x02;
 
     
     
     // z80_mem_write(0x00, 0xdd); //dd
     // z80_mem_write(0x01, 0xcb); //cb
-    // z80_mem_write(0x02, 0x03); //IX+d
+    // z80_mem_write(0x0, 0x06); //IX+d
     // z80_mem_write(0x03, 0x28); //
     // z80_mem_write(0x04, 0xdd); //dd
     // z80_mem_write(0x05, 0xcb); //cb
@@ -9734,14 +9791,20 @@ int main(){
     // z80_mem_write(0x0d, 0x76); //halt
 
 
+
+
+
+
+
+
     // ======= TESTING DAA OP =========
 
-    z80_mem_write(0x00, 0x3E); // LD A, 0x15 (Load 0x15 into A)
-    z80_mem_write(0x01, 0x15); 
-    z80_mem_write(0x02, 0x06); // LD B, 0x27 (Load 0x27 into B)
-    z80_mem_write(0x03, 0x27); 
-    z80_mem_write(0x04, 0x80); // ADD A, B (Add A and B; result is 0x3C)
-    z80_mem_write(0x05, 0x27); // DAA (Adjust A to BCD; result should be 0x42)
+    // z80_mem_write(0x00, 0x3E); // LD A, 0x15 (Load 0x15 into A)
+    // z80_mem_write(0x01, 0x15); 
+    // z80_mem_write(0x02, 0x06); // LD B, 0x27 (Load 0x27 into B)
+    // z80_mem_write(0x03, 0x27); 
+    // z80_mem_write(0x04, 0x80); // ADD A, B (Add A and B; result is 0x3C)
+    // z80_mem_write(0x05, 0x27); // DAA (Adjust A to BCD; result should be 0x42)
 
     // z80_mem_write(0x06, 0x3E); // LD A, 0x99 (Load 0x99 into A)
     // z80_mem_write(0x07, 0x99); 
@@ -9753,7 +9816,7 @@ int main(){
     // z80_mem_write(0x0D, 0xD6); // SUB A, 0x25 (Subtract 0x25 from A; result is 0x20)
     // z80_mem_write(0x0E, 0x25); 
     // z80_mem_write(0x0F, 0x27); // DAA (Adjust A to BCD; result should be 0x20)
-    z80_mem_write(0x10, 0x76); // HALT
+    // z80_mem_write(0x10, 0x76); // HALT
 
 // =============================================================================================
     
@@ -9826,11 +9889,11 @@ cpu.Flags = 0x00;    // Zero flag unset
     cout << bitset<8>(memory[0x5000]) << endl;
     
     
-    for (int i =0; i < 3; i++)
-    {
-        printf("\tram[%04x] = %02x\t ", start1+i, memory[start1+i]);
-        printf("ram[%04x] = %02x\n ", start2+i, memory[start2+i]);
-    }
+//     for (int i =0; i < 3; i++)
+//     {
+//         printf("\tram[%04x] = %02x\t ", start1+i, memory[start1+i]);
+//         printf("ram[%04x] = %02x\n ", start2+i, memory[start2+i]);
+//     }
 
     return 0;
 }
