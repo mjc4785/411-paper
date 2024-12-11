@@ -16,9 +16,9 @@ Max Castle and Emma Chaney's Z80 Emmulator for CMSC 411
 using namespace std;
 
 //FILE NAMES FOR RUNNING===================================================================================================
-const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\divide-8.bin";
+const string filenameEMMA = "C:\\Users\\ekcha\\OneDrive\\Documents\\GitHub\\411-paper\\bit.bin";
 const string filenameMAX = "C:\\411\\bit.bin"; //MAX, PUT .BIN AFTER THE GODDAMN OATH NAME
-const string fileRun = filenameMAX;
+const string fileRun = filenameEMMA;
 
 
 //DEFINING IMPORTNANT THINGS=======================================================================================================
@@ -1364,7 +1364,7 @@ int decode()
                 cpu.reg_PC += offset; // Apply the signed relative jump
                 cpu.cycleCnt += 13; // Jump takes 13 cycles
             } else {
-                cout << "No jump, B = 0" << endl;
+                //cout << "No jump, B = 0" << endl;
                 cpu.cycleCnt += 8; // No jump takes 8 cycles
             }
             break;
@@ -3739,7 +3739,7 @@ int decode()
                 
                 case 0xb0://BLOCK TRANSF INSTRUCTION - while (BC ≠ 0) {(DE) ← (HL), DE ← DE + 1, HL ← HL + 1, BC ← BC – 1}
                 {    
-                    while(bool(cpu.regB|cpu.regC)) //While BC != 0
+                    while(bool(cpu.regB|cpu.regC) && cpu.cycleCnt < CYCLES) //While BC != 0
                     {
                         uint8_t n = cpu.regA + z80_mem_read((cpu.regH << 8) | cpu.regL);
 
@@ -3791,7 +3791,7 @@ int decode()
             
                 case 0xb8://BLOCK TRANSF INSTRUCTION - while (BC ≠ 0) {(DE) ← (HL), DE ← DE - 1, HL ← HL - 1, BC ← BC – 1}
                 {    
-                    while(bool(cpu.regB|cpu.regC)) //While BC != 0
+                    while(bool(cpu.regB|cpu.regC) && cpu.cycleCnt < CYCLES) //While BC != 0
                     {
                         uint8_t n = cpu.regA + z80_mem_read((cpu.regH << 8) | cpu.regL);
 
@@ -3844,7 +3844,6 @@ int decode()
             
                 case 0xb1: //CPIR - A - (HL), HL ← HL +1, BC ← BC – 1
                 {  
-                    cout <<"RENTERING" << endl;
                     uint8_t diff = cpu.regA - z80_mem_read((cpu.regH << 8) | cpu.regL); //A - (HL)
                     uint8_t n = diff - ((cpu.Flags &0x10)>>4); // n = A-(HL)-HF
 
@@ -9031,15 +9030,13 @@ uint16_t add16Flags(uint8_t regH, uint8_t regL, uint16_t other)
 
     uint16_t paired = (regH << 8)| regL; //Make paired 16 bits
     uint32_t sum = paired + other; //Caclilate Sum
-    
-    //Sign doesnt change
-    //Z doesnt change
-    cpu.Flags |= ((sum >> 5) & 1) << 5; //5th bit of result
+
+    //S,Z,PV, not affected; XY from high byte; N reset
+    cpu.Flags = ZSXYtable[sum>>8] | cpu.Flags & 0x80 | cpu.Flags & 0x40 | cpu.Flags & 0x04;
+    cpu.Flags |= ((sum & 0x100) >> 8 & 0x01); //Carry bit
     (((paired & 0x0FFF) + (other & 0x0FFF)) > 0x0FFF) ? (cpu.Flags |=  0x08) : (cpu.Flags &=  ~0x08);//H: Set if carry out of bit 11, reset otherwise
-    cpu.Flags |= ((sum >> 3) & 1) << 3; //3rd bit of result
-    //P/V doesnt change
-    cpu.Flags &= ~0x02; //N reset
-    (sum & 0x10000) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01); //C: set of carry from bit 15, reset otherwise
+    
+    
 
     return sum & 0xffff;
 }
@@ -9093,6 +9090,7 @@ uint8_t adcFlags(uint8_t reg1, uint8_t reg2)
 //subtracts registers and the carry bit if set
 uint8_t sbcFlags(uint8_t reg1, uint8_t reg2)
 {
+
     uint16_t diff = reg1 - reg2 - (cpu.Flags & 0x01);
     printf("x%02x - x%02x - x%01x = x%02x", reg1, reg2, (cpu.Flags & 0x01), diff);
 
@@ -9153,39 +9151,50 @@ uint16_t popS()
 //subtracts registers and the carry bit if set
 uint16_t sbc16Flags(uint16_t reg1, uint16_t reg2)
 {
-    uint16_t diff = reg1 - reg2 - (cpu.Flags & 0x01);
-    //printf("x%04x - x%04x - x%04x = x%04x\n", reg1, reg2, (cpu.Flags & 0x01), diff);
-    //cout << bitset<16>(reg1) << " -\n" << bitset<16>(reg2) << " -\n" << bitset<16>((cpu.Flags & 0x01)) << " =\n" << bitset<16>(diff) << endl;;
-   
+    uint8_t carry =  cpu.Flags & 0x01;
+    uint32_t diff = reg1 - reg2 - carry;
+    
+    printf("x%04x - x%04x - x%04x = x%04x\n", reg1, reg2, (cpu.Flags & 0x01), diff);
+    //cout << bitset<16>(reg1) << " -\n" << bitset<16>(reg2) << " -\n" << bitset<16>((cpu.Flags & 0x01)) << " =\n" << bitset<16>(diff) << endl;
 
-    (diff & 0x8000) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80); //Sign
-    (diff == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40); //Z set if result is 0
-    cpu.Flags |= ((diff >> 13) & 1) << 5; //13th bit of result
-    ((reg1 & 0xfff) < ((reg2 & 0xfff) + (cpu.Flags & 0x01))) ? (cpu.Flags |=  0x10) : (cpu.Flags &=  ~0x10); //FROM ROBM.DEV, borrow from bit 12
-    cpu.Flags |= ((diff >> 11) & 1) << 3; //11th bit of result
-    (bool((reg1 ^ diff ^ reg2) & 0x8000)) ? (cpu.Flags |= 0x04) : (cpu.Flags &= ~0x04);; //If operants have same sign, but sub sign changes - overflow
-    cpu.Flags |= 0x02; //N set
-    ((reg2 + (cpu.Flags & 0x01))  > reg1) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01); //Carry if borrow needed
+    uint8_t lower = ZSPXYtable[diff & 0xff];
+    uint8_t upper = ZSPXYtable[diff >> 8]; 
+
+    cpu.Flags = upper & 0x80 | // sign
+                ((lower & 0x40) && (upper & 0x40));// Zero
+    cpu.Flags |= (upper & 0x04); //V
+    cpu.Flags |= 0x02; //Set Z
+    cpu.Flags |= (ZSXYtable[diff >> 8] & 0x28); //X,Y, based on high byte
+    cpu.Flags |= (((reg1 & 0xfff) - (reg2 & 0xfff) - (carry)) & 0x1000) >> 8; //H based on high byte
+    cpu.Flags |= (diff >> 16) & 0x01; //Borrow out of bit 17
+
+    cout << bitset<8>(cpu.Flags) << endl;
+    
     
     return diff & 0xffff;
 }
 
 uint16_t adc16Flags(uint16_t reg1, uint16_t reg2)
 {
-    uint32_t sum = reg1 + reg2 + (cpu.Flags & 0x01);
-    printf("x%04x + x%04x + x%04x = x%04x\n", reg1, reg2, (cpu.Flags & 0x01), sum);
-    cout << bitset<16>(reg1) << " +\n" << bitset<16>(reg2) << " +\n" << bitset<16>((cpu.Flags & 0x01)) << " =\n" << bitset<16>(sum) << endl;;
-   
+    uint8_t carry = cpu.Flags & 0x01; 
+    uint32_t sum = reg1 + reg2 + carry;
+    //printf("x%04x + x%04x + x%04x = x%04x\n", reg1, reg2, (cpu.Flags & 0x01), sum);
+    //cout << bitset<16>(reg1) << " +\n" << bitset<16>(reg2) << " +\n" << bitset<16>((cpu.Flags & 0x01)) << " =\n" << bitset<16>(sum) << endl;;
+    //cout << bitset<16>((((reg1 & 0xfff) + (reg2 & 0xfff) + carry) & 0x1000)) << endl;
 
-    (sum & 0x8000) ? (cpu.Flags |= 0x80) : (cpu.Flags &= ~0x80); //Sign
-    (sum == 0) ? (cpu.Flags |= 0x40) : (cpu.Flags &= ~0x40); //Z set if result is 0
-    cpu.Flags |= ((sum >> 13) & 1) << 5; //13th bit of result
-    (0xfff < ((reg1 & 0xfff) + (reg2 & 0xfff) + (cpu.Flags & 0x01))) ? (cpu.Flags |=  0x10) : (cpu.Flags &=  ~0x10); //FROM ROBM.DEV, carry to bit 12
-    cpu.Flags |= ((sum >> 11) & 1) << 3; //11th bit of result
-    (bool((reg1 ^ sum ^ reg2) & 0x8000)) ? (cpu.Flags |= 0x04) : (cpu.Flags &= ~0x04);; //If operants have same sign, but sub sign changes - overflow
-    cpu.Flags &= ~0x02; //N reset
-    (sum > 0xffff) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01); //Carry if sum more than 16 bits needed
-    
+    uint8_t lower = ZSPXYtable[sum & 0xff];
+    uint8_t upper = ZSPXYtable[sum >> 8]; 
+
+    cpu.Flags = upper & 0x80 | // sign
+                ((lower & 0x40) && (upper & 0x40));// Zero
+    cpu.Flags |= (upper & 0x04); //V
+    cpu.Flags &= ~0x02; //Reset Z
+    cpu.Flags |= (ZSXYtable[sum >> 8] & 0x28); //X,Y, based on high byte
+    cpu.Flags |= (((reg1 & 0xfff) + (reg2 & 0xfff) + carry) & 0x1000) >> 8; //H based on high byte
+    (sum > 0xffff) ? (cpu.Flags |= 0x01) : (cpu.Flags &= ~0x01); //Carry if sum more than 16 bits 
+
+    //cout << bitset<8>(cpu.Flags) << endl;
+
     return sum & 0xffff;
 }
 
@@ -9202,10 +9211,6 @@ uint16_t displ2(uint16_t val, uint8_t d)
     int8_t offset = (int8_t)d;
     return val + offset;
 }
-
-
-
-
 
 
 
