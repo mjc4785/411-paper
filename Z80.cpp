@@ -921,6 +921,7 @@ int decode()
 
         case 0x09://PAIRED ADD INTRUCTION - Reg hl += bc
         {
+            cpu.regINIR = cpu.regH; // high byte of HL pre addition
             uint16_t paired = add16Flags(cpu.regH, cpu.regL, ((cpu.regB << 8)|cpu.regC));
             cpu.regH = (paired >> 8);   // Upper 8
             cpu.regL = (paired) & 0xFF; // Lower 8
@@ -930,6 +931,7 @@ int decode()
     
         case 0x19: //PAIRED ADD INTRUCTION - Reg hl += de
         {
+            cpu.regINIR = cpu.regH; // high byte of HL pre addition
             uint16_t paired = add16Flags(cpu.regH, cpu.regL, ((cpu.regD << 8)|cpu.regE));
             cpu.regH = (paired >> 8);   // Upper 8
             cpu.regL = (paired) & 0xFF; // Lower 8
@@ -939,6 +941,7 @@ int decode()
 
         case 0x29: //PAIRED ADD INTRUCTION - Reg hl += hl
         {
+            cpu.regINIR = cpu.regH; // high byte of HL pre addition
             uint16_t paired = add16Flags(cpu.regH, cpu.regL, ((cpu.regH << 8)|cpu.regL));
             cpu.regH = (paired >> 8);   // Upper 8
             cpu.regL = (paired) & 0xFF; // Lower 8
@@ -948,6 +951,7 @@ int decode()
         
         case 0x39: //PAIRED ADD INTRUCTION - Reg hl += sp
         {
+            cpu.regINIR = cpu.regH; // high byte of HL pre addition
             uint16_t paired = add16Flags(cpu.regH, cpu.regL, cpu.reg_SP);
             cpu.regH = (paired >> 8);   // Upper 8
             cpu.regL = (paired) & 0xFF; // Lower 8
@@ -1361,7 +1365,7 @@ int decode()
             cpu.reg_PC++; // Increment PC to move past the offset byte
 
             if (cpu.regB != 0) {
-                cpu.reg_PC += offset; // Apply the signed relative jump
+                cpu.reg_PC = displ2(cpu.reg_PC, offset);
                 cpu.cycleCnt += 13; // Jump takes 13 cycles
             } else {
                 //cout << "No jump, B = 0" << endl;
@@ -1377,7 +1381,7 @@ int decode()
             
             if ((cpu.Flags & 0x40) == 0)
             {
-                cpu.reg_PC += offset;
+                cpu.reg_PC = displ2(cpu.reg_PC, offset);
                 cpu.cycleCnt += 12; 
                 break;
             
@@ -1394,7 +1398,7 @@ int decode()
             
             if ((cpu.Flags & 0x01) == 0)
             {
-                cpu.reg_PC += offset;
+                cpu.reg_PC = displ2(cpu.reg_PC, offset);
                 cpu.cycleCnt += 12; 
                 break;
             
@@ -1406,9 +1410,14 @@ int decode()
 
 
         case 0x18: // shift PC by d
-            cpu.reg_PC += z80_mem_read(int(cpu.reg_PC++));
+        {
+            uint16_t addr = z80_mem_read(int(cpu.reg_PC++));
+            cpu.regINIR = addr >> 8; //High byte of target address
+            cpu.reg_PC = displ2(addr, cpu.reg_PC);
             cpu.cycleCnt += 12; 
             break;
+        }
+            
 
 
 
@@ -1419,7 +1428,7 @@ int decode()
             
             if ((cpu.Flags & 0x40) != 0)
             {
-                cpu.reg_PC += offset;
+                cpu.reg_PC = displ2(cpu.reg_PC, offset);
                 cpu.cycleCnt += 12; 
                 break;
             
@@ -1437,7 +1446,7 @@ int decode()
             
             if ((cpu.Flags & 0x01) != 0)
             {
-                cpu.reg_PC += offset;
+                cpu.reg_PC = displ2(cpu.reg_PC, offset);
                 cpu.cycleCnt += 12; 
                 break;
             
@@ -4017,11 +4026,13 @@ int decode()
                 }
 
                 case 0x45: //RETURN - PROJECT SPECIFIC :top stack entry popped into PC
+                    cpu.regIFF1 = cpu.regIFF2;
                     retS();
                     cpu.cycleCnt += 14;
                     break;
 
                 case 0x4d: //RETURN - PROJECT SPECIFIC :top stack entry popped into PC
+                    cpu.regIFF1 = cpu.regIFF2;
                     retS();
                     cpu.cycleCnt += 14;
                     break;
@@ -5889,39 +5900,67 @@ int decode()
                     break;
                 
                 case 0x46: //LOAD INSTRUCTION - Load B with (IX+d)
-                    cpu.regB = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                {
+                    uint16_t addr = (displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))));
+                    cpu.regB = z80_mem_read(addr);
+                    cpu.regINIR = addr >> 8; //High byte of IX+d
                     cpu.cycleCnt += 19;
                     break;
-                
+                }
+                    
                 case 0x56: //LOAD INSTRUCTION - Load D with (IX+d)
-                    cpu.regD = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                {
+                    uint16_t addr = (displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))));
+                    cpu.regD = z80_mem_read(addr);
+                    cpu.regINIR = addr >> 8; //High byte of IX+d
                     cpu.cycleCnt += 19;
                     break;
+                }
                 
                 case 0x66: //LOAD INSTRUCTION - Load H with (IX+d)
-                    cpu.regH = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                {
+                    uint16_t addr = (displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))));
+                    cpu.regH = z80_mem_read(addr);
+                    cpu.regINIR = addr >> 8; //High byte of IX+d
                     cpu.cycleCnt += 19;
                     break;
+                }
                 
                 case 0x4e: //LOAD INSTRUCTION - Load C with (IX+d)
-                    cpu.regC = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                {
+                    uint16_t addr = (displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))));
+                    cpu.regC = z80_mem_read(addr);
+                    cpu.regINIR = addr >> 8; //High byte of IX+d
                     cpu.cycleCnt += 19;
                     break;
+                }
                 
                 case 0x5e: //LOAD INSTRUCTION - Load E with (IX+d)
-                    cpu.regE = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                {
+                    uint16_t addr = (displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))));
+                    cpu.regE = z80_mem_read(addr);
+                    cpu.regINIR = addr >> 8; //High byte of IX+d
                     cpu.cycleCnt += 19;
                     break;
+                }
                 
                 case 0x6e: //LOAD INSTRUCTION - Load L with (IX+d)
-                    cpu.regL = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                {
+                    uint16_t addr = (displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))));
+                    cpu.regL = z80_mem_read(addr);
+                    cpu.regINIR = addr >> 8; //High byte of IX+d
                     cpu.cycleCnt += 19;
                     break;
+                }
                 
                 case 0x7e: //LOAD INSTRUCTION - Load A with (IX+d)
-                    cpu.regA = z80_mem_read((displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++)))));
+                {
+                    uint16_t addr = (displ2(cpu.reg_IX, int8_t(z80_mem_read(cpu.reg_PC++))));
+                    cpu.regA = z80_mem_read(addr);
+                    cpu.regINIR = addr >> 8; //High byte of IX+d
                     cpu.cycleCnt += 19;
                     break;
+                }
 
             }                
                 
@@ -8916,7 +8955,7 @@ void printRegTest(Z80 cpu)
     printf("IFF2:\t%01X\n", cpu.regIFF2);
     printf("IM:\t%01X\n", cpu.regINIR);
 
-    printf("Hidden 16-bit math register:\tNOT IMPLEMENTED\n");
+    printf("Hidden 16-bit math register:\t%04x", cpu.regINIR);
 
     printf("IX:\t%04X\n", cpu.reg_IX);
     printf("IY:\t%04X\n", cpu.reg_IY);
