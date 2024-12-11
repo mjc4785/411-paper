@@ -442,20 +442,20 @@ int decode()
             break;
         
         case 0x01: //LOAD INSTRUCTION - Load 16 bit value nn into paired register BC
-            cpu.regB = z80_mem_read(int(cpu.reg_PC++));
             cpu.regC = z80_mem_read(int(cpu.reg_PC++));
+            cpu.regB = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 10;
             break;
         
         case 0x11: //LOAD INSTRUCTION - Load 16 bit value nn into paired register DE
-            cpu.regD = z80_mem_read(int(cpu.reg_PC++));
             cpu.regE = z80_mem_read(int(cpu.reg_PC++));
+            cpu.regD = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 10;
             break;
         
         case 0x21: //LOAD INSTRUCTION - Load 16 bit value nn into paired register HL
-            cpu.regH = z80_mem_read(int(cpu.reg_PC++));
             cpu.regL = z80_mem_read(int(cpu.reg_PC++));
+            cpu.regH = z80_mem_read(int(cpu.reg_PC++));
             cpu.cycleCnt += 10;
             break;
         
@@ -772,7 +772,8 @@ int decode()
         }
 
         case 0x3a: //LOAD INSTRUCTION - Load Register A with data from memory address stored in (nn)
-            cpu.regA = z80_mem_read(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1)));
+            cpu.regA = z80_mem_read((z80_mem_read16(cpu.reg_PC)));
+            cpu.reg_PC +=2;
             cpu.cycleCnt += 13;
             break;
         
@@ -823,13 +824,15 @@ int decode()
             break;
         
         case 0x32: //LOAD INSTRUCTION - Load Memory Address nn with data from register A
-            z80_mem_write(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1)), cpu.regA);
+            z80_mem_write(z80_mem_read16(cpu.reg_PC), cpu.regA);
+            cpu.reg_PC+=2;
             cpu.cycleCnt += 13;
             break;
         
         case 0x22: //LOAD INSTRUCTION - Load Memory Address nn with data from paired register HL
         {
-            uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+            uint16_t addr = (z80_mem_read16(cpu.reg_PC));
+            cpu.reg_PC+=2;
             z80_mem_write(addr, cpu.regL); //L goes into (nn)
             z80_mem_write(addr+1, cpu.regH); //H goes into (nn+1)
             cpu.cycleCnt += 16;
@@ -3619,7 +3622,8 @@ int decode()
             {
                 case 0x43://LOAD INSTRUCTION - load memory address (nn) with C and (nn+1) with B 
                 {    
-                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    uint16_t addr = (z80_mem_read16(cpu.reg_PC));
+                    cpu.reg_PC += 2;
                     z80_mem_write(addr, cpu.regC); //C goes into (nn)
                     z80_mem_write(addr+1, cpu.regB); //B goes into (nn+1)
                     cpu.cycleCnt += 20;
@@ -3628,7 +3632,8 @@ int decode()
 
                 case 0x53://LOAD INSTRUCTION - load memory address (nn) with E and (nn+1) with D 
                 {    
-                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    uint16_t addr = (z80_mem_read16(cpu.reg_PC));
+                    cpu.reg_PC += 2;
                     z80_mem_write(addr, cpu.regE); //E goes into (nn)
                     z80_mem_write(addr+1, cpu.regD); //D goes into (nn+1)
                     cpu.cycleCnt += 20;
@@ -3637,7 +3642,8 @@ int decode()
 
                 case 0x63://LOAD INSTRUCTION - load memory address (nn) with L and (nn+1) with H 
                 {    
-                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    uint16_t addr = (z80_mem_read16(cpu.reg_PC));
+                    cpu.reg_PC += 2;
                     z80_mem_write(addr, cpu.regL); //L goes into (nn)
                     z80_mem_write(addr+1, cpu.regH); //H goes into (nn+1)
                     cpu.cycleCnt += 20;
@@ -3646,7 +3652,8 @@ int decode()
 
                 case 0x73://LOAD INSTRUCTION - load memory address (nn) with sp LOWER8 and (nn+1) with sp HIGHER8
                 {    
-                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    uint16_t addr = (z80_mem_read16(cpu.reg_PC));
+                    cpu.reg_PC += 2;
                     z80_mem_write(addr, cpu.reg_SP & 0xff ); //Lower8 goes into (nn)
                     z80_mem_write(addr+1, cpu.reg_SP >> 8 ); //higher 8 goes into (nn+1)
                     cpu.cycleCnt += 20;
@@ -3655,7 +3662,8 @@ int decode()
 
                 case 0x4b://LOAD INSTRUCTION - load value at (nn) into C and (nn+1) into B
                 {
-                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    uint16_t addr = (z80_mem_read16(cpu.reg_PC));
+                    cpu.reg_PC += 2;
                     cpu.regC = z80_mem_read(addr); //NOTE THE NN GOES INTO C
                     cpu.regB = z80_mem_read(addr + 1); //NOTE THE NN+1 GOES INTO B
                     cpu.cycleCnt += 20;
@@ -3664,7 +3672,8 @@ int decode()
 
                 case 0x5b://LOAD INSTRUCTION - load value at (nn) into E and (nn+1) into D
                 {
-                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    uint16_t addr = (z80_mem_read16(cpu.reg_PC));
+                    cpu.reg_PC += 2;
                     cpu.regE = z80_mem_read(addr); //NOTE THE NN GOES INTO E
                     cpu.regD = z80_mem_read(addr + 1); //NOTE THE NN+1 GOES INTO D
                     cpu.cycleCnt += 20;
@@ -3673,7 +3682,8 @@ int decode()
 
                 case 0x6b://LOAD INSTRUCTION - load value at (nn) into L and (nn+1) into H
                 {
-                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    uint16_t addr = (z80_mem_read16(cpu.reg_PC));
+                    cpu.reg_PC += 2;
                     cpu.regL = z80_mem_read(addr); //NOTE THE NN GOES INTO L
                     cpu.regH = z80_mem_read(addr + 1); //NOTE THE NN+1 GOES INTO H
                     cpu.cycleCnt += 20;
@@ -3682,7 +3692,8 @@ int decode()
 
                 case 0x7b://LOAD INSTRUCTION - load value at (nn) into spLOWER8 and (nn+1) into spUPPER8
                 {
-                    uint16_t addr = ((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1));
+                    uint16_t addr = (z80_mem_read16(cpu.reg_PC));
+                    cpu.reg_PC += 2;
                     cpu.reg_SP = (z80_mem_read(addr +1) << 8) | z80_mem_read(addr);
                     cpu.cycleCnt += 20;
                     break;
@@ -5850,12 +5861,14 @@ int decode()
                     break;
 
                 case 0x22: //LOAD INSTRUCTION - Load IX into memory (nn)
-                    z80_mem_write16(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1)), cpu.reg_IX); 
+                    z80_mem_write16(z80_mem_read16(cpu.reg_PC), cpu.reg_IX); 
+                    cpu.reg_PC+=2;
                     cpu.cycleCnt += 20;
                     break;
                 
                 case 0x2a: //LOAD INSTRUCTION - Load IX with (nn)
-                    cpu.reg_IX =(z80_mem_read16(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1))));
+                    cpu.reg_IX =(z80_mem_read16(z80_mem_read16(cpu.reg_PC)));
+                    cpu.reg_PC+=2;
                     cpu.cycleCnt += 20;
                     break;
                 
@@ -8253,12 +8266,14 @@ int decode()
                     break;
 
                 case 0x22: //LOAD INSTRUCTION - Load IX into memory (nn)
-                    z80_mem_write16(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1)), cpu.reg_IY); 
+                    z80_mem_write16(z80_mem_read16(cpu.reg_PC), cpu.reg_IY); 
+                    cpu.reg_PC+=2;
                     cpu.cycleCnt += 20;
                     break;
                 
                 case 0x2a: //LOAD INSTRUCTION - Load IX with (nn)
-                    cpu.reg_IY =(z80_mem_read16(((z80_mem_read(++cpu.reg_PC - 1)<<8)|z80_mem_read(++cpu.reg_PC - 1))));
+                    cpu.reg_IY =(z80_mem_read16(z80_mem_read16(cpu.reg_PC)));
+                    cpu.reg_PC+=2;
                     cpu.cycleCnt += 20;
                     break;
                 
@@ -9510,8 +9525,6 @@ int main(){
 
     
     
-     //z80_mem_write(0x01, 0x02); //dd
-     //z80_mem_write(0x03, 0x05); //cb
 
 
 
