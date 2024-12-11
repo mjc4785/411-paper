@@ -9305,12 +9305,13 @@ uint8_t rrFlags(uint8_t reg)
 
 
 
-
+// y, x & tested bit
 
 void bitZero(uint8_t reg)
 {
     cpu.Flags = ZSPXYtable[reg];
     cpu.Flags&=~0x08;
+    cpu.Flags&=~0x20;
     if( (reg&0x01) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9327,6 +9328,7 @@ void bitOne(uint8_t reg)
 {
     cpu.Flags = ZSPXYtable[reg];
     cpu.Flags&=~0x08;
+    cpu.Flags&=~0x20;
     if( (reg&0x02) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9343,6 +9345,7 @@ void bitTwo(uint8_t reg)
 {
     cpu.Flags = ZSPXYtable[reg];
     cpu.Flags&=~0x08;
+    cpu.Flags&=~0x20;
     if( (reg&0x04) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9358,14 +9361,16 @@ void bitTwo(uint8_t reg)
 void bitThree(uint8_t reg)
 {
     cpu.Flags = ZSPXYtable[reg];
-    cpu.Flags&=~0x08;
+    cpu.Flags&=~0x20;
     if( (reg&0x08) == 0x00) 
     {
         cpu.Flags|=0x40;
+        cpu.Flags&=~0x08;
     }
     else
     {
         cpu.Flags&=~0x40;
+        cpu.Flags|=0x08;
     }
     cpu.Flags|=0x10;
     cpu.Flags&=~0x02;
@@ -9375,6 +9380,7 @@ void bitFour(uint8_t reg)
 {
     cpu.Flags = ZSPXYtable[reg];
     cpu.Flags&=~0x08;
+    cpu.Flags&=~0x20;
     if( (reg&0x10) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9389,16 +9395,17 @@ void bitFour(uint8_t reg)
 
 void bitFive(uint8_t reg)
 {
-
     cpu.Flags = ZSPXYtable[reg];
     cpu.Flags&=~0x08;
     if( (reg&0x20) == 0x00) 
     {
         cpu.Flags|=0x40;
+        cpu.Flags&=~0x20;
     }
     else
     {
         cpu.Flags&=~0x40;
+        cpu.Flags|=(reg&0x20);
     }
     cpu.Flags|=0x10;
     cpu.Flags&=~0x02;
@@ -9408,6 +9415,7 @@ void bitSix(uint8_t reg)
 {
     cpu.Flags = ZSPXYtable[reg];
     cpu.Flags&=~0x08;
+    cpu.Flags&=~0x20;
     if( (reg&0x40) == 0x00) 
     {
         cpu.Flags|=0x40;
@@ -9424,6 +9432,7 @@ void bitSeven(uint8_t reg)
 {
     cpu.Flags = ZSPXYtable[reg];
     cpu.Flags&=~0x08;
+    cpu.Flags&=~0x20;
     if( (reg&0x80) == 0x00) 
     {
         cpu.Flags|=0x40;
